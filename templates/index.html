@@ -149,22 +149,22 @@
 
           <!-- Telegram Configurations -->
           <div class="config-card">
-            <h3>Notifiche Telegram</h3>
+            <h3>Notifiche Telegram (Gestito via GitHub Secrets)</h3>
             <div class="form-group">
               <div class="form-row">
                 <span class="form-label">Stato Servizio Notifiche</span>
                 <label class="toggle-switch">
-                  <input type="checkbox" id="cfg-tg-enabled">
+                  <input type="checkbox" id="cfg-tg-enabled" checked disabled>
                   <span class="slider"></span>
                 </label>
               </div>
               <div class="form-row">
                 <span class="form-label">Telegram Bot Token</span>
-                <input type="text" id="cfg-tg-token" class="w-input-wide" placeholder="123456789:ABC...">
+                <input type="text" id="cfg-tg-token" class="w-input-wide" value="🔒 Impostato nei GitHub Secrets (TELEGRAM_BOT_TOKEN)" readonly disabled style="opacity: 0.7; cursor: not-allowed;">
               </div>
               <div class="form-row">
                 <span class="form-label">Chat ID Destinatario</span>
-                <input type="text" id="cfg-tg-chat" class="w-input-wide" placeholder="@nome_canale o ID">
+                <input type="text" id="cfg-tg-chat" class="w-input-wide" value="🔒 Impostato nei GitHub Secrets (TELEGRAM_CHAT_ID)" readonly disabled style="opacity: 0.7; cursor: not-allowed;">
               </div>
             </div>
           </div>
