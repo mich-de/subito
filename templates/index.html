@@ -282,8 +282,7 @@
     function switchTab(name) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('tab-' + name).classList.add('active');
-      ['dashboard','config','yaml'].forEach(p => document.getElementById('panel-' + p).classList.toggle('hidden', p !== name));
-      if (name === 'config') loadFormConfig();
+      if (name === 'config') loadConfig();
       if (name === 'yaml') loadYamlList();
     }
 
@@ -557,7 +556,31 @@
       });
     }
 
-    async function loadFormConfig() {
+    async function loadConfig() {
+      if (window.STATIC_CONFIG_DATA) {
+        const d = window.STATIC_CONFIG_DATA;
+        if (d.general) {
+          document.getElementById('cfg-interval').value = d.general.interval_minutes;
+          document.getElementById('cfg-shipping').checked = d.general.shipping_required;
+        }
+        if (d.telegram) {
+          document.getElementById('cfg-tg-enabled').checked = d.telegram.enabled;
+          document.getElementById('cfg-tg-token').value = d.telegram.bot_token;
+          document.getElementById('cfg-tg-chat').value = d.telegram.chat_id;
+        }
+        if (d.subito) {
+          document.getElementById('cfg-subito-enabled').checked = d.subito.enabled;
+          document.getElementById('cfg-subito-pages').value = d.subito.max_pages;
+        }
+        if (d.amazon) {
+          document.getElementById('cfg-amazon-enabled').checked = d.amazon.enabled;
+          document.getElementById('cfg-amazon-pages').value = d.amazon.max_pages;
+        }
+        if (d.products) {
+          renderProducts(d.products);
+        }
+        return;
+      }
       try {
         const r = await fetch('/api/config/form');
         if (!r.ok) return;
