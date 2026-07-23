@@ -46,13 +46,12 @@ jobs:
         with:
           path: 'public'
 
-      - name: Push Static Site to gh-pages Branch
+      - name: Cleanup Old Deployments Automatically
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global user.name "mich-de"
-          git config --global user.email "mic.deangelis@gmail.com"
-          git fetch origin gh-pages || true
-          git checkout -B gh-pages
-          cp -r public/* .
-          git add index.html static/ data/
-          git diff --quiet && git diff --staged --quiet || git commit -m "Deploy: Update GitHub Pages static dashboard [skip ci]"
-          git push origin gh-pages --force
+          DEPLOYS=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/mich-de/subito/deployments" | jq -r '.[].id')
+          for id in $DEPLOYS; do
+            curl -s -X POST -H "Authorization: token $GH_TOKEN" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/mich-de/subito/deployments/$id/statuses" -d '{"state":"inactive"}'
+            curl -s -X DELETE -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/mich-de/subito/deployments/$id"
+          done
