@@ -1,6 +1,6 @@
 telegram:
   enabled: true
-  bot_token: 8969772993:AAEz4z_fxf3VVQPOWIE6pjvUa6M8Gs1vk78
+  bot_token: '8969772993:AAEz4z_fxf3VVQPOWIE6pjvUa6M8Gs1vk78'
   chat_id: '99016038'
 scanner:
   interval_minutes: 10
