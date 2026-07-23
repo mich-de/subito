@@ -5,3 +5,13 @@ url: https://amazonit.northladder.net
 price_threshold: 300
 device_name: Samsung S24 256GB
 interval_hours: 2
+user_details:
+  first_name: "Michele"
+  last_name: "De Angelis"
+  email: "michele.deangelis@msccrewservices.com"
+  phone: "3333305176"
+  city: "Piano di Sorrento"
+  company: "MSC Crew Services"
+  address: "Via delle Rose 60"
+  address_extra: "Ufficio"
+  zip_code: "80063"

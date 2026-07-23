@@ -82,17 +82,38 @@ class NorthLadderScanner(BaseScanner):
                         page.keyboard.press("Enter")
                         page.wait_for_timeout(2000)
 
-                    # 2. Compilazione email utente se richiesta nel form NorthLadder
-                    email_input = page.query_selector("input[type='email'], input[name*='email'], #emailInput")
-                    if email_input:
-                        email_input.fill("mic.deangelis@gmail.com")
-                        page.wait_for_timeout(300)
+                    # 2. Compilazione automatica modulo dati utente NorthLadder (Passo 3 Provide Details)
+                    user_info = self.config.get("user_details", {})
+                    
+                    # Nome e Cognome
+                    for inp_sel, val in [
+                        ("input[placeholder*='First Name'], input[name*='firstName'], input[name*='first_name']", user_info.get("first_name", "Michele")),
+                        ("input[placeholder*='Last Name'], input[name*='lastName'], input[name*='last_name']", user_info.get("last_name", "De Angelis")),
+                        ("input[type='email'], input[name*='email']", user_info.get("email", "michele.deangelis@msccrewservices.com")),
+                        ("input[type='tel'], input[name*='phone'], input[name*='mobile']", user_info.get("phone", "3333305176")),
+                        ("input[placeholder*='City'], input[name*='city']", user_info.get("city", "Piano di Sorrento")),
+                        ("input[placeholder*='Company'], input[name*='company']", user_info.get("company", "MSC Crew Services")),
+                        ("input[placeholder*='Address line 1'], input[name*='address1'], input[name*='address']", user_info.get("address", "Via delle Rose 60")),
+                        ("input[placeholder*='Address line 2'], input[name*='address2']", user_info.get("address_extra", "Ufficio")),
+                        ("input[placeholder*='Postcode'], input[placeholder*='ZIP'], input[name*='zip'], input[name*='postcode']", user_info.get("zip_code", "80063"))
+                    ]:
+                        try:
+                            el = page.query_selector(inp_sel)
+                            if el:
+                                el.fill(val)
+                                page.wait_for_timeout(200)
+                        except Exception:
+                            pass
+
+                    # Spunta accetto Termini & Condizioni e Privacy Policy
+                    try:
+                        privacy_chk = page.query_selector("input[type='checkbox'], input[name*='agree'], input[name*='terms']")
+                        if privacy_chk and not privacy_chk.is_checked():
+                            privacy_chk.check()
+                    except Exception:
+                        pass
 
                     # 3. Risposte al form di condizione del dispositivo
-                    # Does the device turn on and work normally? -> Yes
-                    # Does the device have any cracks? -> No
-                    # Major scratches/dents? -> No
-                    # Minor scratches visible only on close inspection? -> No
                     for selector in [
                         "button:has-text('Yes')", "label:has-text('Yes')", "input[value='yes']", "input[value='Yes']",
                         "button:has-text('Sì')", "label:has-text('Sì')"
@@ -101,20 +122,20 @@ class NorthLadderScanner(BaseScanner):
                             el = page.query_selector(selector)
                             if el:
                                 el.click()
-                                page.wait_for_timeout(500)
+                                page.wait_for_timeout(300)
                         except Exception:
                             pass
 
-                    # Selezione "No" per graffi, crepe e difetti
                     no_elements = page.query_selector_all("button:has-text('No'), label:has-text('No'), input[value='no'], input[value='No']")
                     for el in no_elements[:5]:
                         try:
                             el.click()
-                            page.wait_for_timeout(400)
+                            page.wait_for_timeout(300)
                         except Exception:
                             pass
 
-                    # 4. Salva URL esatto generato con la sessione di valutazione
+                    # 4. Salva URL esatto generato con la sessione completa di permuta
+                    page.wait_for_timeout(2000)
                     current_page_url = page.url
                     if current_page_url and "northladder.net" in current_page_url:
                         self.target_url = current_page_url
