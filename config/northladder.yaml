@@ -1,7 +1,7 @@
 enabled: true
 name: NorthLadder Trade-In
 source_key: northladder
-url: https://amazonit.northladder.net/it-it/?initialsessionid=522-5002918-5487555&ld=ELXXSOA-www.aboutamazon.it#start-evaluation
+url: https://amazonit.northladder.net
 price_threshold: 300
 device_name: Samsung S24 256GB
 interval_hours: 2
