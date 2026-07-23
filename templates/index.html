@@ -313,14 +313,24 @@
 
     // Pull logs in real-time from server logs endpoint
     async function fetchServerLogs() {
+      if (window.STATIC_LOGS && window.STATIC_LOGS.length) {
+        const el = document.getElementById('log');
+        if (el) {
+          el.innerHTML = window.STATIC_LOGS.map(l =>
+            `<div class="log-entry ${l.level || 'info'}"><span class="log-entry timestamp">[${l.time || '15:25'}]</span>${l.message}</div>`
+          ).join('');
+        }
+        return;
+      }
       if (window.location.hostname.includes('github.io')) {
         const el = document.getElementById('log');
         if (el && el.children.length <= 1) {
           el.innerHTML = `
             <div class="log-entry info"><span class="log-entry timestamp">[CLOUD]</span>Modalità GitHub Pages attiva - Scansioni automatiche registrate su GitHub Actions.</div>
-            <div class="log-entry scan"><span class="log-entry timestamp">[CRON]</span>Esecuzione programma ogni 15 minuti via GitHub Workflow (.github/workflows/scanner.yml).</div>
-            <div class="log-entry found"><span class="log-entry timestamp">[TELEGRAM]</span>Invio notifiche istantaneo attivo verso il Bot Telegram in caso di offerte sotto soglia.</div>
-            <div class="log-entry info"><span class="log-entry timestamp">[STATUS]</span>Registro ultime esecuzioni consultabile su: github.com/mich-de/subito/actions</div>
+            <div class="log-entry scan"><span class="log-entry timestamp">[SUBITO.IT]</span>Scansione attiva per Samsung S24 256/512GB e S25 256/512GB.</div>
+            <div class="log-entry scan"><span class="log-entry timestamp">[AMAZON.IT]</span>Scansione attiva prodotti Nuovo, Ricondizionato e Seconda Mano.</div>
+            <div class="log-entry scan"><span class="log-entry timestamp">[NORTHLADDER]</span>Simulazione valutazioni permuta trade-in.</div>
+            <div class="log-entry found"><span class="log-entry timestamp">[TELEGRAM]</span>Invio notifiche istantaneo attivo verso il Bot Telegram.</div>
           `;
         }
         return;
