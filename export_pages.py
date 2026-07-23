@@ -27,13 +27,17 @@ def build_static_site():
         except Exception:
             pass
 
-    # Copia style.css nella cartella public
+    # Inietta direttamente lo stile CSS inline per eliminare problemi di caricamento o percorsi su GitHub Pages
     with open("static/style.css", encoding="utf-8") as f:
         css = f.read()
-    
+
     os.makedirs("public/static", exist_ok=True)
     with open("public/static/style.css", "w", encoding="utf-8") as f:
         f.write(css)
+
+    style_tag = f"<style>\n{css}\n</style>"
+    final_html = html_content.replace('<link rel="stylesheet" href="static/style.css">', style_tag)
+    final_html = final_html.replace('<link rel="stylesheet" href="/static/style.css">', style_tag)
 
     # Inietta lo stato pre-popolato nell'HTML statico per GitHub Pages
     inject_script = f"""
@@ -50,7 +54,7 @@ def build_static_site():
     </body>
     """
     
-    final_html = html_content.replace("</body>", inject_script)
+    final_html = final_html.replace("</body>", inject_script)
     with open("public/index.html", "w", encoding="utf-8") as f:
         f.write(final_html)
 
