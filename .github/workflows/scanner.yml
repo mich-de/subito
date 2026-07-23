@@ -49,12 +49,12 @@ jobs:
         with:
           path: 'public'
 
-      - name: Save Sent History to Main Branch
+      - name: Save Sent History and Generated Static Site to Main Branch
         run: |
           git config --global user.name "mich-de"
           git config --global user.email "mic.deangelis@gmail.com"
-          git add -f data/sent_items.json data/*_results.json || true
-          git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Save sent items history [skip ci]"
+          git add -f index.html static/ .nojekyll data/sent_items.json data/*_results.json || true
+          git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Save static site build and sent items history [skip ci]"
           git push origin main || true
 
   deploy:
