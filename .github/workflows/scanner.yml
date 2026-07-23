@@ -1,6 +1,8 @@
 name: Price Tracker Scanner
 
 on:
+  push:
+    branches: [ main ]
   schedule:
     # Esegue ogni 15 minuti automaticamente
     - cron: '*/15 * * * *'
