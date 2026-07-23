@@ -46,9 +46,6 @@ jobs:
         with:
           path: 'public'
 
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4.0.5
-
       - name: Commit & Push Sent History Cache
         run: |
           git config --global user.name "mich-de"
@@ -56,3 +53,14 @@ jobs:
           git add data/
           git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Update sent history cache [skip ci]"
           git push
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: scan
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4.0.5
