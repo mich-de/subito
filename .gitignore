@@ -24,3 +24,9 @@ Thumbs.db
 # Environment variables & secrets
 .env
 config/config.local.yaml
+
+GEMINI.MD
+IMPLEMENTATION_PLAN.MD
+TASKS.MD
+HANDOVER.MD
+
