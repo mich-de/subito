@@ -46,13 +46,17 @@ jobs:
         with:
           path: 'public'
 
-      - name: Commit & Push Sent History Cache
+      - name: Push Static Site to gh-pages Branch
         run: |
           git config --global user.name "mich-de"
           git config --global user.email "mic.deangelis@gmail.com"
-          git add data/
-          git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Update sent history cache [skip ci]"
-          git push
+          git fetch origin gh-pages || true
+          git checkout -B gh-pages
+          cp -r public/* .
+          git add index.html static/ data/
+          git diff --quiet && git diff --staged --quiet || git commit -m "Deploy: Update GitHub Pages static dashboard [skip ci]"
+          git push origin gh-pages --force
+          git checkout main
 
   deploy:
     environment:
