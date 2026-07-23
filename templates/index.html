@@ -248,6 +248,17 @@
   <script>
     const state = { items: [], currentConfig: '', formProducts: [], selectedProduct: 'all' };
 
+    function getProductColorClass(name) {
+      if (!name) return 'tag-color-s24-256';
+      const n = name.toLowerCase();
+      if (n.includes('s24') && n.includes('256')) return 'tag-color-s24-256';
+      if (n.includes('s24') && n.includes('512')) return 'tag-color-s24-512';
+      if (n.includes('s25') && n.includes('256')) return 'tag-color-s25-256';
+      if (n.includes('s25') && n.includes('512')) return 'tag-color-s25-512';
+      if (n.includes('pixel')) return 'tag-color-pixel';
+      return 'tag-color-s24-256';
+    }
+
     function setProductFilter(name) {
       state.selectedProduct = name;
       document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -458,6 +469,7 @@
         const sourceName = i.source?.split('.')[0] || 'Web';
         const isBest = i.price && i.price === best;
         const prodName = i.product_name || 'Generico';
+        const colorClass = getProductColorClass(prodName);
         
         return `
           <a href="${i.url}" target="_blank" class="feed-card${isBest ? ' item-best' : ''}">
@@ -465,7 +477,7 @@
               <div class="feed-card-header">
                 <div class="feed-card-tags">
                   <span class="feed-tag-source">${sourceName}</span>
-                  <span class="feed-tag-product" title="${prodName}">${prodName}</span>
+                  <span class="feed-tag-product ${colorClass}" title="${prodName}">${prodName}</span>
                 </div>
                 ${isFresh ? '<span class="badge-new">NEW</span>' : ''}
               </div>
@@ -776,7 +788,7 @@
         const tags = document.getElementById('product-tags');
         if (status.products && status.products.length) {
           tags.innerHTML = status.products.map(p => `
-            <span class="product-tag">${p.name || p.keywords?.[0] || '?'} <span>≤€${p.max_price}</span></span>
+            <span class="product-tag ${getProductColorClass(p.name)}">${p.name || p.keywords?.[0] || '?'} <span>≤€${p.max_price}</span></span>
           `).join('');
           
           // Update filter buttons dynamically
