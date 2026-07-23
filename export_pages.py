@@ -39,7 +39,27 @@ def build_static_site():
     final_html = html_content.replace('<link rel="stylesheet" href="static/style.css">', style_tag)
     final_html = final_html.replace('<link rel="stylesheet" href="/static/style.css">', style_tag)
 
-    # Pre-carica configurazioni per la scheda di configurazione su GitHub Pages
+    # Pre-carica configurazioni strutturate per il pannello form prodotti su GitHub Pages
+    import yaml
+    config_data = {}
+    if os.path.exists("config/config.yaml"):
+        try:
+            with open("config/config.yaml", encoding="utf-8") as f:
+                c = yaml.safe_load(f)
+                config_data["general"] = {
+                    "interval_minutes": c.get("scanner", {}).get("interval_minutes", 10),
+                    "shipping_required": c.get("scanner", {}).get("shipping_required", True)
+                }
+                config_data["telegram"] = {
+                    "enabled": c.get("telegram", {}).get("enabled", True),
+                    "bot_token": c.get("telegram", {}).get("bot_token", ""),
+                    "chat_id": c.get("telegram", {}).get("chat_id", "")
+                }
+                config_data["products"] = c.get("scanner", {}).get("products", [])
+        except Exception:
+            pass
+
+    # Pre-carica configurazioni testuali per la scheda YAML su GitHub Pages
     configs = {}
     for filename in ["config.yaml", "subito.yaml", "amazon.yaml", "northladder.yaml"]:
         path = os.path.join("config", filename)
