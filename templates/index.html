@@ -310,6 +310,18 @@
 
     // Pull logs in real-time from server logs endpoint
     async function fetchServerLogs() {
+      if (window.location.hostname.includes('github.io')) {
+        const el = document.getElementById('log');
+        if (el && el.children.length <= 1) {
+          el.innerHTML = `
+            <div class="log-entry info"><span class="log-entry timestamp">[CLOUD]</span>Modalità GitHub Pages attiva - Scansioni automatiche registrate su GitHub Actions.</div>
+            <div class="log-entry scan"><span class="log-entry timestamp">[CRON]</span>Esecuzione programma ogni 15 minuti via GitHub Workflow (.github/workflows/scanner.yml).</div>
+            <div class="log-entry found"><span class="log-entry timestamp">[TELEGRAM]</span>Invio notifiche istantaneo attivo verso il Bot Telegram in caso di offerte sotto soglia.</div>
+            <div class="log-entry info"><span class="log-entry timestamp">[STATUS]</span>Registro ultime esecuzioni consultabile su: github.com/mich-de/subito/actions</div>
+          `;
+        }
+        return;
+      }
       try {
         const r = await fetch(`/api/logs?since=${lastLogIndex}`);
         if (!r.ok) return;
