@@ -49,6 +49,18 @@ jobs:
         with:
           path: 'public'
 
+      - name: Deploy Static Dashboard and Results to gh-pages Branch
+        run: |
+          git config --global user.name "mich-de"
+          git config --global user.email "mic.deangelis@gmail.com"
+          git fetch origin gh-pages || true
+          git checkout -B gh-pages
+          cp -r public/* .
+          git add index.html static/ data/ .nojekyll
+          git diff --quiet && git diff --staged --quiet || git commit -m "Deploy: Update GitHub Pages dashboard and scannings results [skip ci]"
+          git push origin gh-pages --force
+          git checkout main
+
       - name: Cleanup Old Deployments Automatically
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
