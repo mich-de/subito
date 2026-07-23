@@ -789,6 +789,10 @@
     setInterval(fetchServerLogs, 2000); // Poll logs every 2 seconds
     
     // Initial calls
+    if (window.STATIC_CONFIGS || window.STATIC_CONFIG_DATA) {
+      loadConfig();
+      loadYamlList();
+    }
     fetchStatus();
     fetchServerLogs();
   </script>
