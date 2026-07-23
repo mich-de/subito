@@ -73,6 +73,8 @@ class SubitoScanner(BaseScanner):
                     all_matched.extend(matched)
                     all_near_miss.extend(near)
                     time.sleep(1)
+            combined = all_matched + all_near_miss
+            self._save_results(combined)
             return all_matched, all_near_miss
         finally:
             try:

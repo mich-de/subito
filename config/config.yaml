@@ -16,11 +16,18 @@ scanner:
     - ultra
     - plus
     - watch
+    - notebook
+    - netbook
+    - laptop
+    - pc
+    - tablet
+    - ipad
+    - galaxy a
     - scambio
     - cerco
     subito_urls: []
-    max_price: 240
-    price_margin: 50
+    max_price: 450
+    price_margin: 100
     subito: true
     amazon: true
     search_in_description: false
@@ -34,11 +41,18 @@ scanner:
     - ultra
     - plus
     - watch
+    - notebook
+    - netbook
+    - laptop
+    - pc
+    - tablet
+    - ipad
+    - galaxy a
     - scambio
     - cerco
     subito_urls: []
-    max_price: 240
-    price_margin: 50
+    max_price: 450
+    price_margin: 100
     subito: true
     amazon: true
     search_in_description: false
@@ -52,11 +66,18 @@ scanner:
     - ultra
     - plus
     - watch
+    - notebook
+    - netbook
+    - laptop
+    - pc
+    - tablet
+    - ipad
+    - galaxy a
     - scambio
     - cerco
     subito_urls: []
-    max_price: 400
-    price_margin: 50
+    max_price: 650
+    price_margin: 100
     subito: true
     amazon: true
     search_in_description: false
