@@ -39,10 +39,22 @@ def build_static_site():
     final_html = html_content.replace('<link rel="stylesheet" href="static/style.css">', style_tag)
     final_html = final_html.replace('<link rel="stylesheet" href="/static/style.css">', style_tag)
 
+    # Pre-carica configurazioni per la scheda di configurazione su GitHub Pages
+    configs = {}
+    for filename in ["config.yaml", "subito.yaml", "amazon.yaml", "northladder.yaml"]:
+        path = os.path.join("config", filename)
+        if os.path.exists(path):
+            try:
+                with open(path, encoding="utf-8") as f:
+                    configs[filename] = f.read()
+            except Exception:
+                pass
+
     # Inietta lo stato pre-popolato nell'HTML statico per GitHub Pages
     inject_script = f"""
     <script>
       window.STATIC_ITEMS = {json.dumps(items, ensure_ascii=False)};
+      window.STATIC_CONFIGS = {json.dumps(configs, ensure_ascii=False)};
       document.addEventListener('DOMContentLoaded', () => {{
         if (window.STATIC_ITEMS && window.STATIC_ITEMS.length) {{
           state.items = window.STATIC_ITEMS;

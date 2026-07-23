@@ -625,6 +625,14 @@
 
     /* ---- YAML EDITOR ---- */
     async function loadYamlList() {
+      if (window.STATIC_CONFIGS) {
+        const files = Object.keys(window.STATIC_CONFIGS);
+        document.getElementById('yaml-tabs').innerHTML = files.map(f =>
+          `<button type="button" onclick="loadYaml('${f}')" class="yaml-tab-btn" data-file="${f}">${f}</button>`
+        ).join('');
+        if (files.length) loadYaml(files[0]);
+        return;
+      }
       try {
         const r = await fetch('/api/config');
         if (!r.ok) return;
@@ -637,6 +645,15 @@
     }
 
     async function loadYaml(name) {
+      if (window.STATIC_CONFIGS && window.STATIC_CONFIGS[name]) {
+        document.getElementById('yaml-editor').value = window.STATIC_CONFIGS[name];
+        document.getElementById('yaml-filename').textContent = name;
+        state.currentConfig = name;
+        document.querySelectorAll('.yaml-tab-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.file === name);
+        });
+        return;
+      }
       try {
         const r = await fetch(`/api/config/${name}`);
         if (!r.ok) return;
