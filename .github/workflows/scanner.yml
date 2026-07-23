@@ -57,17 +57,16 @@ jobs:
           git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Save sent items history [skip ci]"
           git push origin main || true
 
-      - name: Deploy Static Dashboard and Results to gh-pages Branch
-        run: |
-          git config --global user.name "mich-de"
-          git config --global user.email "mic.deangelis@gmail.com"
-          git fetch origin gh-pages || true
-          git checkout -B gh-pages
-          cp -r public/* .
-          git add index.html static/ data/ .nojekyll
-          git diff --quiet && git diff --staged --quiet || git commit -m "Deploy: Update GitHub Pages dashboard and scannings results [skip ci]"
-          git push origin gh-pages --force
-          git checkout main
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: scan
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4.0.5
 
       - name: Cleanup Old Deployments Automatically
         env:
