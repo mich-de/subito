@@ -55,12 +55,16 @@ def build_static_site():
     <script>
       window.STATIC_ITEMS = {json.dumps(items, ensure_ascii=False)};
       window.STATIC_CONFIGS = {json.dumps(configs, ensure_ascii=False)};
+      window.STATIC_CONFIG_DATA = {json.dumps(config_data, ensure_ascii=False)};
       document.addEventListener('DOMContentLoaded', () => {{
         if (window.STATIC_ITEMS && window.STATIC_ITEMS.length) {{
           state.items = window.STATIC_ITEMS;
           renderItems(window.STATIC_ITEMS);
           renderNearMiss(window.STATIC_ITEMS);
         }}
+        if (typeof loadConfig === 'function') loadConfig();
+        if (typeof loadYamlList === 'function') loadYamlList();
+        if (typeof fetchServerLogs === 'function') fetchServerLogs();
       }});
     </script>
     </body>
