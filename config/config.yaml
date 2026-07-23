@@ -26,8 +26,8 @@ scanner:
     - scambio
     - cerco
     subito_urls: []
-    max_price: 450
-    price_margin: 100
+    max_price: 360
+    price_margin: 40
     subito: true
     amazon: true
     search_in_description: false
@@ -51,8 +51,8 @@ scanner:
     - scambio
     - cerco
     subito_urls: []
-    max_price: 450
-    price_margin: 100
+    max_price: 400
+    price_margin: 40
     subito: true
     amazon: true
     search_in_description: false
@@ -76,8 +76,8 @@ scanner:
     - scambio
     - cerco
     subito_urls: []
-    max_price: 650
-    price_margin: 100
+    max_price: 380
+    price_margin: 30
     subito: true
     amazon: true
     search_in_description: false
@@ -95,7 +95,7 @@ scanner:
     - cerco
     subito_urls: []
     max_price: 400
-    price_margin: 50
+    price_margin: 30
     subito: true
     amazon: true
     search_in_description: false

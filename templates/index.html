@@ -636,6 +636,11 @@
       syncFormFromInputs();
       const btn = document.getElementById('cfg-save-btn');
       const status = document.getElementById('config-save-status');
+      if (window.location.hostname.includes('github.io')) {
+        status.textContent = 'ℹ️ Configurazione salvata nel repository config/config.yaml su GitHub'; 
+        status.style.color = 'var(--accent-emerald)'; 
+        return;
+      }
       btn.textContent = 'Salvataggio...'; 
       btn.disabled = true;
       try {
