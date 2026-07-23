@@ -282,6 +282,10 @@
     function switchTab(name) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('tab-' + name).classList.add('active');
+      ['dashboard','config','yaml'].forEach(p => {
+        const panel = document.getElementById('panel-' + p);
+        if (panel) panel.classList.toggle('hidden', p !== name);
+      });
       if (name === 'config') loadConfig();
       if (name === 'yaml') loadYamlList();
     }
