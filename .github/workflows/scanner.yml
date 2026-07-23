@@ -13,6 +13,7 @@ permissions:
   id-token: write
   pages: write
   deployments: write
+  actions: write
 
 jobs:
   scan:
@@ -56,6 +57,15 @@ jobs:
           git add -f index.html static/ .nojekyll data/sent_items.json data/*_results.json || true
           git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Save static site build and sent items history [skip ci]"
           git push origin main || true
+
+      - name: Purge Old Workflow Runs Automatically
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RUNS=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/mich-de/subito/actions/runs" | jq -r '.workflow_runs[1:][].id')
+          for run_id in $RUNS; do
+            curl -s -X DELETE -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/mich-de/subito/actions/runs/$run_id"
+          done
 
   deploy:
     environment:
