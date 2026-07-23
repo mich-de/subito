@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import json
 import os
+
+ROME_TZ = timezone(timedelta(hours=2))
 
 PRICE_MARGIN = 50
 SENT_HISTORY_FILE = "data/sent_items.json"
@@ -15,7 +17,7 @@ class Product:
         self.location = location
         self.shipping = shipping
         self.condition = condition
-        self.date = date or datetime.now().isoformat()
+        self.date = date or datetime.now(ROME_TZ).isoformat()
         self.product_name = product_name
         self.near_miss = near_miss
         self.max_price = max_price

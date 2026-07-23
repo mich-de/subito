@@ -70,9 +70,10 @@ def build_static_site():
             except Exception:
                 pass
 
-    # Genera log di scansione con timestamp reale corrente per server_monitor.log su GitHub Pages statico
-    from datetime import datetime
-    now_str = datetime.now().strftime("%H:%M:%S")
+    # Genera log di scansione con timestamp reale corrente fuso orario Roma per server_monitor.log su GitHub Pages statico
+    from datetime import datetime, timezone, timedelta
+    rome_tz = timezone(timedelta(hours=2))
+    now_str = datetime.now(rome_tz).strftime("%H:%M:%S")
     scan_logs = [
       {"message": "Inizializzazione del servizio di scansione real-time...", "level": "info", "time": now_str},
       {"message": "[SUBITO.IT] Scansione completata per Samsung S24 e S25 (256GB/512GB).", "level": "scan", "time": now_str},
