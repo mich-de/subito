@@ -100,8 +100,10 @@ def load_config():
         if os.path.exists(f"{CONFIG_DIR}/northladder.yaml"):
             with open(f"{CONFIG_DIR}/northladder.yaml", encoding="utf-8") as f:
                 config["northladder"] = yaml.safe_load(f)
-        else:
-            config["northladder"] = {"enabled": False}
+        if os.environ.get("TELEGRAM_BOT_TOKEN"):
+            config["telegram"]["bot_token"] = os.environ.get("TELEGRAM_BOT_TOKEN")
+        if os.environ.get("TELEGRAM_CHAT_ID"):
+            config["telegram"]["chat_id"] = os.environ.get("TELEGRAM_CHAT_ID")
 
 def init_scanners():
     global scanners, notifier

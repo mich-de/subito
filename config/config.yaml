@@ -1,7 +1,7 @@
 telegram:
   enabled: true
-  bot_token: '8969772993:AAEz4z_fxf3VVQPOWIE6pjvUa6M8Gs1vk78'
-  chat_id: '99016038'
+  bot_token: "YOUR_TELEGRAM_BOT_TOKEN"
+  chat_id: "YOUR_TELEGRAM_CHAT_ID"
 scanner:
   interval_minutes: 10
   shipping_required: true
