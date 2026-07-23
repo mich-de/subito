@@ -1,0 +1,46 @@
+name: Price Tracker Scanner
+
+on:
+  schedule:
+    # Esegue ogni 15 minuti automaticamente
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+  pages: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m playwright install chromium
+
+      - name: Run Price Scanner
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python run_once.py
+
+      - name: Commit & Push Sent History Cache
+        run: |
+          git config --global user.name "mich-de"
+          git config --global user.email "mic.deangelis@gmail.com"
+          git add data/
+          git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Update sent history cache [skip ci]"
+          git push
