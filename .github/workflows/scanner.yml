@@ -37,6 +37,18 @@ jobs:
         run: |
           python run_once.py
 
+      - name: Build Static Dashboard for GitHub Pages
+        run: |
+          python export_pages.py
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3.0.1
+        with:
+          path: 'public'
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4.0.5
+
       - name: Commit & Push Sent History Cache
         run: |
           git config --global user.name "mich-de"
