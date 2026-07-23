@@ -1,8 +1,8 @@
-flask==3.1.1
-requests==2.32.3
-beautifulsoup4==4.13.4
-pyyaml==6.0.2
-apscheduler==3.11.0
-lxml
-curl_cffi
-playwright
+flask>=3.1.0
+requests>=2.32.3
+beautifulsoup4>=4.13.3
+pyyaml>=6.0.2
+apscheduler>=3.11.0
+lxml>=5.3.0
+curl_cffi>=0.7.4
+playwright>=1.50.0
