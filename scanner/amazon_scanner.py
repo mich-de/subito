@@ -95,27 +95,41 @@ class AmazonScanner(BaseScanner):
                     time.sleep(delay)
                     continue
                 soup = BeautifulSoup(resp.text, "lxml")
-                cards = soup.select("div[data-component-type='s-search-result']")
+                cards = soup.select("div[data-component-type='s-search-result'], div.s-result-item[data-asin]")
                 for card in cards:
-                    title_el = card.select_one("h2 a span, h2 span")
+                    asin = card.get("data-asin", "")
+                    if not asin or card.select_one(".a-row.a-spacing-micro"):
+                        # Salta sponsorizzati generici se privi di ASIN valido
+                        pass
+                    title_el = card.select_one("h2 a span, h2 span, .a-size-medium, .a-size-base-plus")
                     if not title_el:
                         continue
                     title = title_el.get_text(strip=True)
-                    price_el = card.select_one(".a-price-whole, .a-price .a-offscreen")
+                    price_el = card.select_one(".a-price .a-offscreen, span.a-price-whole, .a-color-price, .a-price")
                     if not price_el:
                         continue
                     price = self._parse_price(price_el.get_text(strip=True))
-                    if not price:
+                    if not price or price <= 1:
                         continue
-                    link_el = card.select_one("h2 a")
-                    href = link_el["href"] if link_el and link_el.has_attr("href") else ""
+                    link_el = card.select_one("h2 a, a.a-link-normal[href*='/dp/']")
+                    href = link_el["href"] if link_el and link_el.has_attr("href") else f"/dp/{asin}"
                     full_url = href if href.startswith("http") else f"https://www.amazon.it{href}"
+                    
+                    # Rilevamento condizione (Nuovo, Ricondizionato o Usato)
+                    condition = "Nuovo"
+                    badge_text = card.get_text(separator=" ", strip=True).lower()
+                    if "ricondizionato" in badge_text or "renewed" in badge_text:
+                        condition = "Ricondizionato"
+                    elif "usato" in badge_text or "seconda mano" in badge_text:
+                        condition = "Usato"
+
                     p = Product(
                         title=title, price=price, url=full_url, source="Amazon.it",
-                        location="Amazon.it", shipping=True, condition="Nuovo/Usato"
+                        location="Amazon.it", shipping=True, condition=condition
                     )
                     results.append(p)
-                return results
+                if results:
+                    return results
             except Exception as e:
                 time.sleep(delay)
             finally:
@@ -124,7 +138,7 @@ class AmazonScanner(BaseScanner):
                         session.close()
                     except:
                         pass
-        return []
+        return results
 
     def _fetch_product_page(self, asin):
         urls = [
