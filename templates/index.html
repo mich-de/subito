@@ -738,6 +738,19 @@
 
     /* ---- DASHBOARD ---- */
     async function fetchStatus() {
+      if (window.location.hostname.includes('github.io') || window.STATIC_CONFIG_DATA) {
+        const statusBadge = document.getElementById('status-badge');
+        const statusText = document.getElementById('status-text');
+        const uptimeEl = document.getElementById('uptime');
+        if (statusBadge) {
+          statusBadge.style.backgroundColor = 'var(--accent-emerald-glow)';
+          statusBadge.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+          statusBadge.style.color = 'var(--accent-emerald)';
+        }
+        if (statusText) statusText.textContent = 'Cloud Actions Active';
+        if (uptimeEl) uptimeEl.textContent = 'Cron (15m)';
+        return;
+      }
       try {
         const [status, latest, stats] = await Promise.all([
           fetch('/api/status').then(r=>r.json()), 
