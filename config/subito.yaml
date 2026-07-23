@@ -1,0 +1,13 @@
+enabled: true
+name: Subito.it
+source_key: subito
+base_url: https://www.subito.it
+search_url: https://www.subito.it/annunci-italia/vendita/usato/?q={keyword}&shp=true&order=priceasc
+max_pages: 20
+headers:
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
+    like Gecko) Chrome/128.0.0.0 Safari/537.36
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+  Accept-Language: it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7
+filters:
+  condition: usato

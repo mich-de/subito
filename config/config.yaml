@@ -1,0 +1,111 @@
+telegram:
+  enabled: true
+  bot_token: 8969772993:AAEz4z_fxf3VVQPOWIE6pjvUa6M8Gs1vk78
+  chat_id: '99016038'
+scanner:
+  interval_minutes: 10
+  shipping_required: true
+  products:
+  - name: Samsung S24 256GB
+    keywords:
+    - Samsung S24 256
+    - Samsung Galaxy S24 256
+    - S24 256
+    exclude_keywords:
+    - fe
+    - ultra
+    - plus
+    - watch
+    - scambio
+    - cerco
+    subito_urls: []
+    max_price: 240
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: Samsung S24 512GB
+    keywords:
+    - Samsung S24 512
+    - Samsung Galaxy S24 512
+    - S24 512
+    exclude_keywords:
+    - fe
+    - ultra
+    - plus
+    - watch
+    - scambio
+    - cerco
+    subito_urls: []
+    max_price: 240
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: Samsung S25 256GB
+    keywords:
+    - Samsung S25 256
+    - Samsung Galaxy S25 256
+    - S25 256
+    exclude_keywords:
+    - fe
+    - ultra
+    - plus
+    - watch
+    - scambio
+    - cerco
+    subito_urls: []
+    max_price: 400
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: Samsung S25 512GB
+    keywords:
+    - Samsung S25 512
+    - Samsung Galaxy S25 512
+    - S25 512
+    exclude_keywords:
+    - fe
+    - ultra
+    - plus
+    - watch
+    - scambio
+    - cerco
+    subito_urls: []
+    max_price: 400
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: Google Pixel 1-5
+    keywords:
+    - Google Pixel 1
+    - Google Pixel 2
+    - Google Pixel 3
+    - Google Pixel 4
+    - Google Pixel 5
+    exclude_keywords:
+    - custodia
+    - cover
+    - pellicola
+    - vetro
+    - caricatore
+    - cavo
+    - adattatore
+    - case
+    - silicone
+    - schermo
+    - riparazione
+    - ricambio
+    - batteria
+    subito_urls: []
+    max_price: 100
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+web:
+  host: 0.0.0.0
+  port: 5000
+  debug: false

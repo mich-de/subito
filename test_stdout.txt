@@ -1,0 +1,12 @@
+======================================================================
+  [SUBITO.IT + AMAZON.IT] Monitor Prezzi Samsung S25 256GB
+====================================================================== * Serving Flask app 'main'
+
+  Avviato: 2026-06-30 17:25:35
+  Check ogni: 30 minuti | Max: EUR500 | Spedizione: Richiesta * Debug mode: off
+
+======================================================================
+  [TELEGRAM] Status: [ON]
+  [WEB] http://localhost:5000
+  [INIT] Primo scan tra 10 secondi...
+
