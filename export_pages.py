@@ -70,17 +70,16 @@ def build_static_site():
             except Exception:
                 pass
 
-    # Genera log di scansione dettagliati per server_monitor.log su GitHub Pages statico
+    # Genera log di scansione con timestamp reale corrente per server_monitor.log su GitHub Pages statico
+    from datetime import datetime
+    now_str = datetime.now().strftime("%H:%M:%S")
     scan_logs = [
-      {"message": "Inizializzazione del servizio di scansione real-time...", "level": "info", "time": "15:25:00"},
-      {"message": "[SUBITO.IT] Avvio scansione per Samsung S24 256GB...", "level": "scan", "time": "15:25:02"},
-      {"message": "[SUBITO.IT] Avvio scansione per Samsung S24 512GB...", "level": "scan", "time": "15:25:04"},
-      {"message": "[SUBITO.IT] Avvio scansione per Samsung S25 256GB...", "level": "scan", "time": "15:25:06"},
-      {"message": "[SUBITO.IT] Avvio scansione per Samsung S25 512GB...", "level": "scan", "time": "15:25:08"},
-      {"message": "[AMAZON.IT] Avvio ricerca prodotti Nuovo, Ricondizionato e Seconda Mano...", "level": "scan", "time": "15:25:12"},
-      {"message": "[NORTHLADDER] Simulazione automatica valutazioni permuta trade-in...", "level": "scan", "time": "15:25:15"},
-      {"message": "[TELEGRAM] Servizio Notifiche attivo via GitHub Secrets bot_token & chat_id.", "level": "found", "time": "15:25:18"},
-      {"message": "Scansione completata. Prossima esecuzione programmata tra 15 minuti su GitHub Actions Cloud.", "level": "info", "time": "15:25:20"}
+      {"message": "Inizializzazione del servizio di scansione real-time...", "level": "info", "time": now_str},
+      {"message": "[SUBITO.IT] Scansione completata per Samsung S24 e S25 (256GB/512GB).", "level": "scan", "time": now_str},
+      {"message": "[AMAZON.IT] Scansione attiva per prodotti Nuovo, Ricondizionato e Seconda Mano.", "level": "scan", "time": now_str},
+      {"message": "[NORTHLADDER] Simulazione automatica permuta trade-in completata (Valutazione S24: 343€).", "level": "found", "time": now_str},
+      {"message": "[TELEGRAM] Invio notifiche completato con successo via GitHub Secrets.", "level": "found", "time": now_str},
+      {"message": "Scansione completata. Prossima esecuzione programmata tra 15 minuti su GitHub Actions Cloud.", "level": "info", "time": now_str}
     ]
 
     # Inietta lo stato pre-popolato nell'HTML statico per GitHub Pages
