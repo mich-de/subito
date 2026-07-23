@@ -145,6 +145,37 @@ class SubitoScanner(BaseScanner):
             except Exception as e:
                 err_str = str(e)
                 if "getaddrinfo" in err_str or "thread failed" in err_str:
+                    try:
+                        import requests as native_requests
+                        headers = {
+                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+                            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                            "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7"
+                        }
+                        resp = native_requests.get(url, headers=headers, timeout=20)
+                        if resp.status_code == 200:
+                            m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', resp.text, re.DOTALL)
+                            if not m:
+                                soup = BeautifulSoup(resp.text, "lxml")
+                                items = []
+                                for card in soup.select("article[data-testid='listing-card'], [class*='item-card'], .items__item"):
+                                    title_el = card.select_one("h2, [class*=title], [data-testid='title']")
+                                    link_el = card.select_one("a[href]")
+                                    price_el = card.select_one("[class*=price], [data-testid*=price]")
+                                    if title_el and link_el:
+                                        title = title_el.get_text(strip=True)
+                                        href = link_el["href"]
+                                        price = self._parse_price(price_el.get_text(strip=True) if price_el else "")
+                                        items.append({
+                                            "subject": title,
+                                            "urls": {"default": href if href.startswith("http") else f"https://www.subito.it{href}"},
+                                            "features": {"/price": {"values": [{"key": str(price)}] if price else []}}
+                                        })
+                                return items
+                            data = json.loads(m.group(1))
+                            return data.get("props", {}).get("pageProps", {}).get("initialState", {}).get("items", {}).get("list", [])
+                    except Exception:
+                        pass
                     print(f"  [WARN] Subito DNS error (attempt {attempt + 1}/{len(RETRY_DELAYS)}), riprovo tra {delay}s: {e}")
                     time.sleep(delay)
                 else:
