@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offerte Monitor - Subito & Amazon Tracker</title>
+  <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="header-top">
+        <div class="brand">
+          <h1><span>OFFERTE</span> MONITOR</h1>
+          <p>Subito.it & Amazon.it Real-Time Price Tracker</p>
+          <div id="product-tags" class="tags-row"></div>
+        </div>
+        <div class="status-container">
+          <div id="status-badge" class="status-badge">
+            <span class="status-dot"></span>
+            <span id="status-text">Avvio in corso...</span>
+          </div>
+          <span id="uptime" class="uptime-text">00:00:00</span>
+        </div>
+      </div>
+      <nav class="nav-tabs">
+        <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn active">Dashboard</button>
+        <button onclick="switchTab('config')" id="tab-config" class="tab-btn">Configurazione</button>
+        <button onclick="switchTab('yaml')" id="tab-yaml" class="tab-btn">Visualizza YAML</button>
+      </nav>
+    </header>
+
+    <!-- DASHBOARD PANEL -->
+    <div id="panel-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Scansioni</div>
+          <div id="stat-scans" class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Trovati</div>
+          <div id="stat-total" class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Nuovi</div>
+          <div id="stat-new" class="stat-value emerald">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Oltre Soglia</div>
+          <div id="stat-nearmiss" class="stat-value amber">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Prezzo Medio</div>
+          <div id="stat-avg" class="stat-value amber">€0</div>
+        </div>
+      </div>
+
+      <!-- Near Miss Alert Area (hidden by default) -->
+      <div id="nearmiss-section" class="nearmiss-panel hidden">
+        <div class="nearmiss-title-row">
+          <h2>Offerte Oltre Soglia (+€50 Margine)</h2>
+          <span id="nearmiss-count" class="nearmiss-count">0</span>
+        </div>
+        <div id="nearmiss-list" class="nearmiss-grid"></div>
+      </div>
+
+      <!-- Product Filter Bar -->
+      <div class="filter-container">
+        <span class="filter-label">Filtra per Prodotto:</span>
+        <div id="filter-buttons" class="filter-buttons">
+          <button onclick="setProductFilter('all')" class="filter-btn active" id="btn-filter-all">Tutti i prodotti</button>
+        </div>
+      </div>
+
+      <!-- Scanners List Container -->
+      <div class="lists-grid">
+        <div class="list-panel">
+          <div class="list-header">
+            <h2 class="list-title">
+              <span id="subito-badge" class="list-badge"></span>
+              Subito.it
+            </h2>
+          </div>
+          <div id="subito-list" class="items-container">
+            <div style="color: var(--text-muted); text-align: center; padding: 2rem 0; font-size: 0.875rem;">In attesa di scansione...</div>
+          </div>
+        </div>
+        <div class="list-panel">
+          <div class="list-header">
+            <h2 class="list-title">
+              <span id="amazon-badge" class="list-badge"></span>
+              Amazon.it
+            </h2>
+          </div>
+          <div id="amazon-list" class="items-container">
+            <div style="color: var(--text-muted); text-align: center; padding: 2rem 0; font-size: 0.875rem;">In attesa di scansione...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Latest Items Feed -->
+      <div class="latest-panel">
+        <div class="list-header">
+          <h2 class="list-title">Tutti gli annunci recenti</h2>
+          <span id="new-count" style="font-size: 0.75rem; color: var(--text-muted);">0 trovati</span>
+        </div>
+        <div id="latest-list" class="latest-grid">
+          <div style="color: var(--text-muted); text-align: center; padding: 2rem 0; font-size: 0.875rem; grid-column: 1/-1;">Nessun annuncio da visualizzare</div>
+        </div>
+      </div>
+
+      <!-- Console Logs Terminal -->
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted);">server_monitor.log</div>
+        </div>
+        <div id="log" class="terminal-body">
+          <div class="log-entry info"><span class="log-entry timestamp">[OK]</span>Inizializzazione console in corso...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURATION PANEL -->
+    <div id="panel-config" class="hidden">
+      <form id="config-form" onsubmit="saveForm(event)">
+        <div class="form-grid">
+          <!-- General Configurations -->
+          <div class="config-card">
+            <h3>Impostazioni Generali</h3>
+            <div class="form-group">
+              <div class="form-row">
+                <span class="form-label">Intervallo di Scansione (minuti)</span>
+                <input type="number" id="cfg-interval" min="1" max="1440" class="w-input-small">
+              </div>
+              <div class="form-row">
+                <span class="form-label">Richiedi Spedizione Obbligatoria</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="cfg-shipping">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Telegram Configurations -->
+          <div class="config-card">
+            <h3>Notifiche Telegram</h3>
+            <div class="form-group">
+              <div class="form-row">
+                <span class="form-label">Stato Servizio Notifiche</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="cfg-tg-enabled">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="form-row">
+                <span class="form-label">Telegram Bot Token</span>
+                <input type="text" id="cfg-tg-token" class="w-input-wide" placeholder="123456789:ABC...">
+              </div>
+              <div class="form-row">
+                <span class="form-label">Chat ID Destinatario</span>
+                <input type="text" id="cfg-tg-chat" class="w-input-wide" placeholder="@nome_canale o ID">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products List Management -->
+        <div class="products-panel">
+          <div class="panel-header-row">
+            <h3 style="font-family: var(--font-display); font-size: 0.875rem; text-transform: uppercase; color: var(--accent-emerald); letter-spacing: 0.05em; font-weight: 600;">Prodotti da Monitorare</h3>
+            <button type="button" onclick="addProduct()" class="btn btn-primary">+ Aggiungi Prodotto</button>
+          </div>
+          <div id="products-list"></div>
+        </div>
+
+        <!-- Scanners Settings -->
+        <div class="form-grid">
+          <div class="config-card">
+            <h3>Parametri Subito.it</h3>
+            <div class="form-group">
+              <div class="form-row">
+                <span class="form-label">Scanner Abilitato</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="cfg-subito-enabled">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="form-row">
+                <span class="form-label">Limite Pagine da Scansionare</span>
+                <input type="number" id="cfg-subito-pages" min="1" max="20" class="w-input-small">
+              </div>
+            </div>
+          </div>
+
+          <div class="config-card">
+            <h3>Parametri Amazon.it</h3>
+            <div class="form-group">
+              <div class="form-row">
+                <span class="form-label">Scanner Abilitato</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="cfg-amazon-enabled">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="form-row">
+                <span class="form-label">Limite Pagine da Scansionare</span>
+                <input type="number" id="cfg-amazon-pages" min="1" max="10" class="w-input-small">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 1rem; margin-bottom: 2rem;">
+          <span id="config-save-status" style="font-size: 0.75rem;"></span>
+          <button type="submit" id="cfg-save-btn" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">Salva e Applica Configurazione</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- YAML PANEL -->
+    <div id="panel-yaml" class="hidden">
+      <div id="yaml-tabs" class="yaml-tabs"></div>
+      <div class="yaml-editor-container">
+        <form onsubmit="saveYaml(event)">
+          <div class="yaml-editor-header">
+            <h2 id="yaml-filename" class="yaml-editor-title">config.yaml</h2>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <span id="yaml-status" style="font-size: 0.75rem;"></span>
+              <button type="submit" class="btn btn-primary" style="font-size: 0.75rem;">Salva YAML</button>
+            </div>
+          </div>
+          <textarea id="yaml-editor" class="yaml-editor-area" spellcheck="false"></textarea>
+        </form>
+      </div>
+    </div>
+
+    <footer>
+      Offerte Monitor &copy; 2026 - Premium Dark Vanilla Edition
+    </footer>
+  </div>
+
+  <script>
+    const state = { items: [], currentConfig: '', formProducts: [], selectedProduct: 'all' };
+
+    function setProductFilter(name) {
+      state.selectedProduct = name;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        const isActive = (name === 'all' && btn.id === 'btn-filter-all') || btn.textContent === name;
+        btn.classList.toggle('active', isActive);
+      });
+      renderItems(state.items);
+      renderNearMiss(state.items);
+    }
+    let lastLogIndex = 0;
+
+    function fmtDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const dd = String(d.getDate()).padStart(2,'0');
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const yyyy = d.getFullYear();
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mi = String(d.getMinutes()).padStart(2,'0');
+      return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
+    }
+    function fmtTime(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mi = String(d.getMinutes()).padStart(2,'0');
+      return `${hh}:${mi}`;
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      ['dashboard','config','yaml'].forEach(p => document.getElementById('panel-' + p).classList.toggle('hidden', p !== name));
+      if (name === 'config') loadFormConfig();
+      if (name === 'yaml') loadYamlList();
+    }
+
+    function appendLog(msg, type = 'info', ts = null) {
+      if (!ts) {
+        ts = new Date().toLocaleTimeString('it-IT');
+      }
+      const c = { info: 'info', found: 'found', error: 'error', scan: 'scan' };
+      const el = document.getElementById('log');
+      const d = document.createElement('div');
+      d.className = `log-entry ${c[type] || 'info'}`;
+      
+      const tsSpan = document.createElement('span');
+      tsSpan.className = 'log-entry timestamp';
+      tsSpan.textContent = `[${ts}]`;
+      
+      d.appendChild(tsSpan);
+      d.appendChild(document.createTextNode(msg));
+      
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+      if (el.children.length > 500) el.removeChild(el.firstChild);
+    }
+
+    // Pull logs in real-time from server logs endpoint
+    async function fetchServerLogs() {
+      try {
+        const r = await fetch(`/api/logs?since=${lastLogIndex}`);
+        if (!r.ok) return;
+        const d = await r.json();
+        if (d.logs && d.logs.length) {
+          d.logs.forEach(l => {
+            appendLog(l.message, l.level, l.time);
+            lastLogIndex = Math.max(lastLogIndex, l.index);
+          });
+        }
+      } catch (e) {
+        console.error("Errore fetch logs:", e);
+      }
+    }
+
+    function renderItems(items) {
+      const byPrice = (a, b) => (a.price || 999999) - (b.price || 999999);
+      items.sort(byPrice);
+      
+      const filtered = state.selectedProduct === 'all'
+        ? items
+        : items.filter(i => i.product_name === state.selectedProduct);
+
+      const sub = filtered.filter(i => i.source && i.source.toLowerCase().includes('subito')).sort(byPrice);
+      const amz = filtered.filter(i => i.source && i.source.toLowerCase().includes('amazon')).sort(byPrice);
+      
+      renderList(document.getElementById('subito-list'), sub, 'Subito.it');
+      renderList(document.getElementById('amazon-list'), amz, 'Amazon.it');
+      renderLatest(document.getElementById('latest-list'), filtered);
+      
+      const sbBadge = document.getElementById('subito-badge');
+      const azBadge = document.getElementById('amazon-badge');
+      sbBadge.className = `list-badge ${sub.length ? 'active' : ''}`;
+      azBadge.className = `list-badge ${amz.length ? 'active' : ''}`;
+      
+      document.getElementById('new-count').textContent = `${filtered.length} annunci visualizzati`;
+    }
+
+    const minPrice = items => items.reduce((m, i) => i.price && i.price < m ? i.price : m, Infinity);
+
+    function renderList(el, items, label) {
+      if (!items.length) { 
+        el.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 2rem 0; font-size: 0.875rem;">Nessun annuncio corrispondente</div>'; 
+        return; 
+      }
+      const best = minPrice(items);
+      el.innerHTML = items.map(i => {
+        const isBest = i.price && i.price === best;
+        return `
+        <a href="${i.url}" target="_blank" class="item-card${isBest ? ' item-best' : ''}">
+          <div class="item-row">
+            <div class="item-left">
+              <div class="item-title" title="${i.title}">${i.title}</div>
+              <div class="item-meta">
+                <span>${i.location || label}</span>
+                ${i.shipping ? '<span class="item-ship-icon">📦 Spedizione</span>' : ''}
+                ${i.condition ? `<span style="opacity:0.6;">• ${i.condition}</span>` : ''}
+              </div>
+            </div>
+            <div class="item-right">
+              <div class="item-price${isBest ? ' price-best' : ''}">€${i.price}</div>
+              <div class="item-date">${fmtDate(i.date)}</div>
+            </div>
+          </div>
+        </a>`;
+      }).join('');
+    }
+
+    function renderNearMiss(items) {
+      const sec = document.getElementById('nearmiss-section');
+      const filtered = state.selectedProduct === 'all'
+        ? items
+        : items.filter(i => i.product_name === state.selectedProduct);
+      const near = filtered.filter(i => i.near_miss);
+      if (!near.length) { 
+        sec.classList.add('hidden'); 
+        return; 
+      }
+      sec.classList.remove('hidden');
+      document.getElementById('nearmiss-count').textContent = near.length;
+      document.getElementById('nearmiss-list').innerHTML = near.map(i => {
+        const diff = i.price - (i.max_price || 500);
+        return `
+          <a href="${i.url}" target="_blank" class="nearmiss-row">
+            <span class="nearmiss-time">${fmtTime(i.date)}</span>
+            <span class="nearmiss-text" title="${i.title}">${i.title}</span>
+            <span class="nearmiss-price">€${i.price}</span>
+            <span class="nearmiss-diff">+€${diff}</span>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function renderLatest(el, items) {
+      if (!items.length) { 
+        el.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 2rem 0; font-size: 0.875rem; grid-column: 1/-1;">Nessun annuncio registrato</div>'; 
+        return; 
+      }
+      const best = minPrice(items);
+      el.innerHTML = items.map(i => {
+        const isFresh = i.date && (Date.now() - new Date(i.date).getTime()) < 3600000;
+        const sourceName = i.source?.split('.')[0] || 'Web';
+        const isBest = i.price && i.price === best;
+        const prodName = i.product_name || 'Generico';
+        
+        return `
+          <a href="${i.url}" target="_blank" class="feed-card${isBest ? ' item-best' : ''}">
+            <div>
+              <div class="feed-card-header">
+                <div class="feed-card-tags">
+                  <span class="feed-tag-source">${sourceName}</span>
+                  <span class="feed-tag-product" title="${prodName}">${prodName}</span>
+                </div>
+                ${isFresh ? '<span class="badge-new">NEW</span>' : ''}
+              </div>
+              <div class="feed-card-title" title="${i.title}">${i.title}</div>
+            </div>
+            <div class="feed-card-footer">
+              <div class="feed-card-meta">
+                <span>📍 ${i.location || 'Italia'}</span>
+                <span>🕒 ${fmtTime(i.date)} ${i.shipping ? '• 📦 Spedizione' : ''}</span>
+              </div>
+              <div class="feed-card-price${isBest ? ' best' : ''}">€${i.price}</div>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    /* ---- CONFIG FORM ---- */
+    function renderProducts(products) {
+      state.formProducts = products.map(p => ({
+        ...p, 
+        keywords: Array.isArray(p.keywords) ? p.keywords.join(', ') : (p.keywords || ''),
+        exclude_keywords: Array.isArray(p.exclude_keywords) ? p.exclude_keywords.join(', ') : (p.exclude_keywords || ''),
+        subito_urls: Array.isArray(p.subito_urls) ? p.subito_urls.join(', ') : (p.subito_urls || '')
+      }));
+      const el = document.getElementById('products-list');
+      if (!state.formProducts.length) { 
+        el.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 1.5rem; font-size: 0.875rem;">Nessun prodotto monitorato. Clicca Aggiungi per configurare.</div>'; 
+        return; 
+      }
+      el.innerHTML = state.formProducts.map((p, i) => `
+        <div class="product-item">
+          <div class="product-item-header">
+            <span class="product-item-num">PRODOTTO #${i + 1}</span>
+            <button type="button" onclick="removeProduct(${i})" class="btn btn-danger">Rimuovi</button>
+          </div>
+          <div class="product-grid">
+            <div class="form-row">
+              <span class="form-label">Nome Identificativo</span>
+              <input type="text" data-field="name" data-idx="${i}" value="${p.name || ''}" style="width: 180px;">
+            </div>
+            <div class="form-row">
+              <span class="form-label">Prezzo Limite (€)</span>
+              <input type="number" data-field="max_price" data-idx="${i}" value="${p.max_price || 500}" min="1" class="w-input-small">
+            </div>
+            <div class="form-row">
+              <span class="form-label">Tolleranza Fuori Soglia (€)</span>
+              <input type="number" data-field="price_margin" data-idx="${i}" value="${p.price_margin || 50}" min="0" class="w-input-small">
+            </div>
+            <div class="form-row">
+              <span class="form-label">Monitora su Subito.it</span>
+              <label class="toggle-switch">
+                <input type="checkbox" data-field="subito" data-idx="${i}" ${p.subito !== false ? 'checked' : ''}>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Monitora su Amazon.it</span>
+              <label class="toggle-switch">
+                <input type="checkbox" data-field="amazon" data-idx="${i}" ${p.amazon !== false ? 'checked' : ''}>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Cerca anche nella descrizione</span>
+              <label class="toggle-switch">
+                <input type="checkbox" data-field="search_in_description" data-idx="${i}" ${p.search_in_description !== false ? 'checked' : ''}>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-row product-grid-full" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
+              <span class="form-label">Termini di Ricerca (separati da virgola)</span>
+              <input type="text" data-field="keywords" data-idx="${i}" value="${p.keywords || ''}" style="width: 100%;">
+            </div>
+            <div class="form-row product-grid-full" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
+              <span class="form-label">Parole da Escludere (separate da virgola, es: "fe, ultra, plus")</span>
+              <input type="text" data-field="exclude_keywords" data-idx="${i}" value="${p.exclude_keywords || ''}" style="width: 100%;">
+            </div>
+            <div class="form-row product-grid-full" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
+              <span class="form-label">URL Subito Forzati (separati da virgola, es: /vi/650658295.htm)</span>
+              <input type="text" data-field="subito_urls" data-idx="${i}" value="${Array.isArray(p.subito_urls) ? p.subito_urls.join(', ') : (p.subito_urls || '')}" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addProduct() {
+      syncFormFromInputs();
+      state.formProducts.push({ name: '', keywords: '', exclude_keywords: '', subito_urls: '', max_price: 500, price_margin: 50, subito: true, amazon: true });
+      renderProducts(state.formProducts);
+    }
+
+    function removeProduct(i) {
+      syncFormFromInputs();
+      state.formProducts.splice(i, 1);
+      renderProducts(state.formProducts);
+    }
+
+    function collectFormProducts() {
+      return state.formProducts.map(p => ({
+        name: p.name,
+        keywords: typeof p.keywords === 'string' ? p.keywords.split(',').map(s => s.trim()).filter(Boolean) : p.keywords,
+        exclude_keywords: typeof p.exclude_keywords === 'string' ? p.exclude_keywords.split(',').map(s => s.trim()).filter(Boolean) : p.exclude_keywords,
+        subito_urls: typeof p.subito_urls === 'string' ? p.subito_urls.split(',').map(s => s.trim()).filter(Boolean) : p.subito_urls,
+        max_price: parseInt(p.max_price) || 500,
+        price_margin: parseInt(p.price_margin) || 50,
+        subito: p.subito !== false,
+        amazon: p.amazon !== false,
+        search_in_description: p.search_in_description !== false,
+      }));
+    }
+
+    function syncFormFromInputs() {
+      document.querySelectorAll('#products-list [data-idx]').forEach(el => {
+        const i = parseInt(el.dataset.idx);
+        const f = el.dataset.field;
+        if (!state.formProducts[i]) return;
+        if (el.type === 'checkbox') state.formProducts[i][f] = el.checked;
+        else state.formProducts[i][f] = el.value;
+      });
+    }
+
+    async function loadFormConfig() {
+      try {
+        const r = await fetch('/api/config/form');
+        if (!r.ok) return;
+        const d = await r.json();
+        document.getElementById('cfg-interval').value = d.general.interval_minutes;
+        document.getElementById('cfg-shipping').checked = d.general.shipping_required;
+        document.getElementById('cfg-tg-enabled').checked = d.telegram.enabled;
+        document.getElementById('cfg-tg-token').value = d.telegram.bot_token;
+        document.getElementById('cfg-tg-chat').value = d.telegram.chat_id;
+        document.getElementById('cfg-subito-enabled').checked = d.subito.enabled;
+        document.getElementById('cfg-subito-pages').value = d.subito.max_pages;
+        document.getElementById('cfg-amazon-enabled').checked = d.amazon.enabled;
+        document.getElementById('cfg-amazon-pages').value = d.amazon.max_pages;
+        renderProducts(d.products);
+      } catch (e) { console.error(e); }
+    }
+
+    async function saveForm(e) {
+      e.preventDefault();
+      syncFormFromInputs();
+      const btn = document.getElementById('cfg-save-btn');
+      const status = document.getElementById('config-save-status');
+      btn.textContent = 'Salvataggio...'; 
+      btn.disabled = true;
+      try {
+        const r = await fetch('/api/config/form', {
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            general: { 
+              interval_minutes: parseInt(document.getElementById('cfg-interval').value), 
+              shipping_required: document.getElementById('cfg-shipping').checked 
+            },
+            telegram: { 
+              enabled: document.getElementById('cfg-tg-enabled').checked, 
+              bot_token: document.getElementById('cfg-tg-token').value, 
+              chat_id: document.getElementById('cfg-tg-chat').value 
+            },
+            products: collectFormProducts(),
+            subito: { 
+              enabled: document.getElementById('cfg-subito-enabled').checked, 
+              max_pages: parseInt(document.getElementById('cfg-subito-pages').value) 
+            },
+            amazon: { 
+              enabled: document.getElementById('cfg-amazon-enabled').checked, 
+              max_pages: parseInt(document.getElementById('cfg-amazon-pages').value) 
+            },
+          })
+        });
+        const d = await r.json();
+        if (d.ok) { 
+          status.textContent = '✅ Configurazione applicata!'; 
+          status.style.color = 'var(--accent-emerald)'; 
+        } else { 
+          status.textContent = '❌ ' + (d.error || 'errore'); 
+          status.style.color = 'var(--accent-rose)'; 
+        }
+      } catch (e) { 
+        status.textContent = '❌ Errore connessione'; 
+        status.style.color = 'var(--accent-rose)'; 
+      }
+      btn.textContent = 'Salva e Applica Configurazione'; 
+      btn.disabled = false;
+    }
+
+    /* ---- YAML EDITOR ---- */
+    async function loadYamlList() {
+      try {
+        const r = await fetch('/api/config');
+        if (!r.ok) return;
+        const d = await r.json();
+        document.getElementById('yaml-tabs').innerHTML = d.files.map(f =>
+          `<button type="button" onclick="loadYaml('${f}')" class="yaml-tab-btn" data-file="${f}">${f}</button>`
+        ).join('');
+        if (d.files.length) loadYaml(d.files[0]);
+      } catch (e) { console.error(e); }
+    }
+
+    async function loadYaml(name) {
+      try {
+        const r = await fetch(`/api/config/${name}`);
+        if (!r.ok) return;
+        const d = await r.json();
+        document.getElementById('yaml-editor').value = d.content;
+        document.getElementById('yaml-filename').textContent = name;
+        state.currentConfig = name;
+        document.querySelectorAll('.yaml-tab-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.file === name);
+        });
+      } catch (e) { console.error(e); }
+    }
+
+    async function saveYaml(e) {
+      e.preventDefault();
+      const status = document.getElementById('yaml-status');
+      try {
+        const r = await fetch(`/api/config/${state.currentConfig}`, { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ content: document.getElementById('yaml-editor').value }) 
+        });
+        const d = await r.json();
+        if (d.ok) { 
+          status.textContent = '✅ Configurazione salvata!'; 
+          status.style.color = 'var(--accent-emerald)'; 
+        } else { 
+          status.textContent = '❌ ' + (d.error || 'errore'); 
+          status.style.color = 'var(--accent-rose)'; 
+        }
+      } catch (e) { 
+        status.textContent = '❌ Errore'; 
+        status.style.color = 'var(--accent-rose)'; 
+      }
+    }
+
+    /* ---- DASHBOARD ---- */
+    async function fetchStatus() {
+      try {
+        const [status, latest, stats] = await Promise.all([
+          fetch('/api/status').then(r=>r.json()), 
+          fetch('/api/latest').then(r=>r.json()), 
+          fetch('/api/stats').then(r=>r.json())
+        ]);
+        
+        const tags = document.getElementById('product-tags');
+        if (status.products && status.products.length) {
+          tags.innerHTML = status.products.map(p => `
+            <span class="product-tag">${p.name || p.keywords?.[0] || '?'} <span>≤€${p.max_price}</span></span>
+          `).join('');
+          
+          // Update filter buttons dynamically
+          const filterContainer = document.getElementById('filter-buttons');
+          let buttonsHtml = `<button onclick="setProductFilter('all')" class="filter-btn ${state.selectedProduct === 'all' ? 'active' : ''}" id="btn-filter-all">Tutti i prodotti</button>`;
+          status.products.forEach(p => {
+            const name = p.name;
+            if (name) {
+              buttonsHtml += `<button onclick="setProductFilter('${name}')" class="filter-btn ${state.selectedProduct === name ? 'active' : ''}">${name}</button>`;
+            }
+          });
+          filterContainer.innerHTML = buttonsHtml;
+        }
+        
+        document.getElementById('stat-scans').textContent = status.scan_count || 0;
+        document.getElementById('stat-total').textContent = status.total_items_found || 0;
+        document.getElementById('stat-new').textContent = status.total_new_items || 0;
+        document.getElementById('stat-nearmiss').textContent = status.total_near_miss || 0;
+        document.getElementById('stat-avg').textContent = stats.avg_price ? `€${stats.avg_price}` : '€0';
+        document.getElementById('uptime').textContent = status.uptime || '00:00:00';
+        
+        const statusBadge = document.getElementById('status-badge');
+        const statusText = document.getElementById('status-text');
+        
+        if (status.status === 'running') {
+          statusBadge.style.backgroundColor = 'var(--accent-emerald-glow)';
+          statusBadge.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+          statusBadge.style.color = 'var(--accent-emerald)';
+          statusText.textContent = 'Monitor Attivo';
+        }
+        
+        if (Array.isArray(latest) && latest.length) { 
+          state.items = latest; 
+          renderItems(latest); 
+          renderNearMiss(latest); 
+        }
+      } catch (e) {}
+    }
+
+    // Pull status and server-side logs on intervals
+    setInterval(fetchStatus, 10000);
+    setInterval(fetchServerLogs, 2000); // Poll logs every 2 seconds
+    
+    // Initial calls
+    fetchStatus();
+    fetchServerLogs();
+  </script>
+
+    <script>
+      window.STATIC_ITEMS = [{"title": "Samsung S25 256 Gb", "price": 350, "url": "https://www.subito.it/telefonia/samsung-s25-256-gb-reggio-emilia-654962247.htm", "source": "Subito.it", "location": "Scandiano (RE)", "shipping": true, "condition": "usato", "date": "2026-07-23T13:17:16.468961", "product_name": "Samsung S25 256GB", "near_miss": false, "max_price": 400}, {"title": "Samsung Galaxy S25 (Grigio lucido chiaro) - 256 gb", "price": 400, "url": "https://www.subito.it/telefonia/samsung-galaxy-s25-grigio-lucido-chiaro-256-gb-pavia-652795359.htm", "source": "Subito.it", "location": "Pavia (PV)", "shipping": true, "condition": "usato", "date": "2026-07-23T13:17:16.468961", "product_name": "Samsung S25 256GB", "near_miss": false, "max_price": 400}, {"title": "3 Caricatori per Google Pixel Watch 1", "price": 20, "url": "https://www.subito.it/telefonia/3-caricatori-per-google-pixel-watch-1-arezzo-651239568.htm", "source": "Subito.it", "location": "Arezzo (AR)", "shipping": true, "condition": "usato", "date": "2026-07-23T13:22:39.239440", "product_name": "Google Pixel 1-5", "near_miss": false, "max_price": 100}, {"title": "Cinturini Google Pixel 3 45mm", "price": 3, "url": "https://www.subito.it/telefonia/cinturini-google-pixel-3-45mm-roma-625254921.htm", "source": "Subito.it", "location": "Roma (RM)", "shipping": true, "condition": "usato", "date": "2026-07-23T13:24:12.243256", "product_name": "Google Pixel 1-5", "near_miss": false, "max_price": 100}, {"title": "Google pixel 4 xl  Ghostek exec con porta card", "price": 15, "url": "https://www.subito.it/telefonia/google-pixel-4-xl-ghostek-exec-con-porta-card-milano-594527931.htm", "source": "Subito.it", "location": "Milano (MI)", "shipping": true, "condition": "usato", "date": "2026-07-23T13:25:00.171005", "product_name": "Google Pixel 1-5", "near_miss": false, "max_price": 100}, {"title": "display Google pixel 4", "price": 20, "url": "https://www.subito.it/telefonia/display-google-pixel-4-benevento-640083640.htm", "source": "Subito.it", "location": "San Lorenzello (BN)", "shipping": true, "condition": "usato", "date": "2026-07-23T13:25:00.171005", "product_name": "Google Pixel 1-5", "near_miss": false, "max_price": 100}, {"title": "Samsung S25 Edge 256 GB NUOVO", "price": 450, "url": "https://www.subito.it/telefonia/samsung-s25-edge-256-gb-nuovo-monza-650886403.htm", "source": "Subito.it", "location": "Brugherio (MB)", "shipping": true, "condition": "usato", "date": "2026-07-23T13:17:16.468961", "product_name": "Samsung S25 256GB", "near_miss": true, "max_price": 400}, {"title": "Samsung s25 eidge nero 256 giga", "price": 450, "url": "https://www.subito.it/telefonia/samsung-s25-eidge-nero-256-giga-roma-621329415.htm", "source": "Subito.it", "location": "Roma (RM)", "shipping": true, "condition": "usato", "date": "2026-07-23T13:17:16.468961", "product_name": "Samsung S25 256GB", "near_miss": true, "max_price": 400}, {"title": "SAMSUNG S25  12/512 GB", "price": 450, "url": "https://www.subito.it/telefonia/samsung-s25-12-512-gb-caserta-654835478.htm", "source": "Subito.it", "location": "Caserta (CE)", "shipping": true, "condition": "usato", "date": "2026-07-23T13:19:58.758034", "product_name": "Samsung S25 512GB", "near_miss": true, "max_price": 400}];
+      document.addEventListener('DOMContentLoaded', () => {
+        if (window.STATIC_ITEMS && window.STATIC_ITEMS.length) {
+          state.items = window.STATIC_ITEMS;
+          renderItems(window.STATIC_ITEMS);
+          renderNearMiss(window.STATIC_ITEMS);
+        }
+      });
+    </script>
+    </body>
+    
+</html>
