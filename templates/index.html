@@ -378,7 +378,7 @@
       const statNear = document.getElementById('stat-near');
       const statAvg = document.getElementById('stat-avg');
 
-      if (statScan) statScan.textContent = totalCount ? 'Cloud (15m)' : '0';
+      if (statScan) statScan.textContent = totalCount ? totalCount : '0';
       if (statFound) statFound.textContent = totalCount;
       if (statNew) statNew.textContent = freshCount;
       if (statNear) statNear.textContent = nearCount;
