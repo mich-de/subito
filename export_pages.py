@@ -5,6 +5,8 @@ from flask import Flask, render_template_string
 def build_static_site():
     print("Building static site for GitHub Pages...")
     os.makedirs("public", exist_ok=True)
+    with open("public/.nojekyll", "w", encoding="utf-8") as f:
+        f.write("")
     
     with open("templates/index.html", encoding="utf-8") as f:
         html_content = f.read()
