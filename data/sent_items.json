@@ -44,8 +44,8 @@
     "timestamp": "2026-07-23T16:40:08.454481"
   },
   "https://www.subito.it/telefonia/samsung-s24-8gb-ram-256-gb-macerata-654391860.htm|Samsung S24 256GB": {
-    "price": 400,
-    "timestamp": "2026-07-23T16:40:08.454737"
+    "price": 380,
+    "timestamp": "2026-07-24T15:20:48.866048"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-256gb-firenze-652197108.htm|Samsung S24 256GB": {
     "price": 400,
@@ -78,5 +78,9 @@
   "https://www.subito.it/telefonia/samsung-s25-edge-256-gb-napoli-655144528.htm|Samsung S25 256GB": {
     "price": 400,
     "timestamp": "2026-07-24T07:30:24.057423"
+  },
+  "https://www.subito.it/telefonia/samsung-galax-s24-256-gb-nero-milano-655190450.htm|Samsung S24 256GB": {
+    "price": 390,
+    "timestamp": "2026-07-24T15:20:48.866419"
   }
 }
