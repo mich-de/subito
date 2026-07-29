@@ -7,20 +7,7 @@
     "location": "San Severo (FG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761684+02:00",
-    "product_name": "Samsung S24 256GB",
-    "near_miss": false,
-    "max_price": 360
-  },
-  {
-    "title": "Samsung S24 8/256",
-    "price": 350,
-    "url": "https://www.subito.it/telefonia/samsung-s24-8-256-parma-655658765.htm",
-    "source": "Subito.it",
-    "location": "Parma (PR)",
-    "shipping": true,
-    "condition": "usato",
-    "date": "2026-07-29T16:42:27.761695+02:00",
+    "date": "2026-07-29T18:11:49.227558+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -33,7 +20,7 @@
     "location": "Bari (BA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761714+02:00",
+    "date": "2026-07-29T18:11:49.227574+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -46,7 +33,7 @@
     "location": "Trani (BT)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761726+02:00",
+    "date": "2026-07-29T18:11:49.227582+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -59,7 +46,7 @@
     "location": "Salerno (SA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761739+02:00",
+    "date": "2026-07-29T18:11:49.227591+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -72,7 +59,7 @@
     "location": "Carini (PA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:43:49.458669+02:00",
+    "date": "2026-07-29T18:13:20.505203+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -85,7 +72,7 @@
     "location": "Napoli (NA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:48:40.906471+02:00",
+    "date": "2026-07-29T18:18:25.460754+02:00",
     "product_name": "Samsung S25 512GB",
     "near_miss": false,
     "max_price": 400
@@ -98,7 +85,7 @@
     "location": "Arezzo (AR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:50:49.992774+02:00",
+    "date": "2026-07-29T18:20:35.764032+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -111,7 +98,7 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:52:13.885221+02:00",
+    "date": "2026-07-29T18:22:03.543015+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -124,7 +111,7 @@
     "location": "Milano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:52:56.346773+02:00",
+    "date": "2026-07-29T18:22:51.519218+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -137,7 +124,7 @@
     "location": "San Lorenzello (BN)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:52:56.346784+02:00",
+    "date": "2026-07-29T18:22:51.519230+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -150,7 +137,7 @@
     "location": "Verona (VR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:52:56.346798+02:00",
+    "date": "2026-07-29T18:22:51.519244+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -163,7 +150,7 @@
     "location": "Macerata (MC)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761749+02:00",
+    "date": "2026-07-29T18:11:49.227598+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -176,7 +163,7 @@
     "location": "Todi (PG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761763+02:00",
+    "date": "2026-07-29T18:11:49.227608+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -189,7 +176,7 @@
     "location": "Bergamo (BG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761775+02:00",
+    "date": "2026-07-29T18:11:49.227617+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -202,7 +189,7 @@
     "location": "Peio (TN)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761785+02:00",
+    "date": "2026-07-29T18:11:49.227624+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -215,7 +202,7 @@
     "location": "Ercolano (NA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761795+02:00",
+    "date": "2026-07-29T18:11:49.227631+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -228,7 +215,7 @@
     "location": "Firenze (FI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761807+02:00",
+    "date": "2026-07-29T18:11:49.227640+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -241,7 +228,7 @@
     "location": "Albiate (MB)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761820+02:00",
+    "date": "2026-07-29T18:11:49.227648+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -254,7 +241,7 @@
     "location": "Buttigliera Alta (TO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:42:27.761830+02:00",
+    "date": "2026-07-29T18:11:49.227655+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -267,7 +254,7 @@
     "location": "Pavia (PV)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:46:35.182896+02:00",
+    "date": "2026-07-29T18:16:12.609381+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
@@ -280,7 +267,7 @@
     "location": "Napoli (NA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-07-29T16:47:58.787556+02:00",
+    "date": "2026-07-29T18:17:42.418441+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
