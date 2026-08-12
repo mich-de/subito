@@ -1,15 +1,15 @@
 [
   {
     "title": "NorthLadder Trade-In Valuation - Samsung S24 256GB",
-    "price": 343,
+    "price": 100,
     "url": "https://amazonit.northladder.net/it-en/",
     "source": "NorthLadder",
     "location": "Amazon Trade-In",
     "shipping": true,
     "condition": "Eccellente (Si accende, senza graffi/crepe)",
-    "date": "2026-08-12T14:04:36.445829",
+    "date": "2026-08-12T15:14:34.817255",
     "product_name": "Permuta Samsung S24 256GB",
-    "near_miss": false,
+    "near_miss": true,
     "max_price": 300
   }
 ]
