@@ -62,6 +62,19 @@ jobs:
           git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Save scan results and sent items history [skip ci]"
           git push origin main || true
 
+      - name: Rebuild GitHub Pages from Branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Il commit dei dati porta [skip ci], quindi la ricostruzione
+          # automatica di Pages non scatta e il sito resterebbe fermo
+          # all'ultimo index.html pubblicato. Va chiesta esplicitamente.
+          # Passo necessario solo finche' Pages e' in modalita' branch.
+          curl -s -X POST -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/pages/builds" > /dev/null || true
+
       - name: Purge Old Workflow Runs Automatically
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
