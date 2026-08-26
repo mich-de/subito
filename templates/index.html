@@ -217,8 +217,26 @@
         </div>
 
         <div style="display: flex; align-items: center; justify-content: flex-end; gap: 1rem; margin-bottom: 2rem;">
-          <span id="config-save-status" style="font-size: 0.75rem;"></span>
-          <button type="submit" id="cfg-save-btn" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">Salva e Applica Configurazione</button>
+          <span id="config-save-status" style="font-size: 0.75rem; text-align: right; line-height: 1.5;"></span>
+          <button type="submit" id="cfg-save-btn" class="btn btn-primary" style="padding: 0.75rem 1.5rem; flex-shrink: 0;">Salva e Applica Configurazione</button>
+        </div>
+
+        <!-- Export YAML: su GitHub Pages non esiste un backend scrivibile -->
+        <div id="static-export" class="config-card" style="display: none; margin-bottom: 2rem;">
+          <h3>YAML da riportare in config/config.yaml</h3>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0 0 0.75rem; line-height: 1.6;">
+            GitHub Pages serve solo file statici, quindi il form non può scrivere sul repository.
+            Le modifiche restano salvate in questo browser. Per renderle davvero attive copia il blocco
+            qui sotto dentro <code>config/config.yaml</code> e fai commit: al prossimo giro di
+            GitHub Actions lo scanner userà questi prodotti.
+          </p>
+          <textarea id="static-export-yaml" readonly spellcheck="false"
+            style="width: 100%; min-height: 260px; font-family: var(--font-mono); font-size: 0.75rem;"></textarea>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem; align-items: center;">
+            <button type="button" class="btn btn-primary" onclick="copyStaticExport()">Copia negli appunti</button>
+            <button type="button" class="btn btn-secondary" onclick="downloadStaticExport()">Scarica products.yaml</button>
+            <span id="static-export-status" style="font-size: 0.75rem;"></span>
+          </div>
         </div>
       </form>
     </div>
@@ -496,6 +514,98 @@
     }
 
     /* ---- CONFIG FORM ---- */
+
+    /* Build statico (GitHub Pages): nessun endpoint /api scrivibile.
+       Le modifiche vengono tenute in localStorage e riversate in YAML da copiare nel repo. */
+    const IS_STATIC = !!(window.STATIC_CONFIG_DATA || window.STATIC_CONFIGS)
+      || location.hostname.endsWith('github.io')
+      || location.protocol === 'file:';
+    const LS_PRODUCTS_KEY = 'subito.products.draft';
+
+    function escAttr(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function loadDraftProducts() {
+      try {
+        const raw = localStorage.getItem(LS_PRODUCTS_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) && parsed.length ? parsed : null;
+      } catch (e) { return null; }
+    }
+
+    function saveDraftProducts(products) {
+      try { localStorage.setItem(LS_PRODUCTS_KEY, JSON.stringify(products)); return true; }
+      catch (e) { return false; }
+    }
+
+    /* Serializza i prodotti nello stesso stile di config/config.yaml */
+    function yamlScalar(v) {
+      if (typeof v === 'boolean') return v ? 'true' : 'false';
+      if (typeof v === 'number') return String(v);
+      const s = String(v == null ? '' : v);
+      if (s === '' || /^[\s]|[\s]$|[:#\-?{}\[\],&*!|>'"%@`]|^(true|false|null|yes|no|on|off)$/i.test(s) || /^[\d.+-]+$/.test(s)) {
+        return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+      }
+      return s;
+    }
+
+    function buildProductsYaml(products) {
+      const lines = ['scanner:', '  products:'];
+      products.forEach(p => {
+        lines.push('  - name: ' + yamlScalar(p.name || ''));
+        ['keywords', 'exclude_keywords', 'subito_urls'].forEach(key => {
+          const arr = Array.isArray(p[key]) ? p[key] : [];
+          lines.push('    ' + key + ':' + (arr.length ? '' : ' []'));
+          arr.forEach(v => lines.push('    - ' + yamlScalar(v)));
+        });
+        lines.push('    max_price: ' + (parseInt(p.max_price) || 0));
+        lines.push('    price_margin: ' + (parseInt(p.price_margin) || 0));
+        lines.push('    subito: ' + (p.subito !== false));
+        lines.push('    amazon: ' + (p.amazon !== false));
+        lines.push('    search_in_description: ' + (p.search_in_description === true));
+      });
+      return lines.join('\n') + '\n';
+    }
+
+    function showStaticExport(products) {
+      const box = document.getElementById('static-export');
+      const ta = document.getElementById('static-export-yaml');
+      if (!box || !ta) return;
+      ta.value = buildProductsYaml(products);
+      box.style.display = '';
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function copyStaticExport() {
+      const ta = document.getElementById('static-export-yaml');
+      const st = document.getElementById('static-export-status');
+      try {
+        await navigator.clipboard.writeText(ta.value);
+        st.textContent = '✅ Copiato';
+      } catch (e) {
+        ta.select();
+        st.textContent = document.execCommand('copy') ? '✅ Copiato' : '❌ Copia manuale (Ctrl+C)';
+      }
+      st.style.color = 'var(--accent-emerald)';
+      setTimeout(() => { st.textContent = ''; }, 3000);
+    }
+
+    function downloadStaticExport() {
+      const ta = document.getElementById('static-export-yaml');
+      const blob = new Blob([ta.value], { type: 'text/yaml;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'products.yaml';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
     function renderProducts(products) {
       state.formProducts = products.map(p => ({
         ...p, 
@@ -517,15 +627,15 @@
           <div class="product-grid">
             <div class="form-row">
               <span class="form-label">Nome Identificativo</span>
-              <input type="text" data-field="name" data-idx="${i}" value="${p.name || ''}" style="width: 180px;">
+              <input type="text" data-field="name" data-idx="${i}" value="${escAttr(p.name || '')}" style="width: 180px;">
             </div>
             <div class="form-row">
               <span class="form-label">Prezzo Limite (€)</span>
-              <input type="number" data-field="max_price" data-idx="${i}" value="${p.max_price || 500}" min="1" class="w-input-small">
+              <input type="number" data-field="max_price" data-idx="${i}" value="${escAttr(p.max_price || 500)}" min="1" class="w-input-small">
             </div>
             <div class="form-row">
               <span class="form-label">Tolleranza Fuori Soglia (€)</span>
-              <input type="number" data-field="price_margin" data-idx="${i}" value="${p.price_margin || 50}" min="0" class="w-input-small">
+              <input type="number" data-field="price_margin" data-idx="${i}" value="${escAttr(p.price_margin || 50)}" min="0" class="w-input-small">
             </div>
             <div class="form-row">
               <span class="form-label">Monitora su Subito.it</span>
@@ -544,21 +654,21 @@
             <div class="form-row">
               <span class="form-label">Cerca anche nella descrizione</span>
               <label class="toggle-switch">
-                <input type="checkbox" data-field="search_in_description" data-idx="${i}" ${p.search_in_description !== false ? 'checked' : ''}>
+                <input type="checkbox" data-field="search_in_description" data-idx="${i}" ${p.search_in_description === true ? 'checked' : ''}>
                 <span class="slider"></span>
               </label>
             </div>
             <div class="form-row product-grid-full" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
               <span class="form-label">Termini di Ricerca (separati da virgola)</span>
-              <input type="text" data-field="keywords" data-idx="${i}" value="${p.keywords || ''}" style="width: 100%;">
+              <input type="text" data-field="keywords" data-idx="${i}" value="${escAttr(p.keywords || '')}" style="width: 100%;">
             </div>
             <div class="form-row product-grid-full" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
               <span class="form-label">Parole da Escludere (separate da virgola, es: "fe, ultra, plus")</span>
-              <input type="text" data-field="exclude_keywords" data-idx="${i}" value="${p.exclude_keywords || ''}" style="width: 100%;">
+              <input type="text" data-field="exclude_keywords" data-idx="${i}" value="${escAttr(p.exclude_keywords || '')}" style="width: 100%;">
             </div>
             <div class="form-row product-grid-full" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
               <span class="form-label">URL Subito Forzati (separati da virgola, es: /vi/650658295.htm)</span>
-              <input type="text" data-field="subito_urls" data-idx="${i}" value="${Array.isArray(p.subito_urls) ? p.subito_urls.join(', ') : (p.subito_urls || '')}" style="width: 100%;">
+              <input type="text" data-field="subito_urls" data-idx="${i}" value="${escAttr(Array.isArray(p.subito_urls) ? p.subito_urls.join(', ') : (p.subito_urls || ''))}" style="width: 100%;">
             </div>
           </div>
         </div>
@@ -567,8 +677,10 @@
 
     function addProduct() {
       syncFormFromInputs();
-      state.formProducts.push({ name: '', keywords: '', exclude_keywords: '', subito_urls: '', max_price: 500, price_margin: 50, subito: true, amazon: true });
+      state.formProducts.push({ name: '', keywords: '', exclude_keywords: '', subito_urls: '', max_price: 500, price_margin: 50, subito: true, amazon: true, search_in_description: false });
       renderProducts(state.formProducts);
+      const inputs = document.querySelectorAll('#products-list [data-field="name"]');
+      if (inputs.length) inputs[inputs.length - 1].focus();
     }
 
     function removeProduct(i) {
@@ -587,7 +699,7 @@
         price_margin: parseInt(p.price_margin) || 50,
         subito: p.subito !== false,
         amazon: p.amazon !== false,
-        search_in_description: p.search_in_description !== false,
+        search_in_description: p.search_in_description === true,
       }));
     }
 
@@ -621,8 +733,16 @@
           document.getElementById('cfg-amazon-enabled').checked = d.amazon.enabled;
           document.getElementById('cfg-amazon-pages').value = d.amazon.max_pages;
         }
-        if (d.products) {
-          renderProducts(d.products);
+        // Le bozze locali hanno la precedenza: su GitHub Pages sono l'unica persistenza possibile
+        const draft = loadDraftProducts();
+        renderProducts(draft || d.products || []);
+        if (draft) {
+          const st = document.getElementById('config-save-status');
+          if (st) {
+            st.innerHTML = '⚠️ Bozza locale non ancora nel repository — usa "Copia negli appunti" qui sotto.';
+            st.style.color = 'var(--accent-amber)';
+          }
+          showStaticExport(collectFormProducts());
         }
         return;
       }
@@ -648,12 +768,18 @@
       syncFormFromInputs();
       const btn = document.getElementById('cfg-save-btn');
       const status = document.getElementById('config-save-status');
-      if (window.location.hostname.includes('github.io')) {
-        status.textContent = 'ℹ️ Configurazione salvata nel repository config/config.yaml su GitHub'; 
-        status.style.color = 'var(--accent-emerald)'; 
+      if (IS_STATIC) {
+        // Nessun backend: si salva in locale e si espone lo YAML da portare nel repository.
+        const products = collectFormProducts();
+        const stored = saveDraftProducts(products);
+        showStaticExport(products);
+        status.innerHTML = stored
+          ? '⚠️ Salvato solo in questo browser: GitHub Pages è di sola lettura.<br>Copia lo YAML qui sotto in <code>config/config.yaml</code> e fai commit per attivarlo.'
+          : '❌ Impossibile salvare in locale (storage non disponibile).<br>Copia lo YAML qui sotto in <code>config/config.yaml</code>.';
+        status.style.color = stored ? 'var(--accent-amber)' : 'var(--accent-rose)';
         return;
       }
-      btn.textContent = 'Salvataggio...'; 
+      btn.textContent = 'Salvataggio...';
       btn.disabled = true;
       try {
         const r = await fetch('/api/config/form', {
@@ -743,8 +869,15 @@
     async function saveYaml(e) {
       e.preventDefault();
       const status = document.getElementById('yaml-status');
+      if (IS_STATIC) {
+        // Su GitHub Pages non esiste POST /api/config: prima falliva con "❌ Errore" generico.
+        status.innerHTML = 'ℹ️ Sola lettura su GitHub Pages: modifica <code>config/' +
+          (state.currentConfig || 'config.yaml') + '</code> nel repository e fai commit.';
+        status.style.color = 'var(--accent-amber)';
+        return;
+      }
       try {
-        const r = await fetch(`/api/config/${state.currentConfig}`, { 
+        const r = await fetch(`/api/config/${state.currentConfig}`, {
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ content: document.getElementById('yaml-editor').value }) 
@@ -828,10 +961,12 @@
       } catch (e) {}
     }
 
-    // Pull status and server-side logs on intervals
-    setInterval(fetchStatus, 10000);
-    setInterval(fetchServerLogs, 2000); // Poll logs every 2 seconds
-    
+    // Il polling ha senso solo col backend Flask: sul build statico i dati non cambiano mai.
+    if (!IS_STATIC) {
+      setInterval(fetchStatus, 10000);
+      setInterval(fetchServerLogs, 2000); // Poll logs every 2 seconds
+    }
+
     // Initial calls
     if (window.STATIC_CONFIGS || window.STATIC_CONFIG_DATA) {
       loadConfig();

@@ -99,6 +99,38 @@ scanner:
     subito: true
     amazon: true
     search_in_description: false
+  - name: OPPO Find X9 Pro
+    keywords:
+    - OPPO Find X9 Pro
+    - Find X9 Pro
+    exclude_keywords:
+    - custodia
+    - cover
+    - pellicola
+    - vetro
+    - caricatore
+    - cavo
+    - adattatore
+    - case
+    - silicone
+    - schermo
+    - riparazione
+    - ricambio
+    - batteria
+    - scambio
+    - cerco
+    - find x8
+    - find x7
+    - find x6
+    - find x5
+    - neo
+    - lite
+    subito_urls: []
+    max_price: 700
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
   - name: Google Pixel 1-5
     keywords:
     - Google Pixel 1
