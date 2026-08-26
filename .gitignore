@@ -15,6 +15,9 @@ data/*.log
 data/*.txt
 data/
 
+# Build statico generato da export_pages.py (pubblicato via artifact, non dal branch)
+public/
+
 # IDE & OS Files
 .vscode/
 .idea/
