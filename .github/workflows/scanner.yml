@@ -62,11 +62,25 @@ jobs:
       - name: Purge Old Workflow Runs Automatically
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          CURRENT_RUN: ${{ github.run_id }}
         run: |
-          RUNS=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/mich-de/subito/actions/runs" | jq -r '.workflow_runs[1:][].id')
-          for run_id in $RUNS; do
-            curl -s -X DELETE -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/mich-de/subito/actions/runs/$run_id"
-          done
+          # Prima chiedeva workflow_runs[1:] senza filtri: teneva UN SOLO run e
+          # cancellava tutti gli altri, compresi quelli in coda o in esecuzione.
+          # Un run appena lanciato spariva prima di partire e il sito non veniva
+          # mai pubblicato. Qui si toccano solo i run gia' conclusi, si salta
+          # sempre quello corrente e se ne conservano dieci per poter indagare.
+          curl -s -H "Authorization: token $GH_TOKEN" \
+            "https://api.github.com/repos/$REPO/actions/runs?per_page=100&status=completed" \
+            | jq -r --arg current "$CURRENT_RUN" \
+                '.workflow_runs
+                 | map(select(.id != ($current | tonumber)))
+                 | .[10:][].id' \
+            | while read -r run_id; do
+                [ -n "$run_id" ] || continue
+                curl -s -X DELETE -H "Authorization: token $GH_TOKEN" \
+                  "https://api.github.com/repos/$REPO/actions/runs/$run_id"
+              done
 
   deploy:
     environment:
