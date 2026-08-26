@@ -1,1079 +1,388 @@
-:root {
-  --bg-primary: #090d16;
-  --bg-secondary: #111827;
-  --bg-glass: rgba(17, 24, 39, 0.7);
-  --border-glass: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(255, 255, 255, 0.12);
-  
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
-  
-  --accent-emerald: #10b981;
-  --accent-emerald-glow: rgba(16, 185, 129, 0.15);
-  --accent-amber: #f59e0b;
-  --accent-amber-glow: rgba(245, 158, 11, 0.15);
-  --accent-rose: #ef4444;
-  --accent-blue: #3b82f6;
-  
-  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
-  
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* ===========================================================================
+   OFFERTE MONITOR — livello applicativo sopra Quadro Partenze
+   ---------------------------------------------------------------------------
+   Qui dentro sta SOLO cio' che il design system non ha gia': il tabellone
+   degli annunci, la fascia dei totali, la consolle e i riquadri prodotto.
+   Tutto il resto (schede, pulsanti, campi, badge, tabelle, flap, stampa)
+   arriva da quadro-partenze.css e non va riscritto.
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+   Regola di manutenzione: se una cosa si puo' ottenere con una classe del
+   sistema, si usa quella. Ogni regola qui sotto esiste perche' descrive un
+   pezzo di QUESTA applicazione, non un componente generico.
 
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  min-height: 100vh;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  background-image: 
-    radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.03) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.03) 0%, transparent 40%);
-}
+   ATTENZIONE ai token: --bc, --a, --ink-fg e simili sono TERNE OKLCH, non
+   colori. Vanno sempre avvolti in oklch(), anche senza diluizione.
+   =========================================================================== */
 
-.app-container {
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 1.5rem 1rem;
-}
+/* ---------------------------------------------------------------------------
+   A. Utilita' di pannello
+   --------------------------------------------------------------------------- */
 
-/* Header & Navigation */
-header {
-  border-bottom: 1px solid var(--border-glass);
-  padding-bottom: 1.5rem;
-  margin-bottom: 2rem;
-}
+.hidden { display: none !important; }
 
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-}
+/* Intestazione che esiste solo su carta: a schermo il titolo lo da' .hero. */
+.print-head { display: none; }
 
-.brand h1 {
+/* Le tre schede della barra di navigazione sono <a> per ereditare lo stato
+   attivo del sistema (.nav a[aria-current]), ma non devono navigare. */
+.nav a { cursor: pointer; }
+
+/* ---------------------------------------------------------------------------
+   B. Stato del servizio nella testata
+   ---------------------------------------------------------------------------
+   Sta nella fascia d'inchiostro, quindi i colori non possono venire dai token
+   di pagina: si diluisce l'ambra e il verde direttamente sul fondo scuro.
+   --------------------------------------------------------------------------- */
+
+.hdr-status {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .2rem .55rem;
+  border-radius: var(--radius);
   font-family: var(--font-display);
-  font-size: 1.8rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  color: #ffffff;
-}
-
-.brand h1 span {
-  color: var(--accent-emerald);
-  text-shadow: 0 0 12px var(--accent-emerald-glow);
-}
-
-.brand p {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-}
-
-.status-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.status-badge {
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  background-color: var(--accent-emerald-glow);
-  color: var(--accent-emerald);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  font-size: 0.875rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--accent-emerald);
-  box-shadow: 0 0 8px var(--accent-emerald);
-  animation: pulse 2s infinite;
-}
-
-.uptime-text {
-  color: var(--text-muted);
-  font-size: 0.875rem;
-  font-family: var(--font-mono);
-}
-
-.nav-tabs {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.tab-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 0.5rem 0.25rem 0.75rem;
-  cursor: pointer;
-  transition: color var(--transition-fast);
-  position: relative;
-}
-
-.tab-btn:hover {
-  color: var(--text-primary);
-}
-
-.tab-btn.active {
-  color: var(--accent-emerald);
-}
-
-.tab-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: var(--accent-emerald);
-  box-shadow: 0 0 8px var(--accent-emerald);
-}
-
-/* Dashboard Panel */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  border-radius: 1rem;
-  padding: 1.25rem;
-  transition: transform var(--transition-normal), border-color var(--transition-normal);
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--border-hover);
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  font-family: var(--font-display);
-  color: #ffffff;
-}
-
-.stat-value.emerald { color: var(--accent-emerald); }
-.stat-value.amber { color: var(--accent-amber); }
-
-/* Listing Grids */
-.lists-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-@media (min-width: 1024px) {
-  .lists-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.list-panel {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  height: 480px;
-}
-
-.list-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  padding-bottom: 0.75rem;
-}
-
-.list-title {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.list-badge {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--text-muted);
-}
-
-.list-badge.active {
-  background-color: var(--accent-emerald);
-  box-shadow: 0 0 6px var(--accent-emerald);
-}
-
-.items-container {
-  overflow-y: auto;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-right: 0.25rem;
-}
-
-/* Item Card */
-.item-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  text-decoration: none;
-  color: inherit;
-  transition: all var(--transition-fast);
-}
-
-.item-card:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: scale(1.005);
-}
-
-.item-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.item-left {
-  min-width: 0;
-  flex: 1;
-}
-
-.item-title {
-  color: #ffffff;
-  font-size: 0.9375rem;
-  font-weight: 500;
+  font-size: .7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .1em;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 0.25rem;
-  transition: color var(--transition-fast);
+  color: oklch(var(--ink-fg) / .7);
+  box-shadow: inset 0 0 0 1px var(--ink-line);
 }
-
-.item-card:hover .item-title {
-  color: var(--accent-emerald);
-}
-
-.item-meta {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.item-ship-icon {
-  color: var(--accent-emerald);
-  font-size: 0.8rem;
-}
-
-.item-right {
-  text-align: right;
+.hdr-status .status-dot {
+  width: .42rem; height: .42rem;
+  background: oklch(var(--ink-fg) / .45);
   flex-shrink: 0;
 }
-
-.item-price {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--accent-amber);
+/* Acceso: l'unico punto ambra della testata oltre al filetto. Un pallino non
+   e' un fondo esteso, quindi la seconda regola regge. */
+.hdr-status.is-live { color: oklch(var(--a) / .95); }
+.hdr-status.is-live .status-dot {
+  background: oklch(var(--a));
+  animation: beacon 2.4s ease-in-out infinite;
 }
+@keyframes beacon { 50% { opacity: .25; } }
 
-.price-best {
-  color: var(--accent-emerald) !important;
-  text-shadow: 0 0 12px var(--accent-emerald-glow);
-}
-
-.item-best {
-  border-color: rgba(16, 185, 129, 0.2) !important;
-  background: rgba(16, 185, 129, 0.03) !important;
-}
-
-.feed-best {
-  background: rgba(16, 185, 129, 0.04) !important;
-}
-
-.item-date {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-top: 0.25rem;
-}
-
-/* Near Miss Alert Panel */
-.nearmiss-panel {
-  background: rgba(245, 158, 11, 0.03);
-  border: 1px solid rgba(245, 158, 11, 0.15);
-  border-radius: 1rem;
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.nearmiss-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.nearmiss-title-row h2 {
-  font-family: var(--font-display);
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  color: var(--accent-amber);
-  letter-spacing: 0.05em;
-  font-weight: 600;
-}
-
-.nearmiss-count {
-  font-size: 0.75rem;
-  color: var(--accent-amber);
-  background-color: var(--accent-amber-glow);
-  padding: 0.15rem 0.5rem;
-  border-radius: 9999px;
-  font-weight: 600;
-}
-
-.nearmiss-grid {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.nearmiss-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.5rem 0.75rem;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 0.5rem;
-  text-decoration: none;
-  color: inherit;
-  border-left: 3px solid var(--accent-amber);
-  transition: background-color var(--transition-fast);
-}
-
-.nearmiss-row:hover {
-  background-color: rgba(245, 158, 11, 0.08);
-}
-
-.nearmiss-time {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  width: 45px;
-  flex-shrink: 0;
-}
-
-.nearmiss-text {
-  font-size: 0.875rem;
-  color: var(--text-primary);
+.hdr-uptime {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  color: oklch(var(--ink-fg) / .45);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
 }
 
-.nearmiss-price {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
+@media (max-width: 720px) {
+  .hdr-status, .hdr-uptime { display: none; }
 }
 
-.nearmiss-diff {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--accent-amber);
-  background-color: var(--accent-amber-glow);
-  padding: 0.1rem 0.35rem;
-  border-radius: 4px;
-}
+/* ---------------------------------------------------------------------------
+   C. Fascia dei totali
+   ---------------------------------------------------------------------------
+   Prima erano cinque riquadri con ombra: cinque scatole per cinque numeri
+   pesano piu' dei numeri. Qui e' una riga sola, divisa da filetti verticali —
+   la stessa logica dell'intestazione di un tabellone.
+   --------------------------------------------------------------------------- */
 
-/* Latest Feed */
-.latest-panel {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  border-radius: 1rem;
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.latest-grid {
+.board-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
-.feed-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 0.75rem;
-  padding: 0.85rem 1rem;
-  text-decoration: none;
-  color: inherit;
-  transition: all var(--transition-fast);
-}
-
-.feed-card:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
-}
-
-.feed-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.feed-card-tags {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.feed-tag-source {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 0.15rem 0.45rem;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-secondary);
-}
-
-.feed-tag-product {
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 0.2rem 0.55rem;
-  border-radius: 6px;
-  background: rgba(59, 130, 246, 0.12);
-  color: var(--accent-blue);
-  max-width: 140px;
-  white-space: nowrap;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--base-100);
   overflow: hidden;
-  text-overflow: ellipsis;
-  border: 1px solid rgba(255, 255, 255, 0.05);
 }
-
-/* Dynamic Product Tag Label Colors */
-.tag-color-s24-256 {
-  background: rgba(59, 130, 246, 0.18) !important;
-  color: #60a5fa !important;
-  border: 1px solid rgba(96, 165, 250, 0.3) !important;
+.board-strip > div {
+  padding: .7rem .9rem;
+  border-left: 1px solid var(--line);
 }
+.board-strip > div:first-child { border-left: 0; }
 
-.tag-color-s24-512 {
-  background: rgba(168, 85, 247, 0.18) !important;
-  color: #c084fc !important;
-  border: 1px solid rgba(192, 132, 252, 0.3) !important;
-}
-
-.tag-color-s25-256 {
-  background: rgba(16, 185, 129, 0.18) !important;
-  color: #34d399 !important;
-  border: 1px solid rgba(52, 211, 153, 0.3) !important;
-}
-
-.tag-color-s25-512 {
-  background: rgba(245, 158, 11, 0.18) !important;
-  color: #fbbf24 !important;
-  border: 1px solid rgba(251, 191, 36, 0.3) !important;
-}
-
-.tag-color-pixel {
-  background: rgba(236, 72, 153, 0.18) !important;
-  color: #f472b6 !important;
-  border: 1px solid rgba(244, 114, 182, 0.3) !important;
-}
-
-.feed-card-title {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  line-height: 1.35;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 0.75rem;
-  height: 2.7em;
-  transition: color var(--transition-fast);
-}
-
-.feed-card:hover .feed-card-title {
-  color: var(--accent-emerald);
-}
-
-.feed-card-footer {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  padding-top: 0.5rem;
-}
-
-.feed-card-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  font-size: 0.72rem;
-  color: var(--text-muted);
-}
-
-.feed-card-price {
+.strip-label {
+  display: block;
   font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--accent-amber);
+  font-size: .66rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .13em;
+  color: oklch(var(--bc) / .5);
 }
-
-.feed-card-price.best {
-  color: var(--accent-emerald);
-  text-shadow: 0 0 10px var(--accent-emerald-glow);
-}
-
-@media (max-width: 640px) {
-  .app-container {
-    padding: 1rem 0.75rem;
-  }
-  .latest-grid {
-    grid-template-columns: 1fr;
-  }
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Logging Console Box */
-.terminal-panel {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.terminal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.terminal-dots {
-  display: flex;
-  gap: 0.35rem;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.dot.red { background-color: var(--accent-rose); }
-.dot.yellow { background-color: var(--accent-amber); }
-.dot.green { background-color: var(--accent-emerald); }
-
-.terminal-body {
-  background-color: #040711;
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  height: 240px;
-  overflow-y: auto;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: #a5b4fc;
-}
-
-.log-entry {
-  line-height: 1.6;
-  white-space: pre-wrap;
-}
-
-.log-entry.info { color: #818cf8; }
-.log-entry.found { color: var(--accent-emerald); }
-.log-entry.error { color: var(--accent-rose); }
-.log-entry.scan { color: var(--accent-blue); }
-.log-entry.timestamp { color: var(--text-muted); font-size: 0.75rem; margin-right: 0.5rem; }
-
-/* Config Forms styling */
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-@media (min-width: 1024px) {
-  .form-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.config-card {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  border-radius: 1rem;
-  padding: 1.5rem;
-}
-
-.config-card h3 {
+.strip-value {
+  display: block;
+  margin-top: .15rem;
   font-family: var(--font-display);
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  color: var(--accent-emerald);
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  margin-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  padding-bottom: 0.5rem;
+  font-size: 1.6rem; font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
 }
+/* Un solo valore qualificato in ambra: quello che chiede attenzione. Gli
+   altri restano inchiostro, o l'ambra smette di significare qualcosa. */
+.strip-value.warn { color: oklch(var(--wa)); }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/* ---------------------------------------------------------------------------
+   D. Filtri
+   --------------------------------------------------------------------------- */
+
+.filters {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: .4rem;
 }
-
-.form-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.form-label {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-/* Custom inputs */
-input[type="text"],
-input[type="number"],
-textarea {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.5rem;
-  padding: 0.4rem 0.75rem;
-  color: #ffffff;
-  font-size: 0.875rem;
-  outline: none;
-  transition: all var(--transition-fast);
-}
-
-input[type="text"]:focus,
-input[type="number"]:focus,
-textarea:focus {
-  border-color: var(--accent-emerald);
-  box-shadow: 0 0 6px var(--accent-emerald-glow);
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.w-input-small { width: 80px; text-align: right; }
-.w-input-wide { width: 100%; max-width: 280px; }
-
-/* Custom Switch Toggle */
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 22px;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.1);
-  transition: .3s;
-  border-radius: 34px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .3s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: var(--accent-emerald);
-}
-
-input:checked + .slider:before {
-  transform: translateX(22px);
-}
-
-/* Product list management */
-.products-panel {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.panel-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.25rem;
-}
-
-.product-item {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.product-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.product-item-num {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-weight: 600;
-}
-
-.product-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-@media (min-width: 640px) {
-  .product-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.product-grid-full {
-  grid-column: 1 / -1;
-}
-
-/* Buttons */
-.btn {
-  background: none;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-primary {
-  background-color: var(--accent-emerald);
-  color: #ffffff;
-  box-shadow: 0 4px 12px var(--accent-emerald-glow);
-}
-
-.btn-primary:hover {
-  background-color: #059669;
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.btn-danger {
-  color: var(--accent-rose);
-  font-size: 0.75rem;
-  background: none;
-  padding: 0.25rem 0.5rem;
-  font-weight: 500;
-}
-
-.btn-danger:hover {
-  text-decoration: underline;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Yaml Editor panel */
-.yaml-tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.yaml-tab-btn {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  color: var(--text-secondary);
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
-  font-family: var(--font-mono);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.yaml-tab-btn:hover {
-  background-color: rgba(255, 255, 255, 0.06);
-}
-
-.yaml-tab-btn.active {
-  background-color: var(--accent-emerald-glow);
-  color: var(--accent-emerald);
-  border-color: rgba(16, 185, 129, 0.2);
-}
-
-.yaml-editor-container {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  border-radius: 1rem;
-  padding: 1.5rem;
-}
-
-.yaml-editor-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.yaml-editor-title {
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.yaml-editor-area {
-  width: 100%;
-  height: 60vh;
-  background-color: #040711;
-  color: #cbd5e1;
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 0.75rem;
-  resize: none;
-}
-
-.yaml-editor-area:focus {
-  border-color: rgba(16, 185, 129, 0.3);
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.05);
-}
-
-/* Footer */
-footer {
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  padding: 1.5rem 0;
-  border-top: 1px solid var(--border-glass);
-  margin-top: 3rem;
-}
-
-/* Tags in brand area */
-.tags-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-.product-tag {
-  font-size: 0.75rem;
-  padding: 0.15rem 0.5rem;
-  border-radius: 9999px;
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: var(--text-secondary);
-}
-
-.product-tag span {
-  color: var(--accent-amber);
-  margin-left: 0.25rem;
-  font-weight: 600;
-}
-
-/* Animation utilities */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: .4;
-  }
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* Product Filter Styles */
-.filter-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.75rem;
-}
-
-.filter-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-}
-
-.filter-buttons {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
+.filters .eyebrow { margin: 0 .4rem 0 0; }
 
 .filter-btn {
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: var(--text-secondary);
-  padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-size: .74rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: .26rem .6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: oklch(var(--bc) / .68);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: color .16s, border-color .16s, background-color .16s;
 }
-
-.filter-btn:hover {
-  background-color: rgba(255, 255, 255, 0.06);
-  color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
+.filter-btn:hover { color: var(--base-content); background: oklch(var(--bc) / .05); }
+.filter-btn:focus-visible { outline: none; box-shadow: var(--ring); }
+/* Il filtro attivo e' struttura, non azione: percio' --p e non --s. */
 .filter-btn.active {
-  background-color: var(--accent-emerald-glow);
-  color: var(--accent-emerald);
-  border-color: rgba(16, 185, 129, 0.25);
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.1);
+  color: var(--primary);
+  border-color: oklch(var(--p) / .55);
+  background: oklch(var(--p) / .1);
+}
+
+/* ---------------------------------------------------------------------------
+   E. Il tabellone degli annunci
+   ---------------------------------------------------------------------------
+   E' il cuore della pagina, ed e' letteralmente un quadro partenze: riga
+   d'intestazione in inchiostro fisso, colonne incolonnate, e la colonna dei
+   prezzi tutta in flap — cifre ambra su nero, una sotto l'altra.
+
+   Le tre liste separate di prima (Subito, Amazon, «tutti gli annunci»)
+   mostravano gli stessi annunci tre volte. Qui la fonte e' una colonna.
+   --------------------------------------------------------------------------- */
+
+.board { table-layout: auto; }
+.board th:first-child, .board td:first-child { padding-left: .9rem; }
+.board th:last-child,  .board td:last-child  { padding-right: .9rem; }
+.board td { vertical-align: middle; }
+
+.board tbody tr { transition: background-color .14s; }
+
+.col-time  { width: 1%; white-space: nowrap; }
+.col-price { width: 1%; text-align: right; }
+.col-state { width: 1%; white-space: nowrap; }
+
+.board-time {
+  font-family: var(--font-mono);
+  font-size: .82rem;
+  font-variant-numeric: tabular-nums;
+  color: oklch(var(--bc) / .55);
+}
+.board-time small { display: block; font-size: .66rem; opacity: .7; }
+
+.board-title {
+  display: block;
+  font-weight: 600;
+  color: var(--base-content);
+  text-decoration: none;
+  max-width: 46ch;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.board-title:hover { color: var(--primary); text-decoration: underline; }
+.board-title:focus-visible { outline: none; box-shadow: var(--ring); }
+
+.board-meta {
+  display: block;
+  margin-top: .1rem;
+  font-size: .72rem;
+  color: oklch(var(--bc) / .52);
+}
+
+.board-product {
+  font-family: var(--font-display);
+  font-size: .74rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: oklch(var(--bc) / .72);
+  white-space: nowrap;
+}
+
+/* Colonna dei prezzi: i flap incolonnati sono il tabellone. La larghezza
+   minima li tiene allineati anche quando le cifre cambiano. */
+.board .flap { min-width: 4.6ch; text-align: right; }
+
+/* La riga del prezzo piu' basso: filetto verde a sinistra, niente fondo
+   colorato. Il fondo colorato farebbe sembrare la riga selezionata. */
+.board tr.is-best td:first-child { box-shadow: inset 3px 0 0 var(--success); }
+
+/* L'entrata: le righe girano dall'alto come le palette del tabellone, una
+   dopo l'altra. Si ferma alla settima — oltre diventa attesa invece di ritmo.
+   flap-in e la clausola prefers-reduced-motion arrivano dal design system. */
+.board tbody.fade-in tr {
+  animation: flap-in .3s cubic-bezier(.2, .75, .3, 1) both;
+  transform-origin: top center;
+}
+.board tbody.fade-in tr:nth-child(1) { animation-delay: .02s }
+.board tbody.fade-in tr:nth-child(2) { animation-delay: .05s }
+.board tbody.fade-in tr:nth-child(3) { animation-delay: .08s }
+.board tbody.fade-in tr:nth-child(4) { animation-delay: .11s }
+.board tbody.fade-in tr:nth-child(5) { animation-delay: .14s }
+.board tbody.fade-in tr:nth-child(6) { animation-delay: .17s }
+.board tbody.fade-in tr:nth-child(n+7) { animation-delay: .2s }
+
+.board-empty {
+  padding: 2.4rem .9rem;
+  text-align: center;
+  color: oklch(var(--bc) / .55);
+  font-size: .88rem;
+}
+
+@media (max-width: 860px) {
+  .board .col-product, .board .col-source { display: none; }
+  .board-title { max-width: 28ch; }
+}
+
+/* ---------------------------------------------------------------------------
+   F. Consolle di sistema
+   ---------------------------------------------------------------------------
+   Richiusa per difetto: e' diagnostica, non contenuto. Prima occupava
+   240px fissi in fondo alla pagina anche quando non diceva niente.
+   --------------------------------------------------------------------------- */
+
+.console {
+  margin-top: .7rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  padding: .6rem .75rem;
+  border-radius: 2px;
+  background: var(--flap);
+  font-family: var(--font-mono);
+  font-size: .76rem;
+  line-height: 1.65;
+}
+.log-entry {
+  white-space: pre-wrap;
+  color: oklch(var(--ink-fg) / .62);
+  border-left: 2px solid transparent;
+  padding-left: .5rem;
+}
+.log-entry.found { color: oklch(78% .12 150); border-left-color: oklch(78% .12 150 / .5); }
+.log-entry.error { color: oklch(70% .17 27);  border-left-color: oklch(70% .17 27 / .5); }
+.log-entry.scan  { color: oklch(76% .09 235); border-left-color: oklch(76% .09 235 / .45); }
+.log-entry.info  { border-left-color: oklch(var(--ink-fg) / .18); }
+/* Il marcatempo e' un'etichetta dentro una riga, non una riga sua: la classe
+   .log-entry sullo <span> arriva dal codice storico e va neutralizzata. */
+.log-entry .log-entry.timestamp,
+.log-entry.timestamp {
+  display: inline;
+  border-left: 0; padding-left: 0;
+  margin-right: .5rem;
+  color: oklch(var(--a) / .7);
+}
+
+/* ---------------------------------------------------------------------------
+   G. Riquadri prodotto (scheda Configurazione)
+   ---------------------------------------------------------------------------
+   Era il punto piu' confuso: nove campi in fila per ogni prodotto, moltiplicati
+   per sei prodotti. Ora in vista si vedono nome, soglia e interruttori; i
+   termini di ricerca stanno in un <details>, che si apre solo se servono.
+   --------------------------------------------------------------------------- */
+
+.prod-grid { display: grid; gap: .85rem; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
+
+.prod-name {
+  flex: 1 1 10rem;
+  font-family: var(--font-display) !important;
+  font-size: 1.02rem !important;
+  font-weight: 700;
+  letter-spacing: .01em;
+  border-color: transparent !important;
+  background: oklch(var(--bc) / .04) !important;
+}
+.prod-name:focus { border-color: oklch(var(--a) / .8) !important; }
+
+.prod-nums { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: .7rem; }
+.prod-nums .field { margin: 0; }
+.prod-flags { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0 .8rem; margin-top: .4rem; }
+.prod-flags .checkline span { font-size: .82rem; }
+
+.prod-terms { display: grid; gap: .6rem; margin-top: .7rem; }
+.prod-terms .field { margin: 0; }
+
+/* ---------------------------------------------------------------------------
+   H. Editor YAML
+   --------------------------------------------------------------------------- */
+
+.yaml-tabs { display: flex; flex-wrap: wrap; gap: .35rem; }
+.yaml-tab-btn {
+  font-family: var(--font-mono);
+  font-size: .76rem;
+  padding: .26rem .6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: oklch(var(--bc) / .68);
+  cursor: pointer;
+}
+.yaml-tab-btn:hover { background: oklch(var(--bc) / .05); color: var(--base-content); }
+.yaml-tab-btn:focus-visible { outline: none; box-shadow: var(--ring); }
+.yaml-tab-btn.active {
+  color: var(--primary);
+  border-color: oklch(var(--p) / .55);
+  background: oklch(var(--p) / .1);
+}
+
+.code-area {
+  width: 100%;
+  min-height: 26rem;
+  padding: .8rem;
+  border-radius: 2px;
+  border: 1px solid var(--line-strong);
+  background: var(--flap);
+  color: oklch(var(--ink-fg) / .88);
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  line-height: 1.6;
+  resize: vertical;
+  tab-size: 2;
+}
+.code-area:focus { border-color: oklch(var(--a) / .8); box-shadow: var(--ring); }
+
+/* Riga d'intestazione con titolo a sinistra e comandi a destra: ricorre in tre
+   punti (prodotti, editor, salvataggio), quindi vive qui una volta sola. */
+.head-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.head-row .section-title { margin-bottom: 0; }
+
+.save-row {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: .9rem; flex-wrap: wrap;
+}
+.form-status { font-size: .78rem; line-height: 1.5; text-align: right; }
+.form-status code { font-size: .95em; }
+
+/* ---------------------------------------------------------------------------
+   I. Stampa
+   ---------------------------------------------------------------------------
+   Su carta resta il tabellone e basta: niente filtri, niente moduli, niente
+   consolle. La fascia dei totali diventa una riga di testo.
+   --------------------------------------------------------------------------- */
+
+@media print {
+  .filters, .console, .save-row, .yaml-tabs { display: none !important; }
+
+  /* Il sistema nasconde .hero in stampa (giustamente: filetto ambra e entrata
+     sfalsata sono roba da schermo), ma il foglio resterebbe senza intestazione.
+     Questa riga e' l'unica cosa che dice cos'e' il foglio che hai in mano. */
+  .print-head { display: block !important; }
+  .print-head::after {
+    content: 'OFFERTE MONITOR — TABELLONE ANNUNCI';
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.15rem; font-weight: 700;
+    letter-spacing: .06em;
+    padding-bottom: .4rem;
+    border-bottom: 1.5px solid #000;
+    margin-bottom: .9rem;
+  }
+
+  .board-strip { border: 0; }
+  .board-strip > div { border-left: 0; padding: 0 1.2rem 0 0; display: inline-block; }
+  .strip-value { font-size: 1rem; }
+  .board-title { max-width: none; white-space: normal; }
+  .board .flap { min-width: 0; }
 }

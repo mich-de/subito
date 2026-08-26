@@ -26,17 +26,18 @@ def build_static_site():
         except (json.JSONDecodeError, OSError) as e:
             print(f"  [WARN] {path}: illeggibile ({e}), ignorato")
 
-    # Inietta direttamente lo stile CSS inline per eliminare problemi di caricamento o percorsi su GitHub Pages
-    with open("static/style.css", encoding="utf-8") as f:
-        css = f.read()
-
+    # Inietta direttamente lo stile CSS inline per eliminare problemi di caricamento o percorsi su GitHub Pages.
+    # Due fogli in cascata: prima il design system, poi il livello applicativo. L'ordine va rispettato.
     os.makedirs("public/static", exist_ok=True)
-    with open("public/static/style.css", "w", encoding="utf-8") as f:
-        f.write(css)
-
-    style_tag = f"<style>\n{css}\n</style>"
-    final_html = html_content.replace('<link rel="stylesheet" href="static/style.css">', style_tag)
-    final_html = final_html.replace('<link rel="stylesheet" href="/static/style.css">', style_tag)
+    final_html = html_content
+    for sheet in ("quadro-partenze.css", "style.css"):
+        with open(f"static/{sheet}", encoding="utf-8") as f:
+            css = f.read()
+        with open(f"public/static/{sheet}", "w", encoding="utf-8") as f:
+            f.write(css)
+        style_tag = f"<style>\n{css}\n</style>"
+        for href in (f'static/{sheet}', f'/static/{sheet}'):
+            final_html = final_html.replace(f'<link rel="stylesheet" href="{href}">', style_tag)
 
     # Pre-carica configurazioni strutturate per il pannello form prodotti su GitHub Pages
     import yaml
@@ -173,7 +174,6 @@ def build_static_site():
         if (window.STATIC_ITEMS && window.STATIC_ITEMS.length) {{
           state.items = window.STATIC_ITEMS;
           renderItems(window.STATIC_ITEMS);
-          renderNearMiss(window.STATIC_ITEMS);
         }}
         if (typeof loadConfig === 'function') loadConfig();
         if (typeof loadYamlList === 'function') loadYamlList();
