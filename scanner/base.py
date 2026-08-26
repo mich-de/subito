@@ -127,8 +127,12 @@ class BaseScanner(ABC):
     def _load_results(self):
         if not os.path.exists(self.results_file):
             return []
-        with open(self.results_file, encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(self.results_file, encoding="utf-8") as f:
+                data = json.load(f)
+            return data if isinstance(data, list) else []
+        except (json.JSONDecodeError, OSError):
+            return []
 
     def _save_results(self, results):
         os.makedirs("data", exist_ok=True)

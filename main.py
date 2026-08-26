@@ -117,9 +117,16 @@ def init_scanners():
 
 def load_history():
     global scan_history
-    if os.path.exists(HISTORY_FILE):
+    if not os.path.exists(HISTORY_FILE):
+        return
+    try:
         with open(HISTORY_FILE, encoding="utf-8") as f:
-            scan_history = json.load(f)
+            data = json.load(f)
+        scan_history = data if isinstance(data, list) else []
+    except (json.JSONDecodeError, OSError) as e:
+        # Un file vuoto o troncato faceva crashare l'avvio: si riparte da storico vuoto
+        print(f"  [WARN] {HISTORY_FILE} illeggibile ({e}), storico reimpostato.")
+        scan_history = []
 
 def save_history():
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -232,7 +239,8 @@ def api_status():
         "telegram_enabled": config["telegram"]["enabled"],
         "scanners": {
             "subito": config["subito"]["enabled"],
-            "amazon": config["amazon"]["enabled"]
+            "amazon": config["amazon"]["enabled"],
+            "northladder": config.get("northladder", {}).get("enabled", False)
         },
         "last_scan": last_scan,
         "scan_count": len(scan_history),
