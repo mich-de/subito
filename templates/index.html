@@ -202,6 +202,9 @@
               <div class="section-title"><h2>Prodotti monitorati</h2></div>
               <button type="button" class="btn btn-ghost btn-sm" onclick="addProduct()">+ Aggiungi</button>
             </div>
+            <!-- Compare solo quando la bozza locale differisce dal repository:
+                 altrimenti la lista mostrata non e' quella che scansiona. -->
+            <div id="draft-warning" class="alert alert-warning no-print hidden"></div>
             <div id="products-list" class="prod-grid" style="margin-top:.85rem"></div>
           </section>
 
@@ -469,6 +472,33 @@
       catch (e) { return false; }
     }
 
+    /* La bozza locale ha la precedenza sul repository, quindi un prodotto
+       aggiunto al repository dopo l'ultimo salvataggio nel browser resta
+       invisibile: il pannello mostra la bozza, il tabellone il repository, e
+       i due non coincidono. Qui la divergenza si dichiara e si puo' annullare. */
+    function showDraftDivergence(draft, repoProducts) {
+      const box = document.getElementById('draft-warning');
+      if (!box) return;
+      const nomi = list => (list || []).map(p => p && p.name).filter(Boolean);
+      const soloNelRepo = draft ? nomi(repoProducts).filter(n => !nomi(draft).includes(n)) : [];
+      if (!draft || !soloNelRepo.length) { box.classList.add('hidden'); return; }
+      box.innerHTML = '<strong>Stai vedendo una bozza salvata in questo browser.</strong> '
+        + 'Nel repository c\'è anche ' + soloNelRepo.map(esc).join(', ')
+        + ', che la scansione usa già ma qui non compare. '
+        + '<button type="button" class="btn btn-ghost btn-sm" onclick="discardDraftProducts()">'
+        + 'Scarta la bozza</button>';
+      box.classList.remove('hidden');
+    }
+
+    function discardDraftProducts() {
+      try { localStorage.removeItem(LS_PRODUCTS_KEY); } catch (e) { /* storage negato: nulla da scartare */ }
+      const exp = document.getElementById('static-export');
+      if (exp) exp.classList.add('hidden');
+      const st = document.getElementById('config-save-status');
+      if (st) st.textContent = 'Bozza scartata: questi sono i prodotti del repository.';
+      loadConfig();
+    }
+
     /* Serializza i prodotti nello stesso stile di config/config.yaml */
     function yamlScalar(v) {
       if (typeof v === 'boolean') return v ? 'true' : 'false';
@@ -659,6 +689,7 @@
           if (st) st.textContent = 'Bozza locale non ancora nel repository — usa «Copia» qui sotto.';
           showStaticExport(collectFormProducts());
         }
+        showDraftDivergence(draft, d.products || []);
         return;
       }
       try {
