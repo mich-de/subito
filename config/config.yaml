@@ -11,6 +11,10 @@ scanner:
     - Samsung S24 256
     - Samsung Galaxy S24 256
     - S24 256
+    # La ricerca di Subito non lega "256" a un titolo che scrive "256Gb"
+    # attaccato: sono due parole diverse per il suo indice. Senza questa
+    # variante quegli annunci non tornano proprio dalla ricerca.
+    - S24 256gb
     exclude_keywords:
     - fe
     - ultra
@@ -36,6 +40,7 @@ scanner:
     - Samsung S24 512
     - Samsung Galaxy S24 512
     - S24 512
+    - S24 512gb
     exclude_keywords:
     - fe
     - ultra
@@ -61,6 +66,7 @@ scanner:
     - Samsung S25 256
     - Samsung Galaxy S25 256
     - S25 256
+    - S25 256gb
     exclude_keywords:
     - fe
     - ultra
@@ -77,7 +83,10 @@ scanner:
     - cerco
     subito_urls: []
     max_price: 380
-    price_margin: 30
+    # Margine a 50 (era 30): il tetto passa da 410 a 430. Il margine finisce
+    # in pe= dell'URL di ricerca, quindi con 30 gli annunci sopra 410 non
+    # venivano nemmeno restituiti da Subito. Obiettivo reale sempre 380.
+    price_margin: 50
     subito: true
     amazon: true
     search_in_description: false
@@ -86,6 +95,7 @@ scanner:
     - Samsung S25 512
     - Samsung Galaxy S25 512
     - S25 512
+    - S25 512gb
     exclude_keywords:
     - fe
     - ultra
