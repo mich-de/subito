@@ -97,22 +97,31 @@ class SubitoScanner(BaseScanner):
     def search(self, keyword, ps=None, pe=None):
         results = []
         seen_urns = set()
+        base = self._build_search_url(keyword, ps=ps, pe=pe)
         for page in range(1, self.max_pages + 1):
-            url = self._build_search_url(keyword, ps=ps, pe=pe)
-            if page > 1:
-                url = f"{url}&page={page}"
+            # Subito impagina con o=N. Con page=N il parametro veniva ignorato
+            # e tornava sempre la prima pagina: max_pages richieste identiche,
+            # 1,5 s di pausa ciascuna, e mai un annuncio oltre i primi 30.
+            url = base if page == 1 else f"{base}&o={page}"
             try:
                 items = self._fetch_page(url)
-                for item in items:
-                    urn = item.get("urn", "")
-                    if urn in seen_urns:
-                        continue
-                    seen_urns.add(urn)
-                    product = self._parse_item(item, keyword)
-                    if product:
-                        results.append(product)
             except Exception as e:
                 print(f"  [ERROR] Subito page {page}: {e}")
+                break
+            nuovi = 0
+            for item in items:
+                urn = item.get("urn", "")
+                if urn in seen_urns:
+                    continue
+                seen_urns.add(urn)
+                nuovi += 1
+                product = self._parse_item(item, keyword)
+                if product:
+                    results.append(product)
+            # Pagina senza niente di nuovo: i risultati sono finiti. Senza
+            # questa uscita si chiedevano pagine vuote fino a max_pages.
+            if not nuovi:
+                break
             time.sleep(1.5)
         return results
 

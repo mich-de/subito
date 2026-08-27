@@ -8,6 +8,13 @@ on:
     - cron: '*/15 * * * *'
   workflow_dispatch:
 
+# Rete di sicurezza contro l'accavallamento: un run per volta, in coda e non
+# annullato, cosi' una scansione lunga non si ritrova a spingere su main
+# insieme a quella partita dal cron successivo.
+concurrency:
+  group: scanner
+  cancel-in-progress: false
+
 permissions:
   contents: write
   id-token: write
