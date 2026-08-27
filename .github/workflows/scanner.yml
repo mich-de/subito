@@ -44,6 +44,13 @@ jobs:
       - name: Build Static Dashboard for GitHub Pages
         run: |
           python export_pages.py
+          # export_pages.py scrive in public/, ma Pages in modalita' branch
+          # serve la root: senza questa copia il sito resta fermo all'ultimo
+          # index.html committato a mano, con i dati del giorno in cui e'
+          # stato creato. Tornando a build_type=workflow, togliere le due
+          # righe (l'artifact si prende public/ da solo).
+          cp public/index.html index.html
+          cp public/.nojekyll .nojekyll
 
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3.0.1
