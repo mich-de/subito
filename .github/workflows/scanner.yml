@@ -4,8 +4,11 @@ on:
   push:
     branches: [ main ]
   schedule:
-    # Esegue ogni 15 minuti automaticamente
-    - cron: '*/15 * * * *'
+    # Ogni 30 minuti, non 15: il run completo dura ~13 min (Subito ne prende
+    # 3, il resto sono Amazon e NorthLadder via Playwright) e a 15 minuti il
+    # margine era di novanta secondi. A 30 il turno successivo parte sempre a
+    # tavolo libero.
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 # Rete di sicurezza contro l'accavallamento: un run per volta, in coda e non

@@ -39,6 +39,13 @@ class SubitoScanner(BaseScanner):
                     margin = product.get("price_margin", 50)
                     pe = max_price + margin
                     results = self.search(keyword, pe=pe)
+                    # La ricerca di Subito e' a testo libero e restituisce
+                    # anche marche diverse: per "Magic 8 Pro" tornavano un
+                    # MacBook col Magic Mouse e un Red Magic 8S. Le esclusioni
+                    # da sole non bastano, vanno indovinate una per una;
+                    # qui si pretende che il titolo contenga davvero le
+                    # parole della keyword che ha generato la ricerca.
+                    results = [r for r in results if self._matches_keyword(r.title, keyword)]
                     results = [r for r in results if not self._excluded_by_keywords(r, exclude_kw)]
                     matched, near = self.classify_results(results, max_price, margin)
                     for p in matched:

@@ -172,6 +172,14 @@ scanner:
     - magicpad
     - magic watch
     - lite
+    # La ricerca di Subito e' a testo libero: "Magic 8 Pro" le ha restituito
+    # un MacBook col Magic Mouse e un Red Magic 8S, ed entrambi sono finiti
+    # su Telegram. Sono marchi diversi, non varianti dell'Honor.
+    - macbook
+    - mouse
+    - red magic
+    - redmagic
+    - nubia
     subito_urls: []
     max_price: 650
     price_margin: 50
@@ -185,12 +193,16 @@ scanner:
     - Google Pixel 3
     - Google Pixel 4
     - Google Pixel 5
+    # "custodi" e non "custodia": l'esclusione e' per sottostringa, e
+    # "2 Custodie Google Pixel 10 Pro" passava indisturbato. Stessa ragione
+    # per "cinturin" e "caricator". Il resto e' il catalogo accessori Pixel,
+    # che con la paginazione corretta arriva tutto invece dei primi trenta.
     exclude_keywords:
-    - custodia
+    - custodi
     - cover
     - pellicola
     - vetro
-    - caricatore
+    - caricator
     - cavo
     - adattatore
     - case
@@ -199,6 +211,23 @@ scanner:
     - riparazione
     - ricambio
     - batteria
+    - cinturin
+    - watch
+    - orologio
+    - buds
+    - auricolari
+    - cuffie
+    - stand
+    - dock
+    - alimentatore
+    - tablet
+    - display
+    - danneggiato
+    - difetto
+    - rotto
+    - guasto
+    - scambio
+    - cerco
     subito_urls: []
     max_price: 100
     price_margin: 50
