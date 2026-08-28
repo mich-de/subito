@@ -32,11 +32,16 @@ sei kilobyte).
   ┌────────┐   POST      ┌────────────┐   GET      ┌──────────────┐
   │pannello│ ──────────► │ config/    │ ─────────► │sync_config.py│
   └────────┘ /api/store  │  *.yaml    │  indirizzo └──────┬───────┘
-                         └────────────┘   pubblico        ▼
-                                                    run_once.py
-                                                          │
-   tabellone ◄──── raw.githubusercontent.com ◄── data/*.json (commit)
+       │                 ├────────────┤   pubblico        ▼
+       └───────────────► │ state/     │             run_once.py
+          annunci tolti  │ nascosti   │                   │
+                         └─────┬──────┘                   │
+                               │ filtro in lettura        │
+   tabellone ◄─────────────────┴─── raw.githubusercontent.com ◄── data/*.json
 ```
+
+`state/` sta fuori da `config/` apposta: `sync_config.py` ritira solo i quattro
+YAML, e l'elenco dei nascosti non deve finire in mezzo.
 
 1. Premi **Salva e applica**: `/api/store` riscrive gli YAML e li mette su Blob.
 2. Alla scansione successiva `sync_config.py` li ritira e li mette in `config/`.
@@ -99,6 +104,24 @@ si digita una volta nel browser e resta li'; il confronto avviene sul server.
 Senza `APP_PASSWORD` o senza store Blob il tabellone funziona lo stesso in
 lettura, e il registro in fondo alla pagina dice che la scrittura e' spenta.
 
+### Cosa protegge la password
+
+Non solo la scrittura: **anche la lettura della configurazione**.
+
+| Chi apre il tabellone | Cosa vede |
+|---|---|
+| Chiunque | Gli annunci, i filtri, la stampa. |
+| Chi ha la password | In piu': prodotti, soglie, parole chiave, esclusioni, editor YAML, e i pulsanti per togliere un annuncio. |
+
+Prima la configurazione usciva da `/api/store` a chiunque aprisse la pagina, e
+la password copriva solo il salvataggio. Ma quei dati sono soglie e parole
+chiave: dicono in chiaro cosa si sta cercando e a quanto si e' disposti a
+comprarlo. Ora la scheda **Configurazione** la chiede quando la si apre, e il
+registro non rivela nemmeno quanti prodotti sono monitorati a chi non l'ha —
+sarebbe gia' un'informazione.
+
+Il tabellone degli annunci resta pubblico: quello e' il suo mestiere.
+
 Le variabili d'ambiente Vercel le legge **al momento del deploy**: dopo averle
 aggiunte serve un `vercel --prod` perche' esistano davvero.
 
@@ -122,12 +145,35 @@ che aggiungi tu dal pannello, che non ne hanno.
 
 Salvare senza aver cambiato niente non scrive niente.
 
+## Togliere un annuncio dal tabellone
+
+Passando su una riga compare una **✕** a destra: toglie quell'annuncio. Serve la
+password, come per salvare.
+
+Non lo cancella davvero, e non potrebbe: gli annunci stanno in
+`data/*_results.json`, che lo scanner riscrive da capo a ogni giro, e la
+funzione su Vercel non ha — di proposito — nessuna credenziale per scrivere nel
+repository. Un annuncio cancellato tornerebbe alla scansione successiva.
+
+Quindi si tiene l'elenco di cio' che va nascosto e lo si applica **in lettura**:
+
+```
+state/nascosti.json   su Blob, fuori dal prefisso config/ cosi' sync_config.py
+                      non lo ritira insieme agli YAML
+```
+
+Il filtro sopravvive a qualunque riscrittura dei risultati, vale per tutti e non
+solo per chi ha premuto la ✕, ed e' reversibile: l'annuncio non e' distrutto,
+e' escluso. Nella scheda **Configurazione** c'e' il riquadro che dice quanti ne
+sono nascosti e il pulsante **Rimetti tutti**.
+
 ## I file
 
 ```
 vercel/
 ├─ index.html        generato da export_vercel.py — non modificarlo a mano
-├─ api/store.py      GET: legge tutto. POST: scrive su Blob, con password.
+├─ api/store.py      GET: annunci a tutti, configurazione solo con password.
+│                    POST: scrive su Blob (config e nascosti), con password.
 ├─ vercel.json       intestazioni e salto della build sui commit di soli dati
 └─ requirements.txt  ruamel.yaml, per non perdere i commenti
 
