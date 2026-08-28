@@ -1,28 +1,36 @@
-"""Ponte fra il tabellone e il repository GitHub.
+"""Ponte fra il tabellone e i dati, tutto dentro i servizi gratuiti di Vercel.
 
-    GET  /api/store   tutto cio' che serve alla pagina: annunci, prodotti,
-                      configurazioni, registro. Nessuna password: sono gli
-                      stessi dati che il repository pubblica gia'.
+    GET  /api/store              annunci, prodotti, configurazioni, registro.
+    GET  /api/store?only=configs solo i quattro YAML: e' quello che chiede il
+                                 workflow prima di scansionare.
+    POST /api/store              riscrive i config/*.yaml su Vercel Blob.
+                                 Password obbligatoria.
 
-    POST /api/store   riscrive config/config.yaml, subito.yaml e amazon.yaml
-                      in un solo commit. Password obbligatoria.
+Di GitHub qui non si usa nessuna credenziale. Le due sorgenti sono:
 
-Il token GitHub vive in una variabile d'ambiente e non lascia mai il server.
-E' l'unica ragione per cui questo file esiste invece di far parlare il
-browser direttamente con l'API di GitHub: su una pagina pubblica il token
-sarebbe leggibile da chiunque apra gli strumenti di sviluppo.
+  * **Vercel Blob** per la configurazione. E' la cassetta postale fra il
+    pannello e lo scanner: il browser scrive qui, il workflow legge da qui a
+    ogni giro. Il token lo inietta Vercel da solo quando lo store e' collegato
+    al progetto, quindi non c'e' niente da creare ne' da incollare.
 
-Un solo file e non due (uno per leggere, uno per scrivere) perche' su Vercel
-ogni file in api/ e' una funzione a se': tenerli insieme evita di duplicare
-il codice di dialogo con GitHub, che e' la parte grossa.
+  * **raw.githubusercontent.com** per i dati delle scansioni, che nascono su
+    Actions e vivono nel repository. E' una lettura di file pubblici via CDN:
+    nessun token, e soprattutto nessun limite di 60 richieste l'ora come
+    sull'API di GitHub — che su Vercel, dove l'indirizzo IP e' condiviso con
+    mezzo mondo, si sarebbe esaurito in fretta e senza spiegazioni.
+
+Sulla configurazione comanda il Blob: se un file e' stato salvato dal pannello,
+quella e' la versione buona e il workflow la riporta nel repository a ogni
+scansione. Finche' non salvi mai dal pannello vale quella del repository, che
+serve anche da primo riempimento.
 """
 
-import base64
 import hmac
 import json
 import os
 import re
 import urllib.error
+import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
@@ -33,10 +41,18 @@ from ruamel.yaml import YAML
 
 REPO = os.environ.get("GITHUB_REPO", "mich-de/subito")
 BRANCH = os.environ.get("GITHUB_BRANCH", "main")
-TOKEN = os.environ.get("GITHUB_TOKEN", "")
 PASSWORD = os.environ.get("APP_PASSWORD", "")
 
+# Iniettato da Vercel quando lo store Blob e' collegato al progetto. Se manca,
+# il tabellone resta in sola lettura e lo dice nel registro.
+BLOB_TOKEN = os.environ.get("BLOB_READ_WRITE_TOKEN", "")
+
+RAW = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/"
 CONFIG_FILES = ["config.yaml", "subito.yaml", "amazon.yaml", "northladder.yaml"]
+# Elenco fisso invece di chiedere l'indice della cartella: quello richiederebbe
+# l'API di GitHub, cioe' proprio la cosa a cui vogliamo smettere di appoggiarci.
+DATA_FILES = ["subitoscanner_results.json", "amazonscanner_results.json",
+              "northladderscanner_results.json"]
 WORKFLOW = ".github/workflows/scanner.yml"
 
 # Round-trip: senza questo i commenti dentro config.yaml — quelli che spiegano
@@ -47,52 +63,130 @@ _yaml.preserve_quotes = True
 # Misura larga: a 80 colonne ruamel manda a capo dopo i due punti i valori
 # lunghi e inspezzabili (search_url, l'header Accept) lasciandoci pure uno
 # spazio in coda. Allargando restano su una riga, come li scriverebbe una
-# persona. In cambio lo User-Agent, che nel file e' piegato su due righe, si
-# ricompatta: succede una volta sola e solo quando quel file cambia davvero.
+# persona.
 _yaml.width = 4096
 
 
-# ---------------------------------------------------------------- GitHub ---
-
-def gh(path, method="GET", body=None):
-    url = path if path.startswith("http") else "https://api.github.com" + path
-    payload = json.dumps(body).encode("utf-8") if body is not None else None
-    req = urllib.request.Request(url, data=payload, method=method)
-    req.add_header("Accept", "application/vnd.github+json")
+def fetch(url, headers=None, data=None, method="GET", timeout=20):
+    req = urllib.request.Request(url, data=data, method=method)
     req.add_header("User-Agent", "offerte-monitor")
-    if TOKEN:
-        req.add_header("Authorization", "Bearer " + TOKEN)
-    if payload is not None:
-        req.add_header("Content-Type", "application/json")
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    for chiave, valore in (headers or {}).items():
+        req.add_header(chiave, valore)
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read()
 
 
-def read_file(path):
-    """Contenuto testuale di un file del repository, None se non esiste."""
+def parallel(fn, chiavi):
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        return dict(zip(chiavi, pool.map(fn, chiavi)))
+
+
+# ------------------------------------------------------------ repository ---
+
+def raw_file(path):
+    """Contenuto di un file pubblico del repository, None se non c'e'."""
     try:
-        node = gh(f"/repos/{REPO}/contents/{path}?ref={BRANCH}")
+        return fetch(RAW + path).decode("utf-8")
     except urllib.error.HTTPError as e:
-        if e.code == 404:
+        if e.code in (403, 404):
             return None
         raise
-    if node.get("encoding") != "base64":
+    except Exception:
         return None
-    return base64.b64decode(node["content"]).decode("utf-8")
 
 
-def list_dir(path):
+# ------------------------------------------------------------------ blob ---
+
+BLOB_API = "https://blob.vercel-storage.com"
+# L'API HTTP di Blob non e' documentata da Vercel, che pubblica solo l'SDK
+# JavaScript. Questa versione e' quella che usano i client in circolazione; se
+# un giorno Vercel la cambia, il salvataggio smette di funzionare e lo dice —
+# la lettura, che passa dagli indirizzi pubblici, continua comunque.
+BLOB_API_VERSION = "10"
+
+
+def blob_headers(extra=None):
+    intestazioni = {"authorization": "Bearer " + BLOB_TOKEN,
+                    "x-api-version": BLOB_API_VERSION}
+    intestazioni.update(extra or {})
+    return intestazioni
+
+
+def blob_index():
+    """{pathname: (url pubblico, data di caricamento)} dei config gia' salvati.
+
+    L'elenco arriva dall'API autenticata, che non passa dalla CDN: e' sempre
+    aggiornato, ed e' da qui che si prende la marca temporale con cui rileggere
+    il contenuto senza incappare nella copia in cache.
+    """
+    if not BLOB_TOKEN:
+        return {}
     try:
-        return gh(f"/repos/{REPO}/contents/{path}?ref={BRANCH}")
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            return []
-        raise
+        url = f"{BLOB_API}?prefix=config/&limit=100"
+        risposta = json.loads(fetch(url, blob_headers()).decode("utf-8"))
+    except Exception:
+        # Blob irraggiungibile o token scaduto: si continua col repository.
+        # Meglio una configurazione vecchia di un tabellone bianco.
+        return {}
+    return {b["pathname"]: (b["url"], str(b.get("uploadedAt") or ""))
+            for b in risposta.get("blobs", [])
+            if b.get("pathname") and b.get("url")}
 
 
-def parallel(fn, keys):
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        return dict(zip(keys, pool.map(fn, keys)))
+def blob_get(url, versione=""):
+    """Contenuto di un blob dal suo indirizzo pubblico.
+
+    Gli indirizzi pubblici passano dalla CDN, che tiene il file in cache per il
+    minuto dichiarato alla scrittura. Un minuto e' niente per il tabellone, ma
+    e' abbastanza per fare danni al salvataggio: due modifiche a distanza di
+    trenta secondi e la seconda partirebbe da una copia vecchia, riportando
+    indietro la prima. La marca temporale in coda cambia la chiave di cache e
+    costringe a rileggere davvero. Se dovesse dare fastidio si ripiega
+    sull'indirizzo nudo, che nel caso peggiore e' vecchio di un minuto.
+    """
+    for tentativo in ([f"{url}?v={urllib.parse.quote(versione)}"] if versione else []) + [url]:
+        try:
+            return fetch(tentativo).decode("utf-8")
+        except Exception:
+            continue
+    return None
+
+
+def blob_put(pathname, testo):
+    intestazioni = blob_headers({
+        "access": "public",
+        "x-content-type": "text/yaml; charset=utf-8",
+        # Un minuto, non un anno com'e' il default: questo file cambia quando
+        # tocchi il pannello, e la scansione successiva deve vedere il nuovo.
+        "x-cache-control-max-age": "60",
+        # Senza questo Blob rifiuta di riscrivere un percorso che esiste gia',
+        # e qui si riscrive sempre lo stesso.
+        "x-allow-overwrite": "1",
+    })
+    url = f"{BLOB_API}/?pathname={urllib.parse.quote(pathname)}"
+    risposta = fetch(url, intestazioni, data=testo.encode("utf-8"),
+                     method="PUT")
+    return json.loads(risposta.decode("utf-8"))
+
+
+def leggi_config():
+    """I quattro YAML: dal Blob se ci sono, altrimenti dal repository."""
+    indice = blob_index()
+    testi = parallel(raw_file, [f"config/{n}" for n in CONFIG_FILES])
+    fuori = {n: testi.get(f"config/{n}") for n in CONFIG_FILES}
+
+    da_blob = [n for n in CONFIG_FILES if f"config/{n}" in indice]
+    if da_blob:
+        salvati = parallel(lambda n: blob_get(*indice[f"config/{n}"]), da_blob)
+        for nome, testo in salvati.items():
+            if testo:
+                fuori[nome] = testo
+            else:
+                # Il blob c'e' ma non si e' riuscito a leggerlo: resta la
+                # versione del repository, gia' in "fuori", e il nome esce
+                # dall'elenco per non dichiarare una provenienza falsa.
+                da_blob = [x for x in da_blob if x != nome]
+    return fuori, set(da_blob)
 
 
 def load_yaml(text):
@@ -113,31 +207,26 @@ def dump_yaml(node):
 # ------------------------------------------------------------------ GET ----
 
 def build_payload():
-    """Ricostruisce quello che export_pages.py inietta nel build statico.
+    """Ricostruisce quello che il build statico iniettava nella pagina.
 
-    Stessi nomi e stessa forma: cosi' la pagina usa il percorso di lettura che
-    aveva gia', e l'unica differenza fra il tabellone su Pages e questo e' da
-    dove arrivano i dati.
+    Stessi nomi e stessa forma, cosi' la pagina usa il percorso di lettura che
+    aveva gia' e l'unica differenza e' da dove arrivano i dati.
     """
-    fissi = [f"config/{n}" for n in CONFIG_FILES] + [WORKFLOW]
-    testi = parallel(read_file, fissi)
-
-    elenco = [n["path"] for n in list_dir("data")
-              if n.get("type") == "file" and n["name"].endswith("scanner_results.json")]
-    grezzi = parallel(read_file, sorted(elenco))
+    configs, dal_blob = leggi_config()
+    grezzi = parallel(raw_file, [f"data/{n}" for n in DATA_FILES] + [WORKFLOW])
 
     items = []
     conteggi = {}
-    for path, testo in sorted(grezzi.items()):
+    for nome in DATA_FILES:
         try:
-            dati = json.loads(testo or "[]")
+            dati = json.loads(grezzi.get(f"data/{nome}") or "[]")
         except json.JSONDecodeError:
             dati = []
         if isinstance(dati, list):
             items.extend(dati)
-            conteggi[os.path.basename(path)] = len(dati)
+            conteggi[nome] = len(dati)
 
-    cfg = load_yaml(testi.get("config/config.yaml")) or {}
+    cfg = load_yaml(configs.get("config.yaml")) or {}
     scanner = cfg.get("scanner", {}) or {}
     telegram = cfg.get("telegram", {}) or {}
 
@@ -147,9 +236,9 @@ def build_payload():
             "shipping_required": scanner.get("shipping_required", True),
         },
         "telegram": {
-            # Il token Telegram non esce da qui: sul server vive nei secret di
-            # GitHub Actions, e in config.yaml c'e' solo un segnaposto. Mandarlo
-            # al browser non servirebbe a niente e sarebbe solo un rischio.
+            # Il token Telegram non esce da qui: vive nei secret di Actions e
+            # in config.yaml c'e' solo un segnaposto. Mandarlo al browser non
+            # servirebbe a niente e sarebbe solo un rischio.
             "enabled": telegram.get("enabled", True),
             "bot_token": "",
             "chat_id": "",
@@ -157,19 +246,20 @@ def build_payload():
         "products": json.loads(json.dumps(scanner.get("products", []) or [])),
     }
     for chiave in ("subito", "amazon"):
-        s = load_yaml(testi.get(f"config/{chiave}.yaml")) or {}
+        s = load_yaml(configs.get(f"{chiave}.yaml")) or {}
         config_data[chiave] = {
             "enabled": s.get("enabled", True),
             "max_pages": s.get("max_pages", 3),
         }
 
     cadenza = 30
-    m = re.search(r"cron:\s*['\"]\*/(\d+)", testi.get(WORKFLOW) or "")
+    m = re.search(r"cron:\s*['\"]\*/(\d+)", grezzi.get(WORKFLOW) or "")
     if m:
         cadenza = int(m.group(1))
 
     ora = datetime.now(timezone(timedelta(hours=2))).strftime("%H:%M:%S")
-    logs = [{"message": f"Dati letti dal repository {REPO} — "
+    origine = "Vercel Blob" if dal_blob else "repository"
+    logs = [{"message": f"Configurazione letta da {origine} — "
                         f"{len(config_data['products'])} prodotti monitorati.",
              "level": "info", "time": ora}]
     for etichetta, nome in (("SUBITO.IT", "subitoscanner_results.json"),
@@ -177,23 +267,25 @@ def build_payload():
                             ("NORTHLADDER", "northladderscanner_results.json")):
         n = conteggi.get(nome)
         if n is None:
-            logs.append({"message": f"[{etichetta}] Nessun risultato nel repository.",
+            logs.append({"message": f"[{etichetta}] Nessun risultato pubblicato.",
                          "level": "error", "time": ora})
         else:
             logs.append({"message": f"[{etichetta}] {n} annunci dall'ultima scansione.",
                          "level": "found" if n else "scan", "time": ora})
-    logs.append({"message": f"Scansione via GitHub Actions ogni {cadenza} minuti. "
-                            f"Il pannello configurazione scrive sul repository.",
-                 "level": "info", "time": ora})
+    scrivibile = bool(BLOB_TOKEN and PASSWORD)
+    logs.append({"message": f"Scansione ogni {cadenza} minuti. " + (
+        "Il pannello salva su Vercel Blob e la scansione seguente lo raccoglie."
+        if scrivibile else
+        "Salvataggio spento: manca lo store Blob o la password."),
+        "level": "info", "time": ora})
 
     return {
         "items": items,
         "config": config_data,
-        "configs": {n: testi.get(f"config/{n}") or "" for n in CONFIG_FILES
-                    if testi.get(f"config/{n}")},
+        "configs": {n: t for n, t in configs.items() if t},
         "logs": logs,
         "cadence": cadenza,
-        "writable": bool(TOKEN and PASSWORD),
+        "writable": scrivibile,
     }
 
 
@@ -233,23 +325,23 @@ def merge_products(esistenti, in_arrivo):
 def cambiato(originale, nodo):
     """Il file e' davvero cambiato, o e' solo ruamel che riscrive a modo suo?
 
-    Confrontare il nuovo testo con quello del repository direbbe «cambiato»
-    anche quando non si e' toccato niente, perche' la resa di ruamel non
-    coincide riga per riga con quella di PyYAML che ha scritto i file. Il
-    paragone giusto e' fra due rese dello stesso strumento: quella del file
-    com'era e quella del file com'e' adesso.
+    Confrontare il nuovo testo con quello di partenza direbbe «cambiato» anche
+    quando non si e' toccato niente, perche' la resa di ruamel non coincide
+    riga per riga con quella di PyYAML che ha scritto i file. Il paragone
+    giusto e' fra due rese dello stesso strumento: quella del file com'era e
+    quella del file com'e' adesso.
     """
     reso = dump_yaml(nodo)
     return (reso != dump_yaml(load_yaml(originale))), reso
 
 
 def apply_changes(testi, dati):
-    """Restituisce {percorso: nuovo contenuto} per i soli file che cambiano."""
+    """Restituisce {nome file: nuovo contenuto} per i soli file che cambiano."""
     fuori = {}
 
-    cfg = load_yaml(testi["config/config.yaml"])
+    cfg = load_yaml(testi.get("config.yaml"))
     if cfg is None:
-        raise ValueError("config/config.yaml illeggibile nel repository")
+        raise ValueError("config.yaml illeggibile")
 
     generale = dati.get("general") or {}
     if "interval_minutes" in generale:
@@ -260,60 +352,47 @@ def apply_changes(testi, dati):
     telegram = dati.get("telegram") or {}
     if "enabled" in telegram:
         cfg["telegram"]["enabled"] = bool(telegram["enabled"])
-    # bot_token e chat_id non si toccano: vivono nei secret di GitHub Actions e
-    # il browser non li riceve nemmeno, quindi riscriverli significherebbe
+    # bot_token e chat_id non si toccano: vivono nei secret di Actions e il
+    # browser non li riceve nemmeno, quindi riscriverli significherebbe
     # sovrascrivere il segnaposto con una stringa vuota.
 
     prodotti = dati.get("products")
     if isinstance(prodotti, list) and prodotti:
         cfg["scanner"]["products"] = merge_products(cfg["scanner"].get("products"), prodotti)
 
-    diverso, reso = cambiato(testi["config/config.yaml"], cfg)
+    diverso, reso = cambiato(testi["config.yaml"], cfg)
     if diverso:
-        fuori["config/config.yaml"] = reso
+        fuori["config.yaml"] = reso
 
     for chiave in ("subito", "amazon"):
         blocco = dati.get(chiave)
         if not blocco:
             continue
-        percorso = f"config/{chiave}.yaml"
-        nodo = load_yaml(testi.get(percorso))
+        nome = f"{chiave}.yaml"
+        nodo = load_yaml(testi.get(nome))
         if nodo is None:
             continue
         if "enabled" in blocco:
             nodo["enabled"] = bool(blocco["enabled"])
         if "max_pages" in blocco:
             nodo["max_pages"] = int(blocco["max_pages"])
-        diverso, reso = cambiato(testi[percorso], nodo)
+        diverso, reso = cambiato(testi[nome], nodo)
         if diverso:
-            fuori[percorso] = reso
+            fuori[nome] = reso
 
     return fuori
 
 
-def commit(files, messaggio):
-    """Un commit solo per tutti i file.
+def salva(files):
+    """Scrive i file cambiati sul Blob e restituisce i nomi salvati.
 
-    Tre PUT su /contents sarebbero tre commit, e fra il primo e il terzo il
-    repository resterebbe in uno stato che nessuno ha mai chiesto. Con l'API
-    Git l'aggiornamento e' unico e atomico.
+    Prima li carica tutti e poi risponde: se uno fallisce si solleva, e il
+    pannello lo dice invece di far credere che sia andato tutto a posto.
     """
-    ref = gh(f"/repos/{REPO}/git/ref/heads/{BRANCH}")
-    padre = ref["object"]["sha"]
-    base = gh(f"/repos/{REPO}/git/commits/{padre}")["tree"]["sha"]
-
-    albero = gh(f"/repos/{REPO}/git/trees", "POST", {
-        "base_tree": base,
-        "tree": [{"path": p, "mode": "100644", "type": "blob", "content": c}
-                 for p, c in files.items()],
-    })
-    nuovo = gh(f"/repos/{REPO}/git/commits", "POST", {
-        "message": messaggio,
-        "tree": albero["sha"],
-        "parents": [padre],
-    })
-    gh(f"/repos/{REPO}/git/refs/heads/{BRANCH}", "PATCH", {"sha": nuovo["sha"]})
-    return nuovo["sha"]
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        list(pool.map(lambda kv: blob_put(f"config/{kv[0]}", kv[1]),
+                      sorted(files.items())))
+    return sorted(files)
 
 
 # -------------------------------------------------------------- handler ----
@@ -336,19 +415,27 @@ class handler(BaseHTTPRequestHandler):
         return hmac.compare_digest(fornita, PASSWORD)
 
     def do_GET(self):
+        query = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         try:
+            if (query.get("only") or [""])[0] == "configs":
+                # Quello che chiede il workflow prima di scansionare: solo i
+                # quattro YAML, senza gli annunci. Niente cache, perche' una
+                # configurazione salvata un minuto fa deve valere subito.
+                configs, dal_blob = leggi_config()
+                self._send(200, {"configs": {n: t for n, t in configs.items() if t},
+                                 "fromBlob": sorted(dal_blob)})
+                return
             # Un minuto di cache al bordo: la scansione gira ogni trenta, quindi
-            # ricaricare la pagina due volte di fila non deve ricontattare
-            # GitHub sei volte.
+            # ricaricare la pagina due volte di fila non deve rileggere tutto.
             self._send(200, build_payload(), "public, max-age=0, s-maxage=60")
         except urllib.error.HTTPError as e:
-            self._send(502, {"error": f"GitHub ha risposto {e.code}"})
+            self._send(502, {"error": f"La sorgente ha risposto {e.code}"})
         except Exception as e:
             self._send(500, {"error": str(e)})
 
     def do_POST(self):
-        if not TOKEN:
-            self._send(503, {"error": "GITHUB_TOKEN non configurato su Vercel."})
+        if not BLOB_TOKEN:
+            self._send(503, {"error": "Store Blob non collegato al progetto su Vercel."})
             return
         if not PASSWORD:
             self._send(503, {"error": "APP_PASSWORD non configurata: scrittura disattivata."})
@@ -365,8 +452,10 @@ class handler(BaseHTTPRequestHandler):
             return
 
         try:
+            configs, _ = leggi_config()
+
             # L'editor YAML manda un file intero gia' scritto a mano: si
-            # controlla solo che sia analizzabile, perche' committare un YAML
+            # controlla solo che sia analizzabile, perche' salvare un YAML
             # rotto fermerebbe la scansione successiva senza dire perche'.
             grezzo = dati.get("yaml")
             if grezzo:
@@ -380,46 +469,39 @@ class handler(BaseHTTPRequestHandler):
                 except Exception as e:
                     self._send(400, {"error": f"YAML non valido: {e}"})
                     return
-                percorso = f"config/{nome}"
-                if testo == (read_file(percorso) or ""):
+                if testo == (configs.get(nome) or ""):
                     self._send(200, {"ok": True, "changed": False,
                                      "message": "Nessuna modifica da salvare."})
                     return
-                sha = commit({percorso: testo},
-                             f"Aggiorna {percorso} dall'editor del pannello")
+                salva({nome: testo})
                 self._send(200, {
-                    "ok": True, "changed": True, "commit": sha[:7], "files": [percorso],
-                    "url": f"https://github.com/{REPO}/commit/{sha}",
-                    "message": "Salvato. La scansione riparte da sola.",
+                    "ok": True, "changed": True, "files": [nome],
+                    "message": "Salvato. La scansione lo raccoglie al giro seguente.",
                 })
                 return
 
-            percorsi = [f"config/{n}" for n in ("config.yaml", "subito.yaml", "amazon.yaml")]
-            testi = parallel(read_file, percorsi)
-            if not testi.get("config/config.yaml"):
-                self._send(502, {"error": "config/config.yaml non trovato nel repository."})
+            if not configs.get("config.yaml"):
+                self._send(502, {"error": "config.yaml non trovato ne' su Blob ne' nel repository."})
                 return
 
-            files = apply_changes(testi, dati)
+            files = apply_changes(configs, dati)
             if not files:
                 self._send(200, {"ok": True, "changed": False,
                                  "message": "Nessuna modifica da salvare."})
                 return
 
-            sha = commit(files, "Aggiorna la configurazione dal pannello\n\n"
-                                "Scritto da " + ", ".join(sorted(files)) + " via /api/store.")
+            salvati = salva(files)
             self._send(200, {
-                "ok": True, "changed": True, "commit": sha[:7],
-                "files": sorted(files),
-                "url": f"https://github.com/{REPO}/commit/{sha}",
-                "message": "Salvato. La scansione riparte da sola con i nuovi prodotti.",
+                "ok": True, "changed": True, "files": salvati,
+                "message": "Salvato su Vercel Blob. La scansione seguente parte "
+                           "con i nuovi prodotti.",
             })
         except urllib.error.HTTPError as e:
             dettaglio = ""
             try:
-                dettaglio = json.loads(e.read().decode()).get("message", "")
+                dettaglio = (e.read().decode() or "")[:200]
             except Exception:
                 pass
-            self._send(502, {"error": f"GitHub ha risposto {e.code}. {dettaglio}".strip()})
+            self._send(502, {"error": f"Vercel Blob ha risposto {e.code}. {dettaglio}".strip()})
         except Exception as e:
             self._send(500, {"error": str(e)})

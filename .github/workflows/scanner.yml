@@ -44,6 +44,14 @@ jobs:
           pip install -r requirements.txt
           python -m playwright install chromium
 
+      - name: Fetch Config Saved from the Dashboard
+        run: |
+          # Il pannello su Vercel non scrive qui: scrive su Vercel Blob. Questo
+          # passo ritira quello che ci ha lasciato e lo mette in config/, prima
+          # che lo scanner legga. Non fallisce mai: se Blob non risponde si
+          # scansiona con la configurazione che c'e' gia'.
+          python sync_config.py
+
       - name: Run Price Scanner
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -64,11 +72,16 @@ jobs:
         run: |
           git config --global user.name "mich-de"
           git config --global user.email "mic.deangelis@gmail.com"
-          # Solo dati, piu' vercel/index.html quando cambia il template. La
-          # dashboard non ha piu' bisogno di essere ricommittata a ogni giro:
-          # su Vercel la pagina non contiene dati, li chiede a /api/store
-          # quando la si apre.
-          git add -f data/sent_items.json data/*_results.json data/northladder_history.json vercel/index.html || true
+          # Dati, config/ quando il pannello l'ha cambiata, e vercel/index.html
+          # quando cambia il template. La dashboard non ha piu' bisogno di
+          # essere ricommittata a ogni giro: su Vercel la pagina non contiene
+          # dati, li chiede a /api/store quando la si apre.
+          #
+          # config/ sta qui per una ragione precisa: cosi' il repository resta
+          # lo specchio di cio' che sta girando davvero. Senza, le soglie
+          # vivrebbero solo dentro Blob e guardare il repository per sapere
+          # cosa si sta cercando direbbe una bugia.
+          git add -f data/sent_items.json data/*_results.json data/northladder_history.json config/*.yaml vercel/index.html || true
           git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Save scan results and sent items history [skip ci]"
           git push origin main || true
 

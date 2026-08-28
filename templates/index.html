@@ -764,7 +764,7 @@
       if (CAN_WRITE) {
         btn.textContent = 'Salvataggio…';
         btn.disabled = true;
-        status.textContent = 'Scrittura sul repository in corso…';
+        status.textContent = 'Salvataggio in corso…';
         try {
           const d = await postStore({
             general: {
@@ -783,7 +783,7 @@
             }
           });
           status.textContent = d.ok
-            ? (d.changed ? `${d.message} Commit ${d.commit}.` : d.message)
+            ? (d.changed ? `${d.message} (${d.files.join(', ')})` : d.message)
             : (d.error || 'Errore di salvataggio.');
         } catch (e) {
           status.textContent = 'Errore di connessione con /api/store.';
@@ -888,13 +888,13 @@
       e.preventDefault();
       const status = document.getElementById('yaml-status');
       if (CAN_WRITE) {
-        status.textContent = 'Scrittura sul repository in corso…';
+        status.textContent = 'Salvataggio in corso…';
         try {
           const d = await postStore({
             yaml: { name: state.currentConfig, content: document.getElementById('yaml-editor').value }
           });
           status.textContent = d.ok
-            ? (d.changed ? `${d.message} Commit ${d.commit}.` : d.message)
+            ? (d.changed ? `${d.message} (${d.files.join(', ')})` : d.message)
             : (d.error || 'Errore di salvataggio.');
         } catch (e) {
           status.textContent = 'Errore di connessione con /api/store.';
