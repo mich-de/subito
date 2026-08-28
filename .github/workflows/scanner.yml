@@ -18,11 +18,11 @@ concurrency:
   group: scanner
   cancel-in-progress: false
 
+# Niente piu' pages/deployments/id-token: dal 28/08/2026 la dashboard sta su
+# Vercel e questo workflow non pubblica piu' niente su GitHub Pages. Restano i
+# due permessi che servono davvero: committare i dati e ripulire i run vecchi.
 permissions:
   contents: write
-  id-token: write
-  pages: write
-  deployments: write
   actions: write
 
 jobs:
@@ -51,17 +51,6 @@ jobs:
         run: |
           python run_once.py
 
-      - name: Build Static Dashboard for GitHub Pages
-        run: |
-          python export_pages.py
-          # export_pages.py scrive in public/, ma Pages in modalita' branch
-          # serve la root: senza questa copia il sito resta fermo all'ultimo
-          # index.html committato a mano, con i dati del giorno in cui e'
-          # stato creato. Tornando a build_type=workflow, togliere le due
-          # righe (l'artifact si prende public/ da solo).
-          cp public/index.html index.html
-          cp public/.nojekyll .nojekyll
-
       - name: Build Dashboard for Vercel
         run: |
           # Il tabellone su Vercel non contiene dati: li chiede a /api/store
@@ -71,35 +60,17 @@ jobs:
           # senza doversi ricordare di lanciare lo script a mano.
           python export_vercel.py
 
-      - name: Upload GitHub Pages Artifact
-        uses: actions/upload-pages-artifact@v3.0.1
-        with:
-          path: 'public'
-
       - name: Save Scan Data to Main Branch
         run: |
           git config --global user.name "mich-de"
           git config --global user.email "mic.deangelis@gmail.com"
-          # Dati + index.html: dal 26/08/2026 Pages pubblica dal branch, non
-          # dall'artifact, quindi la dashboard in root va rigenerata a ogni
-          # scansione o il sito resta fermo ai dati del giorno del passaggio.
-          # Tornando a build_type=workflow, togliere index.html da questa riga.
-          git add -f data/sent_items.json data/*_results.json data/northladder_history.json index.html vercel/index.html || true
+          # Solo dati, piu' vercel/index.html quando cambia il template. La
+          # dashboard non ha piu' bisogno di essere ricommittata a ogni giro:
+          # su Vercel la pagina non contiene dati, li chiede a /api/store
+          # quando la si apre.
+          git add -f data/sent_items.json data/*_results.json data/northladder_history.json vercel/index.html || true
           git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Save scan results and sent items history [skip ci]"
           git push origin main || true
-
-      - name: Rebuild GitHub Pages from Branch
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-        run: |
-          # Il commit dei dati porta [skip ci], quindi la ricostruzione
-          # automatica di Pages non scatta e il sito resterebbe fermo
-          # all'ultimo index.html pubblicato. Va chiesta esplicitamente.
-          # Passo necessario solo finche' Pages e' in modalita' branch.
-          curl -s -X POST -H "Authorization: token $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/$REPO/pages/builds" > /dev/null || true
 
       - name: Purge Old Workflow Runs Automatically
         env:
@@ -124,28 +95,6 @@ jobs:
                   "https://api.github.com/repos/$REPO/actions/runs/$run_id"
               done
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: scan
-    # Con Pages in modalita' branch questo passo fallisce per forza: deploy-pages
-    # sa parlare solo con build_type=workflow. Non e' un errore da inseguire,
-    # e' il prezzo della pubblicazione da branch. Rimettere a false quando si
-    # torna all'artifact.
-    continue-on-error: true
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4.0.5
-
-      - name: Cleanup Old Deployments Automatically
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          DEPLOYS=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/mich-de/subito/deployments" | jq -r '.[].id')
-          for id in $DEPLOYS; do
-            curl -s -X POST -H "Authorization: token $GH_TOKEN" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/mich-de/subito/deployments/$id/statuses" -d '{"state":"inactive"}'
-            curl -s -X DELETE -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/mich-de/subito/deployments/$id"
-          done
+# Qui c'era il job "deploy", che pubblicava su GitHub Pages. Non esiste piu':
+# GitHub e' il repository e lo scanner, la pagina web sta su Vercel. Un solo
+# tabellone, quindi nessun dubbio su quale dei due dica il vero.
