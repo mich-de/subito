@@ -1461,6 +1461,7 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
     window.STATIC_LOGS = [];
     window.SCAN_CADENCE = 30;
     window.PANEL_HAS_PASSWORD = null;
+    window.PANEL_UNLOCKED = false;
   </script>
 </head>
 <body>
@@ -1858,12 +1859,16 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
       const best = rows.length ? rows[0].price : null;
       const prices = rows.map(i => i.price).filter(p => p > 1);
       const avg = prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
+      // Le soglie viaggiano con gli annunci solo per chi ha la password: da
+      // anonimo il conteggio dei fuori soglia non e' zero, e' ignoto — e uno
+      // zero direbbe che sono tutti dentro, che e' un'altra cosa.
+      const soglieNote = window.PANEL_UNLOCKED !== false;
       const near = rows.filter(i => i.near_miss).length;
 
       document.getElementById('stat-total').textContent = rows.length;
       document.getElementById('stat-best').textContent = best ? `€${best}` : '—';
       document.getElementById('stat-avg').textContent = avg ? `€${avg}` : '—';
-      document.getElementById('stat-nearmiss').textContent = near;
+      document.getElementById('stat-nearmiss').textContent = soglieNote ? near : '—';
 
       const body = document.getElementById('board-body');
       if (!rows.length) {
@@ -1888,7 +1893,8 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
         const state_ = isBest ? '<span class="badge badge-success">minimo</span>'
           : i.near_miss ? '<span class="badge badge-warning">oltre soglia</span>'
           : isFresh ? '<span class="badge badge-info">nuovo</span>'
-          : '<span class="badge badge-ghost">in soglia</span>';
+          : soglieNote ? '<span class="badge badge-ghost">in soglia</span>'
+          : '<span class="badge badge-ghost">trovato</span>';
         const meta = [i.location, i.shipping ? 'spedizione' : null, i.condition]
           .filter(Boolean).map(esc).join(' · ');
         return `
@@ -2034,7 +2040,11 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
       if (!token) return false;
       let r;
       try {
-        r = await fetch(API_STORE + '?only=configs', {
+        // Il payload intero, non solo i config: da anonimi gli annunci
+        // arrivano senza soglia ne' near_miss, quindi il tabellone mostra
+        // badge neutri. Sbloccando vanno ripresi con quei campi, o i badge
+        // resterebbero neutri fino al ricaricamento della pagina.
+        r = await fetch(API_STORE, {
           cache: 'no-store', headers: { 'x-auth-token': token }
         });
       } catch (e) {
@@ -2056,6 +2066,12 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
       window.STATIC_CONFIGS = d.configs || {};
       window.STATIC_CONFIG_DATA = d.config || {};
       configSbloccata = true;
+      window.PANEL_UNLOCKED = true;
+      if (Array.isArray(d.items) && d.items.length) {
+        window.STATIC_ITEMS = d.items;
+        state.items = d.items;
+        renderItems(d.items);
+      }
       return true;
     }
 
@@ -2582,6 +2598,7 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
               window.STATIC_LOGS = d.logs || [];
               window.SCAN_CADENCE = d.cadence || 30;
               window.PANEL_HAS_PASSWORD = d.hasPassword !== false;
+              window.PANEL_UNLOCKED = d.unlocked === true;
               window.HIDDEN_COUNT = d.hiddenCount || 0;
               if (!d.writable) {
                 window.STATIC_LOGS.push({

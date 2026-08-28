@@ -27,6 +27,7 @@ TESTA = """<script>
     window.STATIC_LOGS = [];
     window.SCAN_CADENCE = 30;
     window.PANEL_HAS_PASSWORD = null;
+    window.PANEL_UNLOCKED = false;
   </script>
 """
 
@@ -47,6 +48,7 @@ CODA = """
               window.STATIC_LOGS = d.logs || [];
               window.SCAN_CADENCE = d.cadence || 30;
               window.PANEL_HAS_PASSWORD = d.hasPassword !== false;
+              window.PANEL_UNLOCKED = d.unlocked === true;
               window.HIDDEN_COUNT = d.hiddenCount || 0;
               if (!d.writable) {
                 window.STATIC_LOGS.push({

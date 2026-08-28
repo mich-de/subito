@@ -1,16 +1,24 @@
 """Ponte fra il tabellone e i dati, tutto dentro i servizi gratuiti di Vercel.
 
-    GET  /api/store              annunci e registro. Prodotti e configurazioni
-                                 solo con la password.
-    GET  /api/store?only=configs solo i quattro YAML. Password obbligatoria.
-    POST /api/store              riscrive i config/*.yaml su Vercel Blob.
-                                 Password obbligatoria.
+    GET  /api/store   senza password: annunci e registro, e basta.
+                      con password: in piu' prodotti, configurazioni, YAML,
+                      e gli annunci completi di soglia.
+    POST /api/store   riscrive i config/*.yaml su Vercel Blob, oppure aggiorna
+                      l'elenco degli annunci nascosti. Password obbligatoria.
 
 La password non protegge piu' soltanto la scrittura: la configurazione non esce
 da qui senza. Prima usciva a chiunque aprisse il tabellone, e chiunque poteva
 leggere soglie, parole chiave ed esclusioni di tutti i prodotti — cioe' esporre
-in chiaro cosa si sta cercando e a quanto si e' disposti a comprarlo. Il
-tabellone degli annunci resta pubblico: quello e' il suo mestiere.
+in chiaro cosa si sta cercando e a quanto si e' disposti a comprarlo.
+
+Chiudere la scheda Configurazione pero' non bastava, e vale la pena scriverlo
+perche' e' il tipo di falla che si rifa': ogni annuncio in data/*_results.json
+si porta dietro il max_price del prodotto che l'ha trovato. La configurazione
+era chiusa a chiave e gli stessi numeri uscivano dalla finestra accanto,
+annuncio per annuncio. Da anonimo gli annunci ora escono spogliati (vedi
+`spoglia`).
+
+Il tabellone degli annunci resta pubblico: quello e' il suo mestiere.
 
 Di GitHub qui non si usa nessuna credenziale. Le due sorgenti sono:
 
@@ -247,12 +255,31 @@ def dump_yaml(node):
 
 # ------------------------------------------------------------------ GET ----
 
+# Chiudere la scheda Configurazione non bastava: ogni annuncio in
+# data/*_results.json si porta dietro la soglia del prodotto che l'ha trovato.
+# Con product_name accanto, il tabellone pubblico diceva per esteso cosa si
+# cerca e a quanto si e' disposti a comprarlo — cioe' esattamente il segreto che
+# la password doveva proteggere, servito dalla porta di servizio.
+#
+# near_miss se ne va con lui. Da solo e' un booleano, ma insieme al prezzo
+# stringe la soglia fra il piu' caro "in soglia" e il piu' economico "oltre":
+# due annunci bastano per inquadrarla a poche decine di euro.
+SOGLIE_NEGLI_ANNUNCI = ("max_price", "near_miss")
+
+
+def spoglia(annuncio):
+    """L'annuncio senza i campi che raccontano la soglia. Vale solo da anonimo."""
+    if not isinstance(annuncio, dict):
+        return annuncio
+    return {k: v for k, v in annuncio.items() if k not in SOGLIE_NEGLI_ANNUNCI}
+
+
 def forma_config(configs):
     """Dai quattro YAML alla forma che il modulo Configurazione compila.
 
-    Sta qui da sola perche' la chiedono in due: la pagina intera e la richiesta
-    ?only=configs con cui la scheda si sblocca. Se le due strade costruissero
-    ognuna la propria, prima o poi direbbero cose diverse.
+    Sta fuori da build_payload perche' la costruzione e' abbastanza lunga da
+    meritare un nome, e perche' il giorno che serva anche altrove non nasca una
+    seconda versione che col tempo dice cose diverse.
     """
     cfg = load_yaml(configs.get("config.yaml")) or {}
     scanner = cfg.get("scanner", {}) or {}
@@ -308,6 +335,8 @@ def build_payload(autorizzato):
         if isinstance(dati, list):
             visibili = [i for i in dati
                         if not (isinstance(i, dict) and i.get("url") in nascosti)]
+            if not autorizzato:
+                visibili = [spoglia(i) for i in visibili]
             items.extend(visibili)
             conteggi[nome] = len(visibili)
 
@@ -501,25 +530,13 @@ class handler(BaseHTTPRequestHandler):
         return hmac.compare_digest(fornita, PASSWORD)
 
     def do_GET(self):
-        query = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         autorizzato = self._autorizzato()
         try:
-            if (query.get("only") or [""])[0] == "configs":
-                # Solo i quattro YAML, senza annunci: e' quello che la scheda
-                # Configurazione richiede per sbloccarsi e dopo ogni
-                # salvataggio. Niente cache, perche' una configurazione
-                # salvata un minuto fa deve valere subito.
-                if not autorizzato:
-                    self._send(401, {"error": "Password errata o mancante."}
-                               if PASSWORD else
-                               {"error": "APP_PASSWORD non configurata: "
-                                         "la configurazione resta chiusa."})
-                    return
-                configs, dal_blob = leggi_config()
-                self._send(200, {"configs": {n: t for n, t in configs.items() if t},
-                                 "config": forma_config(configs),
-                                 "fromBlob": sorted(dal_blob)})
-                return
+            # Senza password si risponde lo stesso, ma con meno dentro: niente
+            # configurazione, e gli annunci spogliati della soglia. Non un 401,
+            # perche' il tabellone deve aprirsi per chiunque — a chiudersi e'
+            # solo la parte che racconta cosa si cerca.
+            #
             # Un minuto di cache al bordo: la scansione gira ogni trenta, quindi
             # ricaricare la pagina due volte di fila non deve rileggere tutto.
             # La risposta autorizzata invece non si mette in cache da nessuna
