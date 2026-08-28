@@ -164,6 +164,39 @@
 .col-time  { width: 1%; white-space: nowrap; }
 .col-price { width: 1%; text-align: right; }
 .col-state { width: 1%; white-space: nowrap; }
+.col-del   { width: 1%; text-align: right; }
+
+/* Intestazione di colonna leggibile da uno screen reader e invisibile a
+   schermo: una colonna senza nome e' una colonna senza senso per chi non la
+   vede. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Togliere un annuncio e' un'azione, quindi il rosso di sistema — ma solo
+   quando ci si passa sopra. Una colonna di croci rosse accese urlerebbe piu'
+   del prezzo, che e' la cosa da leggere. */
+.board .btn-hide {
+  opacity: 0;
+  padding: .1rem .34rem;
+  line-height: 1;
+  color: oklch(var(--bc) / .55);
+  transition: opacity .14s, color .14s;
+}
+.board tbody tr:hover .btn-hide,
+.board .btn-hide:focus-visible { opacity: 1; }
+.board .btn-hide:hover { color: oklch(var(--s)); }
+
+/* Su touch il passaggio del dito non esiste: senza questo la croce resterebbe
+   invisibile e la funzione irraggiungibile. */
+@media (hover: none) {
+  .board .btn-hide { opacity: .55; }
+}
 
 .board-time {
   font-family: var(--font-mono);

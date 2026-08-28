@@ -1196,6 +1196,39 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
 .col-time  { width: 1%; white-space: nowrap; }
 .col-price { width: 1%; text-align: right; }
 .col-state { width: 1%; white-space: nowrap; }
+.col-del   { width: 1%; text-align: right; }
+
+/* Intestazione di colonna leggibile da uno screen reader e invisibile a
+   schermo: una colonna senza nome e' una colonna senza senso per chi non la
+   vede. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Togliere un annuncio e' un'azione, quindi il rosso di sistema — ma solo
+   quando ci si passa sopra. Una colonna di croci rosse accese urlerebbe piu'
+   del prezzo, che e' la cosa da leggere. */
+.board .btn-hide {
+  opacity: 0;
+  padding: .1rem .34rem;
+  line-height: 1;
+  color: oklch(var(--bc) / .55);
+  transition: opacity .14s, color .14s;
+}
+.board tbody tr:hover .btn-hide,
+.board .btn-hide:focus-visible { opacity: 1; }
+.board .btn-hide:hover { color: oklch(var(--s)); }
+
+/* Su touch il passaggio del dito non esiste: senza questo la croce resterebbe
+   invisibile e la funzione irraggiungibile. */
+@media (hover: none) {
+  .board .btn-hide { opacity: .55; }
+}
 
 .board-time {
   font-family: var(--font-mono);
@@ -1427,6 +1460,7 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
     window.STATIC_CONFIG_DATA = {};
     window.STATIC_LOGS = [];
     window.SCAN_CADENCE = 30;
+    window.PANEL_HAS_PASSWORD = null;
   </script>
 </head>
 <body>
@@ -1521,10 +1555,13 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
                   <th class="col-source">Fonte</th>
                   <th class="col-price">Prezzo</th>
                   <th class="col-state">Stato</th>
+                  <!-- La colonna della croce esiste solo dove si puo' scrivere:
+                       altrove viene tolta all'avvio, non nascosta col CSS. -->
+                  <th class="col-del no-print" id="th-del"><span class="sr-only">Togli</span></th>
                 </tr>
               </thead>
               <tbody id="board-body">
-                <tr><td colspan="6" class="board-empty">In attesa della prima scansione…</td></tr>
+                <tr><td colspan="7" class="board-empty">In attesa della prima scansione…</td></tr>
               </tbody>
             </table>
           </div>
@@ -1640,6 +1677,23 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
             </div>
           </section>
         </form>
+
+        <!-- Fuori dal form apposta: e' un'azione a se', e un pulsante dentro
+             il form si porterebbe dietro il salvataggio della configurazione.
+             Compare solo quando c'e' qualcosa da rimettere. -->
+        <section id="hidden-box" class="card hidden">
+          <div class="section-title"><h2>Annuncio tolti dal tabellone</h2></div>
+          <div class="alert alert-info">
+            <strong id="hidden-count">Nessuno.</strong>
+            Non sono cancellati da Subito: restano fuori dal tabellone anche
+            dopo le scansioni successive, che li ritroverebbero ogni volta.
+          </div>
+          <div class="save-row" style="justify-content:flex-start;margin-top:.7rem">
+            <button type="button" class="btn btn-secondary btn-sm"
+                    onclick="ripristinaNascosti(this)">Rimetti tutti</button>
+            <span id="hidden-status" class="form-status"></span>
+          </div>
+        </section>
       </div>
 
       <!-- ================================================================= YAML -->
@@ -1727,8 +1781,15 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
         const panel = document.getElementById('panel-' + p);
         if (panel) panel.classList.toggle('hidden', p !== name);
       });
-      if (name === 'config') loadConfig();
-      if (name === 'yaml') loadYamlList();
+      if (name !== 'config' && name !== 'yaml') return;
+      // Le due schede riservate: si chiede la password, e se non arriva si
+      // torna al tabellone invece di mostrare una scheda vuota che sembra
+      // rotta.
+      sbloccaConfig().then(function (ok) {
+        if (!ok) { switchTab('dashboard'); return; }
+        if (name === 'config') { loadConfig(); aggiornaBoxNascosti(); }
+        else loadYamlList();
+      });
     }
 
     document.querySelectorAll('.nav a[data-tab]').forEach(a => {
@@ -1806,7 +1867,7 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
 
       const body = document.getElementById('board-body');
       if (!rows.length) {
-        body.innerHTML = '<tr><td colspan="6" class="board-empty">Nessun annuncio per questo filtro.</td></tr>';
+        body.innerHTML = `<tr><td colspan="${CAN_WRITE ? 7 : 6}" class="board-empty">Nessun annuncio per questo filtro.</td></tr>`;
         return;
       }
 
@@ -1842,8 +1903,48 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
             <td class="col-source mono">${esc((i.source || '').split('.')[0] || '—')}</td>
             <td class="col-price"><span class="flap">€${esc(i.price)}</span></td>
             <td class="col-state">${state_}</td>
+            ${CAN_WRITE ? `<td class="col-del no-print">
+              <button type="button" class="btn btn-ghost btn-sm btn-icon btn-hide"
+                      data-hide="${esc(i.url)}"
+                      aria-label="Togli dal tabellone: ${esc(i.title)}"
+                      title="Togli dal tabellone">✕</button>
+            </td>` : ''}
           </tr>`;
       }).join('');
+    }
+
+    /* L'indirizzo dell'annuncio finisce in un attributo, non dentro un
+       onclick: i titoli arrivano dallo scraping e un apostrofo in un onclick
+       spezzerebbe il gestore. Un solo ascoltatore sul corpo della tabella
+       vale anche per le righe ridisegnate dopo un filtro. */
+    document.getElementById('board-body').addEventListener('click', function (e) {
+      const bottone = e.target.closest('[data-hide]');
+      if (bottone) nascondiAnnuncio(bottone);
+    });
+
+    async function nascondiAnnuncio(bottone) {
+      const url = bottone.dataset.hide;
+      if (!url) return;
+      const riga = bottone.closest('tr');
+      const titolo = riga && riga.querySelector('.board-title')
+        ? riga.querySelector('.board-title').textContent : url;
+      if (!window.confirm('Togliere questo annuncio dal tabellone?\n\n' + titolo
+            + '\n\nResta su Subito: sparisce solo da qui. Si rimette dalla '
+            + 'scheda Configurazione.')) return;
+
+      bottone.disabled = true;
+      const d = await postStore({ hide: [url] });
+      if (d && d.ok) {
+        state.items = (state.items || []).filter(i => i.url !== url);
+        window.STATIC_ITEMS = state.items;
+        window.HIDDEN_COUNT = d.hiddenCount;
+        renderItems(state.items);
+        appendLog(d.message, 'info');
+        aggiornaBoxNascosti();
+      } else {
+        bottone.disabled = false;
+        appendLog((d && d.error) || 'Non sono riuscito a togliere l\'annuncio.', 'error');
+      }
     }
 
     function renderFilters(products) {
@@ -1908,6 +2009,54 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
         if (!riprova) return postStore(payload, true);
       }
       return d;
+    }
+
+    /* Le schede Configurazione e YAML non si aprono senza password. Prima la
+       configurazione arrivava insieme al tabellone, quindi bastava aprire
+       l'indirizzo per leggere soglie, parole chiave ed esclusioni di tutti i
+       prodotti. Il tabellone degli annunci resta pubblico; questa parte no.
+
+       Si sblocca una volta per sessione: dopo, i dati restano in window.STATIC_*
+       e cambiare scheda non richiede piu' niente. */
+    let configSbloccata = false;
+
+    async function sbloccaConfig(riprova) {
+      if (configSbloccata) return true;
+      // Build statico o backend Flask: percorsi che non hanno /api/store.
+      if (!CAN_WRITE) return true;
+      if (window.PANEL_HAS_PASSWORD === false) {
+        appendLog('APP_PASSWORD non configurata su Vercel: la configurazione '
+                + 'resta chiusa. Aggiungila fra le variabili d\'ambiente e '
+                + 'ripubblica.', 'error');
+        return false;
+      }
+      const token = authToken(riprova === true);
+      if (!token) return false;
+      let r;
+      try {
+        r = await fetch(API_STORE + '?only=configs', {
+          cache: 'no-store', headers: { 'x-auth-token': token }
+        });
+      } catch (e) {
+        appendLog('Nessuna risposta da /api/store: ' + e.message, 'error');
+        return false;
+      }
+      if (r.status === 401) {
+        forgetAuthToken();
+        if (!riprova) return sbloccaConfig(true);
+        appendLog('Password errata: configurazione non sbloccata.', 'error');
+        return false;
+      }
+      if (!r.ok) {
+        appendLog('/api/store ha risposto ' + r.status + '.', 'error');
+        return false;
+      }
+      const d = await r.json().catch(() => null);
+      if (!d) { appendLog('Risposta non leggibile dal server.', 'error'); return false; }
+      window.STATIC_CONFIGS = d.configs || {};
+      window.STATIC_CONFIG_DATA = d.config || {};
+      configSbloccata = true;
+      return true;
     }
 
     function loadDraftProducts() {
@@ -2112,6 +2261,38 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
         if (!state.formProducts[i]) return;
         state.formProducts[i][f] = el.type === 'checkbox' ? el.checked : el.value;
       });
+    }
+
+    /* ---- ANNUNCI TOLTI DAL TABELLONE ---- */
+
+    function aggiornaBoxNascosti() {
+      const box = document.getElementById('hidden-box');
+      if (!box) return;
+      const quanti = window.HIDDEN_COUNT || 0;
+      box.classList.toggle('hidden', !(CAN_WRITE && quanti));
+      const etichetta = document.getElementById('hidden-count');
+      if (etichetta) {
+        etichetta.textContent = quanti === 1
+          ? '1 annuncio e\' fuori dal tabellone.'
+          : quanti + ' annunci sono fuori dal tabellone.';
+      }
+    }
+
+    async function ripristinaNascosti(bottone) {
+      const stato = document.getElementById('hidden-status');
+      if (!window.confirm('Rimettere tutti gli annunci tolti?')) return;
+      bottone.disabled = true;
+      if (stato) stato.textContent = 'Ripristino in corso…';
+      const d = await postStore({ unhideAll: true });
+      bottone.disabled = false;
+      if (d && d.ok) {
+        window.HIDDEN_COUNT = d.hiddenCount || 0;
+        if (stato) stato.textContent = d.message;
+        aggiornaBoxNascosti();
+        appendLog(d.message + ' Ricarica il tabellone per rivederli.', 'info');
+      } else if (stato) {
+        stato.textContent = (d && d.error) || 'Ripristino non riuscito.';
+      }
     }
 
     async function loadConfig() {
@@ -2367,7 +2548,17 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
       setInterval(fetchServerLogs, 2000);
     }
 
-    if (window.STATIC_CONFIGS || window.STATIC_CONFIG_DATA) {
+    /* Dove non si puo' scrivere, la colonna della croce non ha ragione di
+       esistere: si toglie dall'intestazione invece di lasciarla vuota. */
+    if (!CAN_WRITE) {
+      const thDel = document.getElementById('th-del');
+      if (thDel) thDel.remove();
+    }
+
+    /* Su Vercel qui non c'e' ancora niente da disegnare: la configurazione
+       arriva solo dopo lo sblocco, quando si apre la scheda. Altrove (build
+       statico) i dati sono gia' nella pagina e si disegnano subito. */
+    if (!CAN_WRITE && (window.STATIC_CONFIGS || window.STATIC_CONFIG_DATA)) {
       loadConfig();
       loadYamlList();
     }
@@ -2376,9 +2567,9 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
   </script>
 
     <script>
-      /* Il ponte verso il repository. Una sola richiesta: annunci,
-         configurazioni e registro tornano insieme, cosi' l'apertura della
-         pagina costa un giro di rete e non sei. */
+      /* Il ponte verso il repository. Una sola richiesta per aprire il
+         tabellone: annunci e registro. La configurazione non viene di qui —
+         la chiede la scheda Configurazione, con la password. */
       (function () {
         function avvia() {
           fetch('/api/store', { cache: 'no-store' })
@@ -2390,9 +2581,11 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
               window.STATIC_CONFIG_DATA = d.config || {};
               window.STATIC_LOGS = d.logs || [];
               window.SCAN_CADENCE = d.cadence || 30;
+              window.PANEL_HAS_PASSWORD = d.hasPassword !== false;
+              window.HIDDEN_COUNT = d.hiddenCount || 0;
               if (!d.writable) {
                 window.STATIC_LOGS.push({
-                  message: 'Scrittura non disponibile: mancano GITHUB_TOKEN o '
+                  message: 'Scrittura non disponibile: manca lo store Blob o '
                          + 'APP_PASSWORD fra le variabili d\'ambiente su Vercel.',
                   level: 'error',
                   time: new Date().toTimeString().slice(0, 8)
@@ -2400,8 +2593,8 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
               }
               if (typeof state === 'object') state.items = window.STATIC_ITEMS;
               if (typeof renderItems === 'function') renderItems(window.STATIC_ITEMS);
-              if (typeof loadConfig === 'function') loadConfig();
-              if (typeof loadYamlList === 'function') loadYamlList();
+              /* La configurazione non si carica qui: la chiede la scheda
+                 Configurazione quando la si apre, con la password. */
               if (typeof fetchServerLogs === 'function') fetchServerLogs();
               if (typeof fetchStatus === 'function') fetchStatus();
             })

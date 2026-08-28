@@ -26,14 +26,15 @@ TESTA = """<script>
     window.STATIC_CONFIG_DATA = {};
     window.STATIC_LOGS = [];
     window.SCAN_CADENCE = 30;
+    window.PANEL_HAS_PASSWORD = null;
   </script>
 """
 
 CODA = """
     <script>
-      /* Il ponte verso il repository. Una sola richiesta: annunci,
-         configurazioni e registro tornano insieme, cosi' l'apertura della
-         pagina costa un giro di rete e non sei. */
+      /* Il ponte verso il repository. Una sola richiesta per aprire il
+         tabellone: annunci e registro. La configurazione non viene di qui —
+         la chiede la scheda Configurazione, con la password. */
       (function () {
         function avvia() {
           fetch('/api/store', { cache: 'no-store' })
@@ -45,9 +46,11 @@ CODA = """
               window.STATIC_CONFIG_DATA = d.config || {};
               window.STATIC_LOGS = d.logs || [];
               window.SCAN_CADENCE = d.cadence || 30;
+              window.PANEL_HAS_PASSWORD = d.hasPassword !== false;
+              window.HIDDEN_COUNT = d.hiddenCount || 0;
               if (!d.writable) {
                 window.STATIC_LOGS.push({
-                  message: 'Scrittura non disponibile: mancano GITHUB_TOKEN o '
+                  message: 'Scrittura non disponibile: manca lo store Blob o '
                          + 'APP_PASSWORD fra le variabili d\\'ambiente su Vercel.',
                   level: 'error',
                   time: new Date().toTimeString().slice(0, 8)
@@ -55,8 +58,8 @@ CODA = """
               }
               if (typeof state === 'object') state.items = window.STATIC_ITEMS;
               if (typeof renderItems === 'function') renderItems(window.STATIC_ITEMS);
-              if (typeof loadConfig === 'function') loadConfig();
-              if (typeof loadYamlList === 'function') loadYamlList();
+              /* La configurazione non si carica qui: la chiede la scheda
+                 Configurazione quando la si apre, con la password. */
               if (typeof fetchServerLogs === 'function') fetchServerLogs();
               if (typeof fetchStatus === 'function') fetchStatus();
             })
