@@ -136,7 +136,7 @@ scanner:
     - neo
     - lite
     subito_urls: []
-    max_price: 700
+    max_price: 650
     price_margin: 50
     subito: true
     amazon: true
@@ -193,10 +193,11 @@ scanner:
     - Google Pixel 3
     - Google Pixel 4
     - Google Pixel 5
-    # "custodi" e non "custodia": l'esclusione e' per sottostringa, e
-    # "2 Custodie Google Pixel 10 Pro" passava indisturbato. Stessa ragione
-    # per "cinturin" e "caricator". Il resto e' il catalogo accessori Pixel,
-    # che con la paginazione corretta arriva tutto invece dei primi trenta.
+    - Pixel 1
+    - Pixel 2
+    - Pixel 3
+    - Pixel 4
+    - Pixel 5
     exclude_keywords:
     - custodi
     - cover

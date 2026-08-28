@@ -228,8 +228,8 @@
     "timestamp": "2026-08-26T16:58:42.163182"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-512-gb-udine-658334151.htm|Honor Magic 8 Pro": {
-    "price": 629,
-    "timestamp": "2026-08-27T12:41:23.113971"
+    "price": 599,
+    "timestamp": "2026-08-28T15:41:59.092869"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-genova-658063262.htm|Honor Magic 8 Pro": {
     "price": 670,
@@ -522,5 +522,49 @@
   "https://www.subito.it/telefonia/accessori-google-pixel-10-pro-xl-roma-658607929.htm|Google Pixel 1-5": {
     "price": 40,
     "timestamp": "2026-08-28T10:42:57.593143"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-512-ram-nero-cremona-658602067.htm|Honor Magic 8 Pro": {
+    "price": 650,
+    "timestamp": "2026-08-28T15:41:59.093794"
+  },
+  "https://www.subito.it/informatica/xtreme-33857-webcam-2-mp-640-x-480-pixel-usb-2-0-n-crotone-524480235.htm|Google Pixel 1-5": {
+    "price": 15,
+    "timestamp": "2026-08-28T15:41:59.094839"
+  },
+  "https://www.subito.it/fotografia/digigr8-ultra-slim-digital-camera-300k-pixel-napoli-253229772.htm|Google Pixel 1-5": {
+    "price": 10,
+    "timestamp": "2026-08-28T15:41:59.095692"
+  },
+  "https://www.subito.it/fotografia/pixel-wifi-shutter-remote-control-canon-oppilas-n3-salerno-626356627.htm|Google Pixel 1-5": {
+    "price": 19,
+    "timestamp": "2026-08-28T15:41:59.096496"
+  },
+  "https://www.subito.it/bambini-giocattoli/pixel-photo-4-quercetti-lecco-633366235.htm|Google Pixel 1-5": {
+    "price": 15,
+    "timestamp": "2026-08-28T15:41:59.097411"
+  },
+  "https://www.subito.it/bambini-giocattoli/quercetti-0804-pixel-photo-4-tav-torino-578395688.htm|Google Pixel 1-5": {
+    "price": 15,
+    "timestamp": "2026-08-28T15:41:59.098212"
+  },
+  "https://www.subito.it/bambini-giocattoli/gioco-pixel-photo-4-torino-623744335.htm|Google Pixel 1-5": {
+    "price": 15,
+    "timestamp": "2026-08-28T15:41:59.099014"
+  },
+  "https://www.subito.it/bambini-giocattoli/gioco-pixel-art-4-quercetti-ancona-652775677.htm|Google Pixel 1-5": {
+    "price": 18,
+    "timestamp": "2026-08-28T15:41:59.099954"
+  },
+  "https://www.subito.it/bambini-giocattoli/quercetti-pixel-photo-4-milano-639764405.htm|Google Pixel 1-5": {
+    "price": 18,
+    "timestamp": "2026-08-28T15:41:59.100917"
+  },
+  "https://www.subito.it/bambini-giocattoli/quercetti-pixel-photo-4-tavolette-bolzano-654057628.htm|Google Pixel 1-5": {
+    "price": 25,
+    "timestamp": "2026-08-28T15:41:59.102104"
+  },
+  "https://www.subito.it/fotografia/fotocamera-compatta-olympus-fe-25-10-megapixel-padova-658158128.htm|Google Pixel 1-5": {
+    "price": 25,
+    "timestamp": "2026-08-28T15:41:59.102952"
   }
 }
