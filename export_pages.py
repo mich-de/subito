@@ -170,6 +170,9 @@ def build_static_site():
       window.STATIC_CONFIGS = {json.dumps(configs, ensure_ascii=False)};
       window.STATIC_CONFIG_DATA = {json.dumps(config_data, ensure_ascii=False)};
       window.STATIC_LOGS = {json.dumps(scan_logs, ensure_ascii=False)};
+      // La pagina scriveva "cron 15m" da una costante: dopo il passaggio a 30
+      // minuti diceva il falso. La cadenza vera e' quella del workflow.
+      window.SCAN_CADENCE = {CRON_MINUTES};
       document.addEventListener('DOMContentLoaded', () => {{
         if (window.STATIC_ITEMS && window.STATIC_ITEMS.length) {{
           state.items = window.STATIC_ITEMS;

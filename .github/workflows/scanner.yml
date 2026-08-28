@@ -62,6 +62,15 @@ jobs:
           cp public/index.html index.html
           cp public/.nojekyll .nojekyll
 
+      - name: Build Dashboard for Vercel
+        run: |
+          # Il tabellone su Vercel non contiene dati: li chiede a /api/store
+          # all'apertura. Va rigenerato solo quando cambiano il template o i
+          # fogli di stile, quindi di norma questo passo non produce nessun
+          # diff — e' qui perche' una modifica al template arrivi su Vercel
+          # senza doversi ricordare di lanciare lo script a mano.
+          python export_vercel.py
+
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3.0.1
         with:
@@ -75,7 +84,7 @@ jobs:
           # dall'artifact, quindi la dashboard in root va rigenerata a ogni
           # scansione o il sito resta fermo ai dati del giorno del passaggio.
           # Tornando a build_type=workflow, togliere index.html da questa riga.
-          git add -f data/sent_items.json data/*_results.json data/northladder_history.json index.html || true
+          git add -f data/sent_items.json data/*_results.json data/northladder_history.json index.html vercel/index.html || true
           git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Save scan results and sent items history [skip ci]"
           git push origin main || true
 

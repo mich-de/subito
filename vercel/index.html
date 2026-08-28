@@ -1,0 +1,2428 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Offerte Monitor — tabellone prezzi Subito &amp; Amazon</title>
+
+  <!-- Il tema si decide PRIMA che il CSS dipinga il primo pixel, altrimenti al
+       ricaricamento la pagina lampeggia in chiaro. Resta inline e senza defer. -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      var dark = saved ? saved === 'dark'
+                       : matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    })();
+  </script>
+
+  <style>
+/* ===========================================================================
+   QUADRO PARTENZE — design system portatile
+   ---------------------------------------------------------------------------
+   Un solo file, nessuna dipendenza, nessun CDN, nessun webfont: si copia in un
+   progetto e funziona anche offline. Framework-agnostico: sono classi CSS su
+   HTML normale, quindi va uguale con HTML statico, Go/html/template, Jinja,
+   PHP, Rails, Astro, React o qualunque altra cosa produca markup.
+
+   DIREZIONE
+   Il tabellone delle partenze. Fascia scura in testa e in coda, etichette in
+   maiuscoletto spaziato, filetti sottili, cifre incolonnate su fondo nero.
+   Da qui discende tutto: angoli quasi vivi da 3px invece di pastiglie, ambra
+   come colore di segnale, un solo colore d'azione, e i numeri importanti
+   composti come palette girate.
+
+   LE CINQUE REGOLE (se se ne rompe una, il sistema smette di funzionare)
+   1. Il colore d'azione (--s) sta SOLO dove si agisce. Se lo si usa anche per
+      qualificare, smette di segnalare le azioni.
+   2. L'ambra (--a) segnala e basta: non e' mai un fondo esteso, mai un testo
+      lungo. E' il filo sotto la testatina, l'anello di fuoco, la piega.
+   3. Niente angoli morbidi. Il riferimento e' un cartello, e i cartelli hanno
+      spigoli. --radius resta a 3px.
+   4. Maiuscoletto spaziato solo per etichette da tre parole. Un paragrafo in
+      maiuscoletto non si legge.
+   5. Il fondo non e' mai bianco puro ne' nero puro: e' avorio caldo o
+      inchiostro blu-nero. Il contrasto lo fa il flap, non la pagina.
+
+   COME SI PERSONALIZZA
+   Si toccano solo i token nella sezione 1. Sono terne OKLCH (L C H) senza
+   funzione attorno, apposta: cosi' si possono diluire con
+   oklch(var(--a) / .12) senza dichiarare un secondo colore.
+   Per cambiare marchio bastano --p (struttura) e --s (azione).
+   Per cambiare densita' basta il font-size di html.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   1. Token — tema diurno: avorio e inchiostro
+   --------------------------------------------------------------------------- */
+
+:root {
+  --p:  42% 0.085 218;   /* struttura: collegamenti, stato attivo, testate    */
+  --pc: 98% 0.008 90;    /* testo sopra --p                                   */
+  --s:  51% 0.21  27;    /* AZIONE: qui si preme, e solo qui                  */
+  --sc: 98% 0.008 90;
+  --a:  70% 0.155 68;    /* ambra: segnala e basta                            */
+  --ac: 20% 0.04  60;
+  --b1: 98.6% 0.006 86;  /* schede                                            */
+  --b2: 95.2% 0.015 84;  /* pagina                                            */
+  --b3: 90%   0.02  82;
+  --bc: 22%   0.018 62;  /* inchiostro caldo: il grigio non vira al blu       */
+  --in: 48% 0.12 235;
+  --su: 47% 0.11 148;
+  --wa: 60% 0.13 66;
+  --er: 50% 0.2  27;
+
+  --primary: oklch(var(--p));
+  --primary-content: oklch(var(--pc));
+  --secondary: oklch(var(--s));
+  --secondary-content: oklch(var(--sc));
+  --accent: oklch(var(--a));
+  --accent-content: oklch(var(--ac));
+  --base-100: oklch(var(--b1));
+  --base-200: oklch(var(--b2));
+  --base-300: oklch(var(--b3));
+  --base-content: oklch(var(--bc));
+  --info: oklch(var(--in));
+  --success: oklch(var(--su));
+  --warning: oklch(var(--wa));
+  --error: oklch(var(--er));
+
+  /* Testata e pie' di pagina restano in inchiostro su ENTRAMBI i temi: sono
+     la cornice del tabellone, e una cornice che cambia colore col tema non
+     inquadra piu' niente. */
+  --ink: oklch(20% 0.022 252);
+  --ink-fg: 94% 0.012 86;              /* componenti, per poterlo diluire */
+  --ink-line: oklch(100% 0 0 / .13);
+
+  /* Il flap: fondo scuro e cifre ambra, come una paletta girata. Identico nei
+     due temi — e' il pezzo che tiene insieme l'identita' quando si commuta. */
+  --flap: oklch(18% 0.018 252);
+  --flap-ink: oklch(88% 0.13 80);
+  --flap-seam: oklch(0% 0 0 / .34);    /* leggera: vedi nota su .flap */
+  --flap-glint: oklch(100% 0 0 / .07);
+
+  /* Filetti derivati dal colore del testo: restano nitidi e si adattano da
+     soli al tema scuro, dove un grigio fisso sparirebbe. */
+  --line: oklch(var(--bc) / .16);
+  --line-strong: oklch(var(--bc) / .3);
+
+  --radius: 3px;
+  --radius-lg: 4px;
+  --shadow: 0 1px 0 oklch(var(--bc) / .06);
+  --shadow-lg: 0 2px 4px oklch(var(--bc) / .1), 0 12px 28px oklch(var(--bc) / .12);
+
+  /* L'anello di fuoco e' ambra: e' l'unico colore che non compete con nessuno
+     stato semantico, quindi si vede sempre per quello che e'. --ring-gap va
+     ridichiarato sulle fasce scure, o l'anello sparisce nel fondo. */
+  --ring-gap: var(--base-100);
+  --ring: 0 0 0 2px var(--ring-gap), 0 0 0 4px oklch(var(--a) / .85);
+
+  /* TIPOGRAFIA SENZA DOWNLOAD.
+     Il display e' un DIN, cioe' il carattere della segnaletica: Bahnschrift su
+     Windows, DIN Alternate su macOS, poi i condensati liberi diffusi su Linux,
+     infine i tagli ottici di Segoe UI Variable. Nessun salto di metrica grave.
+     Se il progetto puo' scaricare un font, i sostituti giusti sono Oswald,
+     Archivo Narrow, Barlow Condensed o D-DIN: si aggiungono in testa a
+     --font-display e basta, il resto del foglio non cambia.
+     Il corpo del testo resta un carattere da lettura: la segnaletica va bene
+     per tre parole, non per un paragrafo. */
+  --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --font-display: "Bahnschrift SemiCondensed", "Bahnschrift", "DIN Alternate",
+                  "Liberation Sans Narrow", "DejaVu Sans Condensed",
+                  "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, ui-monospace, "SF Mono", "DejaVu Sans Mono", monospace;
+}
+
+/* ---------------------------------------------------------------------------
+   2. Token — tema notturno: il tabellone acceso
+   --------------------------------------------------------------------------- */
+
+[data-theme="dark"] {
+  --p:  70% 0.1  215;
+  --pc: 16% 0.02 250;
+  --s:  66% 0.19 27;
+  --sc: 16% 0.02 250;
+  --a:  79% 0.15 72;
+  --ac: 16% 0.03 60;
+  --b1: 19.5% 0.018 252;
+  --b2: 14%   0.015 254;
+  --b3: 27%   0.022 252;
+  --bc: 92%   0.012 86;
+  --in: 71% 0.11 235;
+  --su: 71% 0.13 150;
+  --wa: 80% 0.13 70;
+  --er: 67% 0.17 27;
+
+  --ink: oklch(10.5% 0.012 252);
+  --ink-fg: 93% 0.012 86;
+  --ink-line: oklch(100% 0 0 / .1);
+
+  --flap: oklch(9% 0.01 252);
+  --flap-ink: oklch(85% 0.14 80);
+
+  --line: oklch(var(--bc) / .15);
+  --line-strong: oklch(var(--bc) / .3);
+  --shadow: 0 1px 0 oklch(0% 0 0 / .4);
+  --shadow-lg: 0 2px 4px oklch(0% 0 0 / .5), 0 12px 28px oklch(0% 0 0 / .5);
+}
+
+/* ---------------------------------------------------------------------------
+   3. Fondamenta
+   --------------------------------------------------------------------------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* La densita' si governa da qui: ogni misura del foglio e' in rem, quindi il
+   corpo base scala l'intera interfaccia in un colpo solo. */
+html {
+  font-size: 15px;
+  scroll-behavior: smooth;
+  background: var(--base-200);
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font);
+  background: transparent;
+  color: var(--base-content);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Trama diagonale finissima dietro tutto: e' quello che distingue un fondo da
+   una superficie. Sta a z-index negativo, quindi passa sotto le schede e non
+   sporca una sola riga di testo; il fondo pagina e' su <html> apposta, perche'
+   uno sfondo su <body> la coprirebbe. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(135deg,
+      oklch(var(--bc) / .035) 0 1px,
+      transparent 1px 8px);
+}
+
+::selection { background: oklch(var(--a) / .35); }
+
+a { color: var(--primary); text-underline-offset: .15em; }
+a:hover { text-decoration-color: var(--accent); }
+
+/* Crenatura ottica: piu' stretta sui corpi grandi, nulla sui piccoli. E' la
+   regola tipografica che i fogli generici saltano, ed e' quella che distingue
+   un titolo composto da un titolo scritto. */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  margin: 0 0 .4rem;
+  font-weight: 600;
+}
+h1 { font-size: clamp(1.85rem, 3.4vw, 2.6rem); letter-spacing: -.005em; }
+h2 { font-size: clamp(1.2rem, 1.9vw, 1.45rem); letter-spacing: .002em; }
+h3 { font-size: 1.06rem; }
+h4 { font-size: .95rem; }
+p  { margin: 0 0 .6rem; }
+
+.container { width: min(1240px, 100% - 2.5rem); margin-inline: auto; }
+main { flex: 1; padding: 1.5rem 0 3.5rem; }
+.stack > * + * { margin-top: 1.2rem; }
+.muted  { color: oklch(var(--bc) / .62); }
+.small  { font-size: .8rem; }
+.mono   { font-family: var(--font-mono); font-size: .9em; letter-spacing: -.015em; }
+.center { text-align: center; }
+
+/* Cifre a larghezza fissa ovunque si confrontino numeri in colonna: 9,90 e
+   11,00 devono allinearsi sulla virgola. Non e' una sfumatura estetica. */
+.price, .kv .v, .estimate, table, .flap, .badge, .picker-meta {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+   4. Barra di avanzamento
+   ---------------------------------------------------------------------------
+   Gli indicatori locali stanno accanto al pulsante premuto, che dopo uno
+   scroll puo' essere fuori dalla vista: questa barra dice "sta lavorando" da
+   qualunque punto della pagina. Si accende aggiungendo .net-busy su <body>. */
+
+.net-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 2px; z-index: 100;
+  opacity: 0; transition: opacity .18s;
+  pointer-events: none;
+  overflow: hidden;
+}
+.net-busy .net-bar { opacity: 1; }
+.net-bar::before {
+  content: ""; display: block;
+  height: 100%; width: 28%;
+  background: linear-gradient(90deg, transparent, var(--accent) 60%, var(--secondary));
+  animation: net-slide 1.05s cubic-bezier(.4, 0, .6, 1) infinite;
+}
+@keyframes net-slide {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(460%); }
+}
+
+/* ---------------------------------------------------------------------------
+   5. Testata: la fascia del tabellone
+   --------------------------------------------------------------------------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--ink);
+  color: oklch(var(--ink-fg));
+  border-bottom: 1px solid var(--ink-line);
+  --ring-gap: var(--ink);
+}
+/* Filetto ambra in basso: unico segno di colore della fascia, dice dove
+   finisce la cornice e comincia la pagina. */
+.site-header::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent), transparent 62%);
+  opacity: .55;
+}
+/* L'header sticky coprirebbe il titolo raggiunto via ancora. */
+.card[id], [id].anchor-target { scroll-margin-top: 4.8rem; }
+
+.site-header .container {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  min-height: 3.5rem;
+  flex-wrap: wrap;
+}
+
+.brand { display: flex; align-items: center; gap: .65rem; text-decoration: none; color: inherit; margin-right: auto; }
+/* Il marchio e' una targa, non un bottone: rettangolo pieno e lettere
+   condensate e spaziate, come su un cartello di scalo. */
+.brand-mark {
+  width: 2.35rem; height: 1.75rem;
+  display: grid; place-items: center;
+  border-radius: 2px;
+  background: var(--accent);
+  color: var(--accent-content);
+  font-family: var(--font-display);
+  font-weight: 700; font-size: .82rem; letter-spacing: .1em;
+  text-indent: .1em;  /* compensa la spaziatura sull'ultima lettera */
+}
+.brand-text strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 600; letter-spacing: .01em;
+  text-transform: uppercase;
+}
+.brand-text span {
+  display: block;
+  font-size: .58rem; text-transform: uppercase; letter-spacing: .22em;
+  color: oklch(var(--a) / .85);
+}
+
+/* Le voci sono righe di tabellone: maiuscoletto spaziato, nessuna pastiglia.
+   L'attiva si accende in ambra col quadratino, come la riga in partenza. */
+.nav { display: flex; gap: .15rem; flex-wrap: wrap; }
+.nav a {
+  display: flex; align-items: center; gap: .4rem;
+  padding: .4rem .6rem;
+  border-radius: 2px;
+  text-decoration: none;
+  color: oklch(var(--ink-fg) / .62);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: .82rem;
+  text-transform: uppercase;
+  letter-spacing: .075em;
+  white-space: nowrap;
+  transition: color .16s, background .16s;
+}
+.nav a::before {
+  content: "";
+  width: .3rem; height: .3rem;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity .16s;
+}
+.nav a:hover { color: oklch(var(--ink-fg)); background: oklch(100% 0 0 / .05); }
+.nav a[aria-current="page"] { color: oklch(var(--a)); }
+.nav a[aria-current="page"]::before { opacity: 1; }
+
+.site-header .btn-ghost {
+  border-color: oklch(100% 0 0 / .22);
+  color: oklch(var(--ink-fg));
+}
+.site-header .btn-ghost:hover { background: oklch(100% 0 0 / .08); }
+
+/* ---------------------------------------------------------------------------
+   6. Testatina di pagina
+   ---------------------------------------------------------------------------
+   Occhiello, titolo grande in condensato, filetto a tutta larghezza: dice dove
+   si e' prima di dire cosa si fa. */
+
+.hero {
+  padding: 1.4rem 0 1.2rem;
+  border-bottom: 1px solid var(--line-strong);
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+/* Il tratto ambra torna identico su ogni pagina: e' quello che le fa
+   riconoscere come parti dello stesso strumento. */
+.hero::after {
+  content: "";
+  position: absolute; left: 0; bottom: -1px;
+  width: 4.5rem; height: 3px;
+  background: var(--accent);
+}
+.hero h1 {
+  margin-bottom: .45rem;
+  max-width: 22ch;
+  text-transform: uppercase;
+  letter-spacing: .004em;
+}
+/* La parola che l'autore vuole far risaltare: evidenziata in ambra bassa, non
+   colorata. Un titolo con dentro una parola di un altro colore si legge come
+   un collegamento. */
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(oklch(var(--a) / .38), oklch(var(--a) / .38)) bottom / 100% .42em no-repeat;
+  padding: 0 .1em;
+}
+.hero p { font-size: 1rem; color: oklch(var(--bc) / .68); margin: 0; max-width: 52ch; }
+.hero .eyebrow { margin-bottom: .5rem; }
+
+/* Entrata di pagina: occhiello, titolo e sommario arrivano sfalsati di pochi
+   centesimi. Un solo movimento all'apertura vale piu' di dieci micro-effetti
+   sparsi, e questo e' il momento in cui la pagina si presenta. */
+.hero .eyebrow, .hero h1, .hero p { animation: board-in .42s cubic-bezier(.2, .7, .3, 1) both; }
+.hero h1 { animation-delay: .05s; }
+.hero p  { animation-delay: .1s; }
+@keyframes board-in {
+  from { opacity: 0; transform: translateY(.5rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   7. Superfici
+   --------------------------------------------------------------------------- */
+
+.card {
+  background: var(--base-100);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 1.2rem 1.3rem;
+}
+.card.flush { padding: 0; overflow: hidden; }
+/* La scheda dove si lavora porta la barra ambra in testa: si deve vedere da
+   lontano qual e'. Una sola per schermata, o non significa piu' niente. */
+.card-accent {
+  border-top: 3px solid var(--accent);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.panel {
+  background: var(--base-200);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: .95rem 1.05rem;
+}
+
+/* La carta d'imbarco: per il pezzo che esce dallo strumento e finisce in mano
+   a qualcuno (riepilogo, ricevuta, biglietto). Gli intagli sono disegnati nel
+   fondo, quindi i bordi verticali vanno tolti — un filetto che attraversa
+   l'intaglio fa sembrare la scheda semplicemente rotta. */
+.ticket {
+  border-left: 0; border-right: 0;
+  border-top: 3px solid var(--accent);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background:
+    radial-gradient(circle at left center,
+      transparent 0 .5rem, var(--base-100) .5rem) left  / 50.5% 100% no-repeat,
+    radial-gradient(circle at right center,
+      transparent 0 .5rem, var(--base-100) .5rem) right / 50.5% 100% no-repeat;
+}
+
+.grid { display: grid; gap: .85rem; }
+.grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(225px, 1fr)); }
+.split { display: grid; gap: 1.4rem; grid-template-columns: minmax(0, 1fr); }
+/* 7/5 invece di 1/1: la colonna dove si lavora comanda, l'altra fa da spalla.
+   Due colonne uguali non dicono quale si compila per prima. */
+@media (min-width: 900px) { .split { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); } }
+
+/* Titolo di sezione come riga di tabellone: dopo il titolo e i suoi badge un
+   filetto tira fino al bordo destro. E' quello che trasforma un'intestazione
+   in una riga d'orario. */
+.section-title {
+  display: flex; align-items: center; gap: .65rem;
+  margin-bottom: .95rem;
+  flex-wrap: wrap;
+}
+.section-title h2 { margin: 0; text-transform: uppercase; }
+/* Il simbolo che apre la sezione sta per conto suo, alla dimensione a cui si
+   legge: un glifo dentro un badge e' solo un rettangolo colorato. */
+.section-icon { font-size: 1.25rem; line-height: 1; }
+.section-title::after {
+  content: "";
+  flex: 1 1 2rem;
+  height: 1px;
+  background: var(--line);
+  min-width: 1.5rem;
+}
+
+hr.divider {
+  border: 0;
+  border-top: 1px dashed var(--line-strong);
+  margin: 1.3rem 0;
+}
+
+/* ---------------------------------------------------------------------------
+   8. Controlli
+   --------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+  padding: .46rem .95rem;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  background: oklch(var(--bc) / .08);
+  color: var(--base-content);
+  font-family: var(--font-display);
+  font-weight: 600; font-size: .84rem;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter .16s, box-shadow .16s, background .16s, transform .1s;
+}
+.btn:hover { filter: brightness(1.06); }
+/* Un affondamento di un pixel alla pressione: e' la sola conferma tattile che
+   un'interfaccia server-rendered puo' dare prima che risponda la rete. */
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: none; box-shadow: var(--ring); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.btn-primary   { background: var(--primary); color: var(--primary-content); }
+.btn-secondary { background: var(--secondary); color: var(--secondary-content); }
+.btn-ghost     { background: transparent; border-color: var(--line-strong); }
+.btn-ghost:hover { background: oklch(var(--bc) / .06); filter: none; }
+.btn-sm    { padding: .26rem .6rem; font-size: .76rem; letter-spacing: .04em; }
+.btn-lg    { padding: .68rem 1.5rem; font-size: .95rem; }
+.btn-block { width: 100%; }
+.btn-icon  { padding: 0; width: 2rem; height: 2rem; letter-spacing: 0; }
+
+label.field { display: block; margin-bottom: .7rem; }
+/* Etichetta in maiuscoletto, condivisa fra campi del form e intestazioni di
+   pannello. L'involucro del campo di ricerca e' escluso: e' un contenitore,
+   non un'etichetta, e il maiuscoletto si eredita fin dentro l'input. */
+label.field > span:not(.picker-search), .eyebrow {
+  display: block;
+  font-family: var(--font-display);
+  font-size: .7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .13em;
+  color: oklch(var(--bc) / .55);
+  margin-bottom: .3rem;
+}
+/* Solo l'occhiello porta il quadratino: sui campi sarebbe un segno ripetuto
+   dieci volte in una schermata, e un segno ripetuto non segnala piu' nulla. */
+.eyebrow {
+  display: flex; align-items: center; gap: .45rem;
+  color: oklch(var(--bc) / .6);
+}
+.eyebrow::before {
+  content: "";
+  width: .38rem; height: .38rem;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+.eyebrow-primary { color: var(--primary); }
+.eyebrow-primary::before { background: var(--primary); }
+
+input[type="text"], input[type="search"], input[type="password"], input[type="email"],
+input[type="tel"], input[type="url"], input[type="date"], input[type="number"],
+select, textarea {
+  width: 100%;
+  padding: .46rem .65rem;
+  border-radius: 2px;
+  border: 1px solid var(--line-strong);
+  background: var(--base-100);
+  color: var(--base-content);
+  font: inherit; font-size: .9rem;
+  transition: border-color .16s, box-shadow .16s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: oklch(var(--a) / .8);
+  box-shadow: var(--ring);
+}
+textarea { resize: vertical; min-height: 4.4rem; }
+select { cursor: pointer; }
+input[type="number"] { font-variant-numeric: tabular-nums; }
+::placeholder { color: oklch(var(--bc) / .42); }
+
+.inline-form { display: flex; gap: .55rem; flex-wrap: wrap; align-items: flex-end; }
+.inline-form > * { flex: 1 1 12rem; }
+.inline-form > .btn { flex: 0 0 auto; }
+
+.checkline { display: flex; align-items: flex-start; gap: .55rem; padding: .3rem 0; cursor: pointer; }
+.checkline input { margin-top: .2rem; width: .95rem; height: .95rem; accent-color: var(--accent); cursor: pointer; }
+
+/* ---------------------------------------------------------------------------
+   9. Selettore ricercabile
+   ---------------------------------------------------------------------------
+   Sostituisce una <select> lunga. Una tendina da sessanta voci si naviga solo
+   a memoria: non si cerca, e non c'e' spazio per un secondo dato accanto al
+   nome. Qui il campo filtra, l'elenco resta aperto e il dato sta in colonna a
+   destra. Le righe sono <button>: navigabili da tastiera, e se sono
+   type="submit" dentro un form funzionano anche senza JavaScript. */
+
+.picker { display: grid; gap: .45rem; }
+.picker-search { position: relative; display: block; }
+.picker-icon {
+  position: absolute; left: .6rem; top: 50%; transform: translateY(-50%);
+  font-size: 1rem; line-height: 1;
+  color: oklch(var(--bc) / .45);
+  pointer-events: none;
+}
+.picker-search input { padding-left: 1.9rem; }
+/* La crocetta nativa di WebKit non e' stilizzabile e si appoggia sul bordo. */
+.picker-search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+
+.picker-list {
+  display: grid; gap: 1px;
+  max-height: 15.5rem; overflow-y: auto;
+  border: 1px solid var(--line-strong); border-radius: 2px;
+  background: var(--line);
+  overscroll-behavior: contain;  /* arrivati in fondo non trascina la pagina */
+}
+.picker-list::-webkit-scrollbar { width: 9px; }
+.picker-list::-webkit-scrollbar-thumb { background: var(--line-strong); }
+
+.picker-row {
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+  width: 100%; text-align: left;
+  padding: .4rem .6rem .4rem .55rem;
+  border: 0; border-left: 3px solid transparent;
+  background: var(--base-100);
+  color: inherit; font: inherit; font-size: .86rem;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.picker-row:hover:not([disabled]) { background: oklch(var(--a) / .09); border-left-color: oklch(var(--a) / .45); }
+/* z-index perche' l'anello di fuoco, altrimenti, lo copre la riga seguente. */
+.picker-row:focus-visible { outline: none; box-shadow: var(--ring); position: relative; z-index: 1; }
+.picker-row[disabled] { cursor: default; opacity: .5; }
+.picker-row.current {
+  border-left-color: var(--accent);
+  background: oklch(var(--a) / .12);
+  font-weight: 600;
+}
+.picker-main {
+  display: flex; align-items: center; gap: .4rem;
+  min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.picker-meta {
+  display: flex; align-items: center; gap: .45rem;
+  flex-shrink: 0;
+  font-size: .78rem; color: oklch(var(--bc) / .6);
+}
+.picker-note {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: .74rem; letter-spacing: .04em;
+  color: oklch(var(--bc) / .55);
+}
+.picker-empty { font-weight: 600; color: oklch(var(--bc) / .78); }
+
+/* ---------------------------------------------------------------------------
+   10. Badge e chip
+   ---------------------------------------------------------------------------
+   Etichette da cartello: rettangolari, in maiuscoletto spaziato. Il badge
+   qualifica; il chip e' una cosa che sta in un elenco e si puo' togliere. */
+
+.badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .14rem .42rem;
+  border-radius: 2px;
+  font-family: var(--font-display);
+  font-size: .68rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .07em;
+  background: oklch(var(--bc) / .08);
+  color: oklch(var(--bc) / .78);
+  white-space: nowrap;
+}
+.badge-primary { background: var(--primary); color: var(--primary-content); }
+/* Pieno nel colore d'azione: si usa per «da fare», non per qualificare. */
+.badge-secondary { background: var(--secondary); color: var(--secondary-content); }
+.badge-success { background: oklch(var(--su) / .15); color: var(--success); box-shadow: inset 0 0 0 1px oklch(var(--su) / .3); }
+.badge-warning { background: oklch(var(--wa) / .18); color: oklch(var(--wa)); box-shadow: inset 0 0 0 1px oklch(var(--wa) / .35); }
+.badge-error   { background: oklch(var(--er) / .14); color: var(--error); box-shadow: inset 0 0 0 1px oklch(var(--er) / .3); }
+.badge-info    { background: oklch(var(--in) / .13); color: var(--info); box-shadow: inset 0 0 0 1px oklch(var(--in) / .28); }
+.badge-ghost   { background: transparent; color: oklch(var(--bc) / .68); box-shadow: inset 0 0 0 1px var(--line-strong); font-weight: 500; }
+/* Il tema chiaro ha bisogno di un giallo piu' scuro del riempimento, o il
+   testo ambra su fondo ambra scende sotto la soglia di contrasto. */
+:root .badge-warning { color: oklch(42% .1 66); }
+[data-theme="dark"] .badge-warning { color: oklch(var(--wa)); }
+
+.chips { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
+.chip {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .22rem .3rem .22rem .5rem;
+  border-radius: 2px;
+  background: var(--base-100);
+  border: 1px solid var(--line-strong);
+  font-weight: 500; font-size: .82rem;
+}
+.chip button {
+  border: 0; background: transparent; color: oklch(var(--bc) / .45);
+  width: 1.2rem; height: 1.2rem; border-radius: 2px;
+  cursor: pointer; font-size: .85rem; line-height: 1;
+  display: grid; place-items: center;
+  transition: background .16s, color .16s;
+}
+.chip button:hover { background: oklch(var(--er) / .14); color: var(--error); }
+.chip button:focus-visible { outline: none; box-shadow: var(--ring); }
+
+/* ---------------------------------------------------------------------------
+   11. Avvisi
+   ---------------------------------------------------------------------------
+   Barra piena a sinistra invece di un filetto: sono i messaggi che cambiano
+   quello che si sta per fare, e devono trovarsi con la coda dell'occhio.
+
+   Due forme convivono: «icona + testo», due <span> affiancati, e «titolo +
+   spiegazione», uno <strong> seguito da testo sciolto e da <code> o <p>. La
+   seconda non puo' stare in un contenitore flex — i frammenti di testo nudo
+   diventano elementi flex anonimi e la frase si spezza in colonne — quindi il
+   default e' block e il flex si accende solo quando c'e' un'icona da
+   allineare. Non riportare .alert a display:flex fisso. */
+
+.alert {
+  display: block;
+  padding: .7rem .9rem;
+  border-radius: 2px;
+  border-left: 4px solid var(--info);
+  background: oklch(var(--in) / .08);
+  font-size: .9rem;
+}
+.alert:has(> span:first-child) {
+  display: flex; gap: .65rem; align-items: flex-start;
+}
+.alert-info    { border-color: var(--info);    background: oklch(var(--in) / .08); }
+.alert-success { border-color: var(--success); background: oklch(var(--su) / .09); }
+.alert-warning { border-color: var(--warning); background: oklch(var(--wa) / .12); }
+.alert-error   { border-color: var(--error);   background: oklch(var(--er) / .09); }
+.alert strong { display: block; font-family: var(--font-display); letter-spacing: .01em; }
+
+/* ---------------------------------------------------------------------------
+   12. Tessera: la scheda di contenuto
+   ---------------------------------------------------------------------------
+   E' l'unita' che si ripete in griglia: prodotto, piano, risultato, record. */
+
+.tile {
+  position: relative;
+  background: var(--base-100);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+  transition: box-shadow .18s, border-color .18s;
+}
+.tile:hover { border-color: var(--line-strong); box-shadow: var(--shadow); }
+/* Il rilievo passa da una barra laterale interna, non da un bordo piu' spesso:
+   il bordo doppio sposta di un pixel tutto il contenuto. */
+.tile.highlight {
+  border-color: oklch(var(--a) / .5);
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+.tile.highlight:hover { box-shadow: inset 4px 0 0 var(--accent), var(--shadow); }
+.tile.active {
+  border-color: oklch(var(--su) / .45);
+  background: oklch(var(--su) / .04);
+}
+
+.tile-head { display: flex; justify-content: space-between; gap: .9rem; align-items: flex-start; flex-wrap: wrap; }
+.tile-title {
+  font-family: var(--font-display);
+  font-size: 1.12rem; font-weight: 600;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.tile-desc { color: oklch(var(--bc) / .72); font-size: .88rem; margin: .55rem 0 .75rem; }
+.price { text-align: right; white-space: nowrap; }
+
+/* IL FLAP — l'elemento firma del sistema.
+   Il dato che si sta cercando (prezzo, punteggio, orario, stato) composto come
+   una paletta girata di tabellone: fondo scuro, cifre ambra in monospaziato,
+   la piega orizzontale. E' l'unica cosa nera in una pagina chiara, quindi e'
+   anche la lettura piu' rapida possibile. Usarlo per UN dato per scheda: due
+   flap accanto competono e non si legge piu' nessuno dei due.
+
+   La cucitura sta appena sotto la linea di base, non a meta' altezza: sul
+   tabellone vero la piega taglia le cifre, ma li' le palette sono alte dieci
+   centimetri. A 1.1rem una riga in mezzo alla parola si legge come testo
+   sbarrato — e sbarrare «Incluso» dice il contrario di quello che c'e'
+   scritto. L'offset e' in em, cosi' segue il corpo del carattere. Sotto la
+   cucitura il filo di luce: e' il bordo della paletta inferiore che prende
+   luce, ed e' quello che la fa leggere come una piega e non come un errore. */
+.flap {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 1.1rem; font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: 1.28;
+  padding: .12rem .42rem;
+  border-radius: 2px;
+  color: var(--flap-ink);
+  background:
+    linear-gradient(to bottom,
+      var(--flap)       0                        calc(50% + .36em - 1px),
+      var(--flap-seam)  calc(50% + .36em - 1px)  calc(50% + .36em),
+      var(--flap-glint) calc(50% + .36em)        calc(50% + .36em + 1px),
+      var(--flap)       calc(50% + .36em + 1px)  100%);
+}
+.flap-lg { font-size: 1.6rem; padding: .18rem .55rem; }
+/* L'unita' di misura accanto al flap: piccola, in maiuscoletto, mai in ambra.
+   Il colore del flap deve restare uno solo. */
+.unit {
+  display: inline-block;
+  margin-left: .25rem;
+  font-family: var(--font-display);
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .1em;
+  color: oklch(var(--bc) / .55);
+}
+/* Il dato derivato sta sotto il dato di listino: e' spesso quello che decide,
+   ma non deve rubare la scena al numero ufficiale. */
+.estimate { display: block; margin-top: .4rem; font-size: .86rem; color: oklch(var(--bc) / .8); }
+.estimate strong { color: var(--base-content); font-weight: 700; }
+.estimate-detail { display: block; font-size: .7rem; color: oklch(var(--bc) / .55); }
+
+/* Elenco chiave/valore: righe unite da filetti invece di riquadri staccati.
+   E' una tabella di quantita', e come tale si legge in colonna. */
+.kv {
+  display: grid; gap: 1px; margin: 0; padding: 0; list-style: none;
+  border: 1px solid var(--line); border-radius: 2px; overflow: hidden;
+  background: var(--line);
+}
+.kv li {
+  display: flex; justify-content: space-between; gap: 1rem;
+  padding: .32rem .6rem;
+  background: var(--base-100);
+  font-size: .84rem;
+}
+.kv .k {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: .8rem;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: oklch(var(--bc) / .58);
+}
+.kv .v { text-align: right; font-weight: 600; }
+
+/* Caselle disegnate, non scritte: il glifo di spunta cambia forma e peso da un
+   sistema all'altro, un quadrato di CSS no. */
+.checklist { list-style: none; margin: .55rem 0 0; padding: 0; display: grid; gap: .3rem; }
+.checklist li {
+  display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+  padding: .45rem .75rem;
+  background: var(--base-200);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font-size: .88rem;
+}
+.checklist li::before {
+  content: "";
+  width: .85rem; height: .85rem;
+  flex-shrink: 0;
+  border: 1.5px solid oklch(var(--bc) / .35);
+  border-radius: 1px;
+}
+
+/* La nota che spiega perche': filetto ambra, non rosso. Se il filetto della
+   spiegazione fosse del colore d'azione, apparirebbe su ogni scheda e il
+   colore smetterebbe di indicare dove si preme. */
+.note {
+  margin-top: .65rem;
+  padding: .55rem .8rem;
+  border-left: 3px solid oklch(var(--a) / .55);
+  background: oklch(var(--a) / .07);
+  border-radius: 0 2px 2px 0;
+  font-size: .85rem;
+}
+.note strong {
+  font-family: var(--font-display);
+  text-transform: uppercase; letter-spacing: .05em; font-size: .78rem;
+  color: oklch(var(--bc) / .8);
+  margin-right: .2rem;
+}
+
+/* Il gruppo tratteggiato: piu' tessere che valgono solo insieme. Il tratteggio
+   dice che i pezzi si tengono ma restano distinti. */
+.combo {
+  border: 1px dashed oklch(var(--a) / .55);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+  background: oklch(var(--a) / .05);
+}
+.combo h3 { text-transform: uppercase; letter-spacing: .04em; }
+.combo-items { display: grid; gap: .75rem; margin-top: .75rem; }
+
+/* ---------------------------------------------------------------------------
+   13. Tabelle e blocchi richiudibili
+   --------------------------------------------------------------------------- */
+
+details { border-top: 1px solid var(--line); padding-top: .65rem; margin-top: .65rem; }
+summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 600; font-size: .82rem;
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--primary);
+  list-style-position: inside;
+}
+summary:hover { color: var(--base-content); }
+summary:focus-visible { outline: none; box-shadow: var(--ring); border-radius: 2px; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 2px; }
+table { width: 100%; border-collapse: collapse; font-size: .85rem; background: var(--base-100); }
+th, td { padding: .42rem .7rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+/* L'intestazione e' la riga fissa del tabellone: inchiostro pieno, lettere
+   chiare e spaziate. Resta leggibile mentre la tabella scorre sotto.
+   ATTENZIONE: --ink-fg e' una TERNA, non un colore. Va sempre avvolto in
+   oklch(), anche quando non lo si diluisce, o la dichiarazione e' invalida e
+   il testo ricade sul colore ereditato — cioe' scuro su scuro. */
+th {
+  background: var(--ink);
+  color: oklch(var(--ink-fg) / .78);
+  font-family: var(--font-display);
+  font-size: .68rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .11em;
+  position: sticky; top: 0; z-index: 1;
+  border-bottom: 0;
+  white-space: nowrap;
+}
+tbody tr:last-child td { border-bottom: 0; }
+/* Evidenziazione neutra, non colorata: un fondo colorato su una riga la fa
+   sembrare selezionata o cliccabile, e nessuna delle due cose e' vera. */
+tbody tr:hover { background: oklch(var(--bc) / .04); }
+
+/* ---------------------------------------------------------------------------
+   14. Attesa e movimento
+   --------------------------------------------------------------------------- */
+
+/* Indicatori compatibili con htmx; se non si usa htmx, .is-loading fa lo
+   stesso lavoro con una classe qualunque messa da JS. */
+.htmx-indicator { opacity: 0; transition: opacity .18s; }
+.htmx-request .htmx-indicator, .htmx-request.htmx-indicator,
+.is-loading .htmx-indicator { opacity: 1; }
+.spinner {
+  display: inline-block; width: 1rem; height: 1rem;
+  border: 2px solid oklch(var(--bc) / .2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.fade-in { animation: board-in .24s ease-out both; }
+
+/* Le tessere entrano ruotando dall'alto, una dopo l'altra: e' il gesto del
+   tabellone che si aggiorna, ed e' anche il modo per far leggere l'ordine, che
+   spesso e' l'informazione principale. Si ferma alla sesta perche' oltre
+   diventa attesa invece di ritmo. */
+.fade-in .tile { animation: flap-in .34s cubic-bezier(.2, .75, .3, 1) both; transform-origin: top center; }
+@keyframes flap-in {
+  from { opacity: 0; transform: perspective(700px) rotateX(-32deg); }
+  to   { opacity: 1; transform: perspective(700px) rotateX(0); }
+}
+.fade-in .grid > .tile:nth-child(1) { animation-delay: .04s }
+.fade-in .grid > .tile:nth-child(2) { animation-delay: .09s }
+.fade-in .grid > .tile:nth-child(3) { animation-delay: .14s }
+.fade-in .grid > .tile:nth-child(4) { animation-delay: .19s }
+.fade-in .grid > .tile:nth-child(5) { animation-delay: .24s }
+.fade-in .grid > .tile:nth-child(n+6) { animation-delay: .28s }
+
+/* Chi ha chiesto meno animazioni al sistema operativo non deve vederne. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .btn:active { transform: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   15. Pie' di pagina: l'altra sponda della cornice
+   --------------------------------------------------------------------------- */
+
+.site-footer {
+  background: var(--ink);
+  color: oklch(var(--ink-fg) / .62);
+  border-top: 3px solid oklch(var(--a) / .55);
+  padding: 1rem 0;
+  font-family: var(--font-display);
+  font-size: .78rem;
+  letter-spacing: .05em;
+}
+.site-footer .container { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+
+/* ---------------------------------------------------------------------------
+   16. Stampa
+   ---------------------------------------------------------------------------
+   La stampa e' un formato di consegna, non un ripiego. Sul foglio il tabellone
+   non serve: inchiostro pieno e fondi ambra sprecano toner e abbassano il
+   contrasto, quindi il flap torna a essere un numero e basta.
+   Mettere .no-print su tutto cio' che serve a comporre la richiesta — form,
+   filtri, pulsanti — e non a leggere il risultato. */
+
+@media print {
+  @page { size: A4; margin: 14mm 12mm; }
+
+  html { font-size: 10.5pt; background: #fff; }
+  body::before { display: none; }
+
+  .site-header, .site-footer, .net-bar, .no-print,
+  .hero, details > summary, .picker { display: none !important; }
+
+  body { background: #fff; color: #000; }
+  .container { width: 100%; }
+  main { padding: 0; }
+
+  /* Su carta il rilievo lo fa il filetto. */
+  .card, .tile, .panel, .combo, .table-wrap, .checklist li, .ticket {
+    box-shadow: none !important;
+    background: #fff !important;
+    border-color: #999 !important;
+    break-inside: avoid;
+  }
+  .card, .tile { border-radius: 0; }
+  .card-accent, .ticket { border-top: 2pt solid #000; }
+  .ticket { border-left: 0; border-right: 0; }
+  .alert { border-left-width: 2pt; background: #fff !important; break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; }
+  .kv, .kv li { background: #fff !important; }
+  .note { background: #fff !important; border-left-color: #999; }
+
+  .flap { background: #fff !important; color: #000 !important; padding: 0; font-size: 1.05em; }
+  .badge { box-shadow: none !important; background: #fff !important; color: #000 !important; border: .5pt solid #999; }
+
+  th { background: #f2f2f2 !important; color: #000 !important; border-bottom: 1pt solid #999; position: static; }
+
+  /* Il contenuto dei <details> deve comparire: in stampa non si puo' cliccare. */
+  details { border-top: 0; }
+  details > *:not(summary) { display: revert !important; }
+
+  /* Un link stampato senza il suo indirizzo non e' raggiungibile. */
+  a[href^="http"]::after,
+  a[href^="mailto"]::after { content: " (" attr(href) ")"; font-size: .82em; color: #444; }
+}
+
+</style>
+  <style>
+/* ===========================================================================
+   OFFERTE MONITOR — livello applicativo sopra Quadro Partenze
+   ---------------------------------------------------------------------------
+   Qui dentro sta SOLO cio' che il design system non ha gia': il tabellone
+   degli annunci, la fascia dei totali, la consolle e i riquadri prodotto.
+   Tutto il resto (schede, pulsanti, campi, badge, tabelle, flap, stampa)
+   arriva da quadro-partenze.css e non va riscritto.
+
+   Regola di manutenzione: se una cosa si puo' ottenere con una classe del
+   sistema, si usa quella. Ogni regola qui sotto esiste perche' descrive un
+   pezzo di QUESTA applicazione, non un componente generico.
+
+   ATTENZIONE ai token: --bc, --a, --ink-fg e simili sono TERNE OKLCH, non
+   colori. Vanno sempre avvolti in oklch(), anche senza diluizione.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   A. Utilita' di pannello
+   --------------------------------------------------------------------------- */
+
+.hidden { display: none !important; }
+
+/* Intestazione che esiste solo su carta: a schermo il titolo lo da' .hero. */
+.print-head { display: none; }
+
+/* Le tre schede della barra di navigazione sono <a> per ereditare lo stato
+   attivo del sistema (.nav a[aria-current]), ma non devono navigare. */
+.nav a { cursor: pointer; }
+
+/* ---------------------------------------------------------------------------
+   B. Stato del servizio nella testata
+   ---------------------------------------------------------------------------
+   Sta nella fascia d'inchiostro, quindi i colori non possono venire dai token
+   di pagina: si diluisce l'ambra e il verde direttamente sul fondo scuro.
+   --------------------------------------------------------------------------- */
+
+.hdr-status {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .2rem .55rem;
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-size: .7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .1em;
+  white-space: nowrap;
+  color: oklch(var(--ink-fg) / .7);
+  box-shadow: inset 0 0 0 1px var(--ink-line);
+}
+.hdr-status .status-dot {
+  width: .42rem; height: .42rem;
+  background: oklch(var(--ink-fg) / .45);
+  flex-shrink: 0;
+}
+/* Acceso: l'unico punto ambra della testata oltre al filetto. Un pallino non
+   e' un fondo esteso, quindi la seconda regola regge. */
+.hdr-status.is-live { color: oklch(var(--a) / .95); }
+.hdr-status.is-live .status-dot {
+  background: oklch(var(--a));
+  animation: beacon 2.4s ease-in-out infinite;
+}
+@keyframes beacon { 50% { opacity: .25; } }
+
+.hdr-uptime {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  color: oklch(var(--ink-fg) / .45);
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .hdr-status, .hdr-uptime { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   C. Fascia dei totali
+   ---------------------------------------------------------------------------
+   Prima erano cinque riquadri con ombra: cinque scatole per cinque numeri
+   pesano piu' dei numeri. Qui e' una riga sola, divisa da filetti verticali —
+   la stessa logica dell'intestazione di un tabellone.
+   --------------------------------------------------------------------------- */
+
+.board-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--base-100);
+  overflow: hidden;
+}
+.board-strip > div {
+  padding: .7rem .9rem;
+  border-left: 1px solid var(--line);
+}
+.board-strip > div:first-child { border-left: 0; }
+
+.strip-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: .66rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .13em;
+  color: oklch(var(--bc) / .5);
+}
+.strip-value {
+  display: block;
+  margin-top: .15rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem; font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+}
+/* Un solo valore qualificato in ambra: quello che chiede attenzione. Gli
+   altri restano inchiostro, o l'ambra smette di significare qualcosa. */
+.strip-value.warn { color: oklch(var(--wa)); }
+
+/* ---------------------------------------------------------------------------
+   D. Filtri
+   --------------------------------------------------------------------------- */
+
+.filters {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: .4rem;
+}
+.filters .eyebrow { margin: 0 .4rem 0 0; }
+
+.filter-btn {
+  font-family: var(--font-display);
+  font-size: .74rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: .26rem .6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: oklch(var(--bc) / .68);
+  cursor: pointer;
+  transition: color .16s, border-color .16s, background-color .16s;
+}
+.filter-btn:hover { color: var(--base-content); background: oklch(var(--bc) / .05); }
+.filter-btn:focus-visible { outline: none; box-shadow: var(--ring); }
+/* Il filtro attivo e' struttura, non azione: percio' --p e non --s. */
+.filter-btn.active {
+  color: var(--primary);
+  border-color: oklch(var(--p) / .55);
+  background: oklch(var(--p) / .1);
+}
+
+/* ---------------------------------------------------------------------------
+   E. Il tabellone degli annunci
+   ---------------------------------------------------------------------------
+   E' il cuore della pagina, ed e' letteralmente un quadro partenze: riga
+   d'intestazione in inchiostro fisso, colonne incolonnate, e la colonna dei
+   prezzi tutta in flap — cifre ambra su nero, una sotto l'altra.
+
+   Le tre liste separate di prima (Subito, Amazon, «tutti gli annunci»)
+   mostravano gli stessi annunci tre volte. Qui la fonte e' una colonna.
+   --------------------------------------------------------------------------- */
+
+.board { table-layout: auto; }
+.board th:first-child, .board td:first-child { padding-left: .9rem; }
+.board th:last-child,  .board td:last-child  { padding-right: .9rem; }
+.board td { vertical-align: middle; }
+
+.board tbody tr { transition: background-color .14s; }
+
+.col-time  { width: 1%; white-space: nowrap; }
+.col-price { width: 1%; text-align: right; }
+.col-state { width: 1%; white-space: nowrap; }
+
+.board-time {
+  font-family: var(--font-mono);
+  font-size: .82rem;
+  font-variant-numeric: tabular-nums;
+  color: oklch(var(--bc) / .55);
+}
+.board-time small { display: block; font-size: .66rem; opacity: .7; }
+
+.board-title {
+  display: block;
+  font-weight: 600;
+  color: var(--base-content);
+  text-decoration: none;
+  max-width: 46ch;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.board-title:hover { color: var(--primary); text-decoration: underline; }
+.board-title:focus-visible { outline: none; box-shadow: var(--ring); }
+
+.board-meta {
+  display: block;
+  margin-top: .1rem;
+  font-size: .72rem;
+  color: oklch(var(--bc) / .52);
+}
+
+.board-product {
+  font-family: var(--font-display);
+  font-size: .74rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: oklch(var(--bc) / .72);
+  white-space: nowrap;
+}
+
+/* Colonna dei prezzi: i flap incolonnati sono il tabellone. La larghezza
+   minima li tiene allineati anche quando le cifre cambiano. */
+.board .flap { min-width: 4.6ch; text-align: right; }
+
+/* La riga del prezzo piu' basso: filetto verde a sinistra, niente fondo
+   colorato. Il fondo colorato farebbe sembrare la riga selezionata. */
+.board tr.is-best td:first-child { box-shadow: inset 3px 0 0 var(--success); }
+
+/* L'entrata: le righe girano dall'alto come le palette del tabellone, una
+   dopo l'altra. Si ferma alla settima — oltre diventa attesa invece di ritmo.
+   flap-in e la clausola prefers-reduced-motion arrivano dal design system. */
+.board tbody.fade-in tr {
+  animation: flap-in .3s cubic-bezier(.2, .75, .3, 1) both;
+  transform-origin: top center;
+}
+.board tbody.fade-in tr:nth-child(1) { animation-delay: .02s }
+.board tbody.fade-in tr:nth-child(2) { animation-delay: .05s }
+.board tbody.fade-in tr:nth-child(3) { animation-delay: .08s }
+.board tbody.fade-in tr:nth-child(4) { animation-delay: .11s }
+.board tbody.fade-in tr:nth-child(5) { animation-delay: .14s }
+.board tbody.fade-in tr:nth-child(6) { animation-delay: .17s }
+.board tbody.fade-in tr:nth-child(n+7) { animation-delay: .2s }
+
+.board-empty {
+  padding: 2.4rem .9rem;
+  text-align: center;
+  color: oklch(var(--bc) / .55);
+  font-size: .88rem;
+}
+
+@media (max-width: 860px) {
+  .board .col-product, .board .col-source { display: none; }
+  .board-title { max-width: 28ch; }
+}
+
+/* ---------------------------------------------------------------------------
+   F. Consolle di sistema
+   ---------------------------------------------------------------------------
+   Richiusa per difetto: e' diagnostica, non contenuto. Prima occupava
+   240px fissi in fondo alla pagina anche quando non diceva niente.
+   --------------------------------------------------------------------------- */
+
+.console {
+  margin-top: .7rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  padding: .6rem .75rem;
+  border-radius: 2px;
+  background: var(--flap);
+  font-family: var(--font-mono);
+  font-size: .76rem;
+  line-height: 1.65;
+}
+.log-entry {
+  white-space: pre-wrap;
+  color: oklch(var(--ink-fg) / .62);
+  border-left: 2px solid transparent;
+  padding-left: .5rem;
+}
+.log-entry.found { color: oklch(78% .12 150); border-left-color: oklch(78% .12 150 / .5); }
+.log-entry.error { color: oklch(70% .17 27);  border-left-color: oklch(70% .17 27 / .5); }
+.log-entry.scan  { color: oklch(76% .09 235); border-left-color: oklch(76% .09 235 / .45); }
+.log-entry.info  { border-left-color: oklch(var(--ink-fg) / .18); }
+/* Il marcatempo e' un'etichetta dentro una riga, non una riga sua: la classe
+   .log-entry sullo <span> arriva dal codice storico e va neutralizzata. */
+.log-entry .log-entry.timestamp,
+.log-entry.timestamp {
+  display: inline;
+  border-left: 0; padding-left: 0;
+  margin-right: .5rem;
+  color: oklch(var(--a) / .7);
+}
+
+/* ---------------------------------------------------------------------------
+   G. Riquadri prodotto (scheda Configurazione)
+   ---------------------------------------------------------------------------
+   Era il punto piu' confuso: nove campi in fila per ogni prodotto, moltiplicati
+   per sei prodotti. Ora in vista si vedono nome, soglia e interruttori; i
+   termini di ricerca stanno in un <details>, che si apre solo se servono.
+   --------------------------------------------------------------------------- */
+
+.prod-grid { display: grid; gap: .85rem; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
+
+.prod-name {
+  flex: 1 1 10rem;
+  font-family: var(--font-display) !important;
+  font-size: 1.02rem !important;
+  font-weight: 700;
+  letter-spacing: .01em;
+  border-color: transparent !important;
+  background: oklch(var(--bc) / .04) !important;
+}
+.prod-name:focus { border-color: oklch(var(--a) / .8) !important; }
+
+.prod-nums { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: .7rem; }
+.prod-nums .field { margin: 0; }
+.prod-flags { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0 .8rem; margin-top: .4rem; }
+.prod-flags .checkline span { font-size: .82rem; }
+
+.prod-terms { display: grid; gap: .6rem; margin-top: .7rem; }
+.prod-terms .field { margin: 0; }
+
+/* ---------------------------------------------------------------------------
+   H. Editor YAML
+   --------------------------------------------------------------------------- */
+
+.yaml-tabs { display: flex; flex-wrap: wrap; gap: .35rem; }
+.yaml-tab-btn {
+  font-family: var(--font-mono);
+  font-size: .76rem;
+  padding: .26rem .6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: oklch(var(--bc) / .68);
+  cursor: pointer;
+}
+.yaml-tab-btn:hover { background: oklch(var(--bc) / .05); color: var(--base-content); }
+.yaml-tab-btn:focus-visible { outline: none; box-shadow: var(--ring); }
+.yaml-tab-btn.active {
+  color: var(--primary);
+  border-color: oklch(var(--p) / .55);
+  background: oklch(var(--p) / .1);
+}
+
+.code-area {
+  width: 100%;
+  min-height: 26rem;
+  padding: .8rem;
+  border-radius: 2px;
+  border: 1px solid var(--line-strong);
+  background: var(--flap);
+  color: oklch(var(--ink-fg) / .88);
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  line-height: 1.6;
+  resize: vertical;
+  tab-size: 2;
+}
+.code-area:focus { border-color: oklch(var(--a) / .8); box-shadow: var(--ring); }
+
+/* Riga d'intestazione con titolo a sinistra e comandi a destra: ricorre in tre
+   punti (prodotti, editor, salvataggio), quindi vive qui una volta sola. */
+.head-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.head-row .section-title { margin-bottom: 0; }
+
+.save-row {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: .9rem; flex-wrap: wrap;
+}
+.form-status { font-size: .78rem; line-height: 1.5; text-align: right; }
+.form-status code { font-size: .95em; }
+
+/* ---------------------------------------------------------------------------
+   I. Stampa
+   ---------------------------------------------------------------------------
+   Su carta resta il tabellone e basta: niente filtri, niente moduli, niente
+   consolle. La fascia dei totali diventa una riga di testo.
+   --------------------------------------------------------------------------- */
+
+@media print {
+  .filters, .console, .save-row, .yaml-tabs { display: none !important; }
+
+  /* Il sistema nasconde .hero in stampa (giustamente: filetto ambra e entrata
+     sfalsata sono roba da schermo), ma il foglio resterebbe senza intestazione.
+     Questa riga e' l'unica cosa che dice cos'e' il foglio che hai in mano. */
+  .print-head { display: block !important; }
+  .print-head::after {
+    content: 'OFFERTE MONITOR — TABELLONE ANNUNCI';
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.15rem; font-weight: 700;
+    letter-spacing: .06em;
+    padding-bottom: .4rem;
+    border-bottom: 1.5px solid #000;
+    margin-bottom: .9rem;
+  }
+
+  .board-strip { border: 0; }
+  .board-strip > div { border-left: 0; padding: 0 1.2rem 0 0; display: inline-block; }
+  .strip-value { font-size: 1rem; }
+  .board-title { max-width: none; white-space: normal; }
+  .board .flap { min-width: 0; }
+}
+
+</style>
+<script>
+    window.API_WRITE = true;
+    window.STATIC_ITEMS = [];
+    window.STATIC_CONFIGS = {};
+    window.STATIC_CONFIG_DATA = {};
+    window.STATIC_LOGS = [];
+    window.SCAN_CADENCE = 30;
+  </script>
+</head>
+<body>
+  <div class="net-bar" aria-hidden="true"></div>
+
+  <header class="site-header no-print">
+    <div class="container">
+      <a class="brand" href="#">
+        <span class="brand-mark" aria-hidden="true">OM</span>
+        <span class="brand-text">
+          <strong>Offerte Monitor</strong>
+          <span>Subito · Amazon · NorthLadder</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Sezioni">
+        <a data-tab="dashboard" aria-current="page">Tabellone</a>
+        <a data-tab="config">Configurazione</a>
+        <a data-tab="yaml">YAML</a>
+      </nav>
+
+      <span id="status-badge" class="hdr-status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="status-text">Avvio</span>
+      </span>
+      <span id="uptime" class="hdr-uptime">00:00:00</span>
+
+      <button class="btn btn-ghost btn-sm" type="button" id="theme-toggle">
+        <span id="theme-label">Notte</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="stack">
+
+      <!-- ============================================================ TABELLONE -->
+      <div id="panel-dashboard" class="stack">
+
+        <!-- Compare solo in stampa: il sistema nasconde .hero sul foglio. -->
+        <div class="print-head" aria-hidden="true"></div>
+
+        <!-- La testatina appartiene al tabellone: sulle altre schede sarebbe
+             un titolo che parla di un contenuto non in vista. -->
+        <section class="hero no-print">
+          <div class="eyebrow" id="hero-eyebrow">Monitoraggio prezzi</div>
+          <h1>Offerte in <em>partenza</em></h1>
+          <p>
+            Un solo tabellone: ogni annuncio entro soglia, ordinato per prezzo,
+            con la fonte in colonna e il minimo in evidenza.
+          </p>
+        </section>
+
+        <div class="board-strip">
+          <div>
+            <span class="strip-label">Annunci</span>
+            <span class="strip-value" id="stat-total">0</span>
+          </div>
+          <div>
+            <span class="strip-label">Miglior prezzo</span>
+            <span class="strip-value" id="stat-best">—</span>
+          </div>
+          <div>
+            <span class="strip-label">Prezzo medio</span>
+            <span class="strip-value" id="stat-avg">—</span>
+          </div>
+          <div>
+            <span class="strip-label">Oltre soglia</span>
+            <span class="strip-value warn" id="stat-nearmiss">0</span>
+          </div>
+        </div>
+
+        <section class="card card-accent">
+          <div class="section-title">
+            <span class="section-icon" aria-hidden="true">▤</span>
+            <h2>Annunci entro soglia</h2>
+          </div>
+
+          <div class="filters no-print" id="filter-buttons">
+            <span class="eyebrow">Prodotto</span>
+            <button type="button" class="filter-btn active" id="btn-filter-all"
+                    onclick="setProductFilter('all')">Tutti</button>
+          </div>
+
+          <div class="table-wrap" style="margin-top:.85rem">
+            <table class="board">
+              <thead>
+                <tr>
+                  <th class="col-time">Ora</th>
+                  <th class="col-product">Prodotto</th>
+                  <th>Annuncio</th>
+                  <th class="col-source">Fonte</th>
+                  <th class="col-price">Prezzo</th>
+                  <th class="col-state">Stato</th>
+                </tr>
+              </thead>
+              <tbody id="board-body">
+                <tr><td colspan="6" class="board-empty">In attesa della prima scansione…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <details>
+            <summary>Registro di sistema</summary>
+            <div id="log" class="console">
+              <div class="log-entry info"><span class="log-entry timestamp">[OK]</span>Inizializzazione console in corso…</div>
+            </div>
+          </details>
+        </section>
+      </div>
+
+      <!-- ======================================================== CONFIGURAZIONE -->
+      <div id="panel-config" class="hidden">
+        <form id="config-form" class="stack no-print" onsubmit="saveForm(event)">
+
+          <div class="split">
+            <section class="card">
+              <div class="section-title"><h2>Scansione</h2></div>
+
+              <label class="field">
+                <span>Intervallo in minuti</span>
+                <input type="number" id="cfg-interval" min="1" max="1440">
+              </label>
+
+              <label class="checkline">
+                <input type="checkbox" id="cfg-shipping">
+                <span>Accetta solo annunci con spedizione</span>
+              </label>
+
+              <hr class="divider">
+
+              <div class="grid cols-2">
+                <label class="field">
+                  <span>Subito · pagine</span>
+                  <input type="number" id="cfg-subito-pages" min="1" max="20">
+                </label>
+                <label class="field">
+                  <span>Amazon · pagine</span>
+                  <input type="number" id="cfg-amazon-pages" min="1" max="10">
+                </label>
+              </div>
+              <label class="checkline">
+                <input type="checkbox" id="cfg-subito-enabled">
+                <span>Scanner Subito.it attivo</span>
+              </label>
+              <label class="checkline">
+                <input type="checkbox" id="cfg-amazon-enabled">
+                <span>Scanner Amazon.it attivo</span>
+              </label>
+            </section>
+
+            <section class="card">
+              <div class="section-title"><h2>Notifiche</h2></div>
+
+              <div class="alert alert-info">
+                <strong>Telegram gestito dai GitHub Secrets.</strong>
+                Token e chat ID non vivono in questo modulo: stanno in
+                <code>TELEGRAM_BOT_TOKEN</code> e <code>TELEGRAM_CHAT_ID</code>,
+                e da qui si possono solo leggere.
+              </div>
+
+              <label class="checkline">
+                <input type="checkbox" id="cfg-tg-enabled" checked disabled>
+                <span>Servizio notifiche attivo</span>
+              </label>
+
+              <label class="field">
+                <span>Bot token</span>
+                <input type="text" id="cfg-tg-token" readonly disabled
+                       value="Impostato nei GitHub Secrets">
+              </label>
+              <label class="field">
+                <span>Chat ID</span>
+                <input type="text" id="cfg-tg-chat" readonly disabled
+                       value="Impostato nei GitHub Secrets">
+              </label>
+            </section>
+          </div>
+
+          <section class="card">
+            <div class="head-row">
+              <div class="section-title"><h2>Prodotti monitorati</h2></div>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="addProduct()">+ Aggiungi</button>
+            </div>
+            <!-- Compare solo quando la bozza locale differisce dal repository:
+                 altrimenti la lista mostrata non e' quella che scansiona. -->
+            <div id="draft-warning" class="alert alert-warning no-print hidden"></div>
+            <div id="products-list" class="prod-grid" style="margin-top:.85rem"></div>
+          </section>
+
+          <div class="save-row">
+            <span id="config-save-status" class="form-status"></span>
+            <button type="submit" id="cfg-save-btn" class="btn btn-secondary">Salva e applica</button>
+          </div>
+
+          <!-- Export YAML: su GitHub Pages non esiste un backend scrivibile -->
+          <section id="static-export" class="card hidden">
+            <div class="section-title"><h2>YAML da riportare nel repository</h2></div>
+            <div class="alert alert-warning">
+              <strong>Questo modulo non scrive sul repository.</strong>
+              GitHub Pages serve solo file statici: le modifiche restano in questo
+              browser. Copia il blocco qui sotto dentro <code>config/config.yaml</code>
+              e fai commit — al giro successivo di GitHub Actions lo scanner userà questi prodotti.
+            </div>
+            <textarea id="static-export-yaml" class="code-area" readonly spellcheck="false"
+                      style="min-height:18rem"></textarea>
+            <div class="save-row" style="justify-content:flex-start;margin-top:.7rem">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="copyStaticExport()">Copia</button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="downloadStaticExport()">Scarica products.yaml</button>
+              <span id="static-export-status" class="form-status"></span>
+            </div>
+          </section>
+        </form>
+      </div>
+
+      <!-- ================================================================= YAML -->
+      <div id="panel-yaml" class="hidden stack">
+        <div id="yaml-tabs" class="yaml-tabs no-print"></div>
+        <section class="card">
+          <form onsubmit="saveYaml(event)">
+            <div class="head-row">
+              <div class="section-title">
+                <h2 id="yaml-filename">config.yaml</h2>
+              </div>
+              <div class="save-row no-print">
+                <span id="yaml-status" class="form-status"></span>
+                <button type="submit" class="btn btn-secondary btn-sm">Salva YAML</button>
+              </div>
+            </div>
+            <textarea id="yaml-editor" class="code-area" spellcheck="false" style="margin-top:.85rem"></textarea>
+          </form>
+        </section>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer no-print">
+    <div class="container">
+      <span>Offerte Monitor</span>
+      <span>Quadro Partenze · nessuna dipendenza</span>
+    </div>
+  </footer>
+
+  <script>
+    const state = { items: [], currentConfig: '', formProducts: [], selectedProduct: 'all' };
+    let lastLogIndex = 0;
+
+    /* ---- TEMA ---- */
+    (function () {
+      const btn = document.getElementById('theme-toggle');
+      const label = document.getElementById('theme-label');
+      const sync = () => {
+        label.textContent = document.documentElement.dataset.theme === 'dark' ? 'Giorno' : 'Notte';
+      };
+      sync();
+      btn.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem('theme', next);
+        sync();
+      });
+    })();
+
+    /* ---- UTILITÀ ---- */
+
+    /* I titoli arrivano dallo scraping: entrano nel DOM come stringhe, quindi
+       vanno sempre neutralizzati prima di essere interpolati. */
+    function esc(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      return `${dd}/${mm}`;
+    }
+    function fmtTime(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mi = String(d.getMinutes()).padStart(2, '0');
+      return `${hh}:${mi}`;
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.nav a[data-tab]').forEach(a => {
+        if (a.dataset.tab === name) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      });
+      ['dashboard', 'config', 'yaml'].forEach(p => {
+        const panel = document.getElementById('panel-' + p);
+        if (panel) panel.classList.toggle('hidden', p !== name);
+      });
+      if (name === 'config') loadConfig();
+      if (name === 'yaml') loadYamlList();
+    }
+
+    document.querySelectorAll('.nav a[data-tab]').forEach(a => {
+      a.addEventListener('click', e => { e.preventDefault(); switchTab(a.dataset.tab); });
+    });
+
+    /* ---- REGISTRO ---- */
+    function appendLog(msg, type = 'info', ts = null) {
+      if (!ts) ts = new Date().toLocaleTimeString('it-IT');
+      const el = document.getElementById('log');
+      const d = document.createElement('div');
+      d.className = `log-entry ${['info', 'found', 'error', 'scan'].includes(type) ? type : 'info'}`;
+      const tsSpan = document.createElement('span');
+      tsSpan.className = 'log-entry timestamp';
+      tsSpan.textContent = `[${ts}]`;
+      d.appendChild(tsSpan);
+      d.appendChild(document.createTextNode(msg));
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+      if (el.children.length > 500) el.removeChild(el.firstChild);
+    }
+
+    async function fetchServerLogs() {
+      const el = document.getElementById('log');
+      if (window.STATIC_LOGS && window.STATIC_LOGS.length) {
+        if (el) {
+          el.innerHTML = window.STATIC_LOGS.map(l =>
+            `<div class="log-entry ${esc(l.level || 'info')}"><span class="log-entry timestamp">[${esc(l.time || '')}]</span>${esc(l.message)}</div>`
+          ).join('');
+        }
+        return;
+      }
+      if (IS_STATIC) return;
+      try {
+        const r = await fetch(`/api/logs?since=${lastLogIndex}`);
+        if (!r.ok) return;
+        const d = await r.json();
+        (d.logs || []).forEach(l => {
+          appendLog(l.message, l.level, l.time);
+          lastLogIndex = Math.max(lastLogIndex, l.index);
+        });
+      } catch (e) { console.error('Errore fetch logs:', e); }
+    }
+
+    /* ---- TABELLONE ---- */
+
+    function visibleItems(items) {
+      return state.selectedProduct === 'all'
+        ? items
+        : items.filter(i => i.product_name === state.selectedProduct);
+    }
+
+    function setProductFilter(name) {
+      state.selectedProduct = name;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', (btn.dataset.product || 'all') === name);
+      });
+      renderItems(state.items);
+    }
+
+    function renderItems(items) {
+      const rows = visibleItems(items)
+        .filter(i => i.price)
+        .sort((a, b) => a.price - b.price);
+
+      const best = rows.length ? rows[0].price : null;
+      const prices = rows.map(i => i.price).filter(p => p > 1);
+      const avg = prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
+      const near = rows.filter(i => i.near_miss).length;
+
+      document.getElementById('stat-total').textContent = rows.length;
+      document.getElementById('stat-best').textContent = best ? `€${best}` : '—';
+      document.getElementById('stat-avg').textContent = avg ? `€${avg}` : '—';
+      document.getElementById('stat-nearmiss').textContent = near;
+
+      const body = document.getElementById('board-body');
+      if (!rows.length) {
+        body.innerHTML = '<tr><td colspan="6" class="board-empty">Nessun annuncio per questo filtro.</td></tr>';
+        return;
+      }
+
+      // Le palette girano una volta sola, alla prima comparsa del tabellone:
+      // ripeterlo a ogni filtro trasformerebbe il ritmo in attesa.
+      if (!body.dataset.flapped) {
+        body.classList.add('fade-in');
+        body.dataset.flapped = '1';
+      } else {
+        body.classList.remove('fade-in');
+      }
+
+      body.innerHTML = rows.map(i => {
+        const isBest = i.price === best;
+        const isFresh = i.date && (Date.now() - new Date(i.date).getTime()) < 3600000;
+        // Un solo distintivo per riga, in ordine di importanza: due badge
+        // accanto si annullano a vicenda.
+        const state_ = isBest ? '<span class="badge badge-success">minimo</span>'
+          : i.near_miss ? '<span class="badge badge-warning">oltre soglia</span>'
+          : isFresh ? '<span class="badge badge-info">nuovo</span>'
+          : '<span class="badge badge-ghost">in soglia</span>';
+        const meta = [i.location, i.shipping ? 'spedizione' : null, i.condition]
+          .filter(Boolean).map(esc).join(' · ');
+        return `
+          <tr class="${isBest ? 'is-best' : ''}">
+            <td class="col-time"><span class="board-time">${esc(fmtTime(i.date))}<small>${esc(fmtDate(i.date))}</small></span></td>
+            <td class="col-product"><span class="board-product">${esc(i.product_name || '—')}</span></td>
+            <td>
+              <a class="board-title" href="${esc(i.url)}" target="_blank" rel="noopener"
+                 title="${esc(i.title)}">${esc(i.title)}</a>
+              ${meta ? `<span class="board-meta">${meta}</span>` : ''}
+            </td>
+            <td class="col-source mono">${esc((i.source || '').split('.')[0] || '—')}</td>
+            <td class="col-price"><span class="flap">€${esc(i.price)}</span></td>
+            <td class="col-state">${state_}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    function renderFilters(products) {
+      const el = document.getElementById('filter-buttons');
+      if (!el || !products || !products.length) return;
+      const btn = (label, value) =>
+        `<button type="button" class="filter-btn ${state.selectedProduct === value ? 'active' : ''}"
+                 data-product="${esc(value)}" onclick="setProductFilter('${esc(value).replace(/'/g, "\\'")}')">${esc(label)}</button>`;
+      el.innerHTML = '<span class="eyebrow">Prodotto</span>'
+        + `<button type="button" class="filter-btn ${state.selectedProduct === 'all' ? 'active' : ''}"
+                   data-product="all" id="btn-filter-all" onclick="setProductFilter('all')">Tutti</button>`
+        + products.filter(p => p.name).map(p => btn(p.name, p.name)).join('');
+    }
+
+    /* ---- MODULO CONFIGURAZIONE ---- */
+
+    /* Build statico (GitHub Pages): nessun endpoint /api scrivibile.
+       Le modifiche restano in localStorage e si riversano in YAML da copiare. */
+    const IS_STATIC = !!(window.STATIC_CONFIG_DATA || window.STATIC_CONFIGS)
+      || location.hostname.endsWith('github.io')
+      || location.protocol === 'file:';
+    const LS_PRODUCTS_KEY = 'subito.products.draft';
+    const LS_TOKEN_KEY = 'subito.auth.token';
+
+    /* IS_STATIC diceva due cose insieme: «i dati arrivano da variabili
+       iniettate» e «non si puo' salvare». Su Vercel la prima resta vera e la
+       seconda no — la pagina e' sempre statica, ma dietro c'e' una funzione che
+       sa scrivere sul repository. Le due domande vanno separate. */
+    const CAN_WRITE = !!window.API_WRITE;
+    const API_STORE = '/api/store';
+
+    /* La password non finisce mai nella pagina: si digita una volta e resta in
+       questo browser. Il confronto avviene sul server, che e' l'unico posto
+       dove vive il token GitHub. */
+    function authToken(force) {
+      let t = force ? '' : (localStorage.getItem(LS_TOKEN_KEY) || '');
+      if (!t) {
+        t = window.prompt('Password del pannello (variabile APP_PASSWORD su Vercel):') || '';
+        if (t) { try { localStorage.setItem(LS_TOKEN_KEY, t); } catch (e) {} }
+      }
+      return t;
+    }
+
+    function forgetAuthToken() {
+      try { localStorage.removeItem(LS_TOKEN_KEY); } catch (e) {}
+    }
+
+    /* Una sola porta verso il repository: POST /api/store. Se il server
+       risponde 401 la password memorizzata e' sbagliata, quindi si butta e si
+       richiede una volta sola invece di far ricaricare la pagina. */
+    async function postStore(payload, riprova) {
+      const token = authToken(riprova === true);
+      if (!token) return { error: 'Salvataggio annullato: serve la password.' };
+      const r = await fetch(API_STORE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+        body: JSON.stringify(payload)
+      });
+      const d = await r.json().catch(() => ({ error: 'Risposta non leggibile dal server.' }));
+      if (r.status === 401) {
+        forgetAuthToken();
+        if (!riprova) return postStore(payload, true);
+      }
+      return d;
+    }
+
+    function loadDraftProducts() {
+      try {
+        const raw = localStorage.getItem(LS_PRODUCTS_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) && parsed.length ? parsed : null;
+      } catch (e) { return null; }
+    }
+
+    function saveDraftProducts(products) {
+      try { localStorage.setItem(LS_PRODUCTS_KEY, JSON.stringify(products)); return true; }
+      catch (e) { return false; }
+    }
+
+    /* La bozza locale ha la precedenza sul repository, quindi un prodotto
+       aggiunto al repository dopo l'ultimo salvataggio nel browser resta
+       invisibile: il pannello mostra la bozza, il tabellone il repository, e
+       i due non coincidono. Qui la divergenza si dichiara e si puo' annullare. */
+    function showDraftDivergence(draft, repoProducts) {
+      const box = document.getElementById('draft-warning');
+      if (!box) return;
+      const nomi = list => (list || []).map(p => p && p.name).filter(Boolean);
+      const soloNelRepo = draft ? nomi(repoProducts).filter(n => !nomi(draft).includes(n)) : [];
+      if (!draft || !soloNelRepo.length) { box.classList.add('hidden'); return; }
+      box.innerHTML = '<strong>Stai vedendo una bozza salvata in questo browser.</strong> '
+        + 'Nel repository c\'è anche ' + soloNelRepo.map(esc).join(', ')
+        + ', che la scansione usa già ma qui non compare. '
+        + '<button type="button" class="btn btn-ghost btn-sm" onclick="discardDraftProducts()">'
+        + 'Scarta la bozza</button>';
+      box.classList.remove('hidden');
+    }
+
+    function discardDraftProducts() {
+      try { localStorage.removeItem(LS_PRODUCTS_KEY); } catch (e) { /* storage negato: nulla da scartare */ }
+      const exp = document.getElementById('static-export');
+      if (exp) exp.classList.add('hidden');
+      const st = document.getElementById('config-save-status');
+      if (st) st.textContent = 'Bozza scartata: questi sono i prodotti del repository.';
+      loadConfig();
+    }
+
+    /* Serializza i prodotti nello stesso stile di config/config.yaml */
+    function yamlScalar(v) {
+      if (typeof v === 'boolean') return v ? 'true' : 'false';
+      if (typeof v === 'number') return String(v);
+      const s = String(v == null ? '' : v);
+      if (s === '' || /^[\s]|[\s]$|[:#\-?{}\[\],&*!|>'"%@`]|^(true|false|null|yes|no|on|off)$/i.test(s) || /^[\d.+-]+$/.test(s)) {
+        return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+      }
+      return s;
+    }
+
+    function buildProductsYaml(products) {
+      const lines = ['scanner:', '  products:'];
+      products.forEach(p => {
+        lines.push('  - name: ' + yamlScalar(p.name || ''));
+        ['keywords', 'exclude_keywords', 'subito_urls'].forEach(key => {
+          const arr = Array.isArray(p[key]) ? p[key] : [];
+          lines.push('    ' + key + ':' + (arr.length ? '' : ' []'));
+          arr.forEach(v => lines.push('    - ' + yamlScalar(v)));
+        });
+        lines.push('    max_price: ' + (parseInt(p.max_price) || 0));
+        lines.push('    price_margin: ' + (parseInt(p.price_margin) || 0));
+        lines.push('    subito: ' + (p.subito !== false));
+        lines.push('    amazon: ' + (p.amazon !== false));
+        lines.push('    search_in_description: ' + (p.search_in_description === true));
+      });
+      return lines.join('\n') + '\n';
+    }
+
+    function showStaticExport(products) {
+      const box = document.getElementById('static-export');
+      const ta = document.getElementById('static-export-yaml');
+      if (!box || !ta) return;
+      ta.value = buildProductsYaml(products);
+      box.classList.remove('hidden');
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function copyStaticExport() {
+      const ta = document.getElementById('static-export-yaml');
+      const st = document.getElementById('static-export-status');
+      try {
+        await navigator.clipboard.writeText(ta.value);
+        st.textContent = 'Copiato negli appunti.';
+      } catch (e) {
+        ta.select();
+        st.textContent = document.execCommand('copy') ? 'Copiato negli appunti.' : 'Copia manuale con Ctrl+C.';
+      }
+      setTimeout(() => { st.textContent = ''; }, 3000);
+    }
+
+    function downloadStaticExport() {
+      const ta = document.getElementById('static-export-yaml');
+      const blob = new Blob([ta.value], { type: 'text/yaml;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'products.yaml';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    function renderProducts(products) {
+      state.formProducts = products.map(p => ({
+        ...p,
+        keywords: Array.isArray(p.keywords) ? p.keywords.join(', ') : (p.keywords || ''),
+        exclude_keywords: Array.isArray(p.exclude_keywords) ? p.exclude_keywords.join(', ') : (p.exclude_keywords || ''),
+        subito_urls: Array.isArray(p.subito_urls) ? p.subito_urls.join(', ') : (p.subito_urls || '')
+      }));
+      const el = document.getElementById('products-list');
+      if (!state.formProducts.length) {
+        el.innerHTML = '<p class="muted small">Nessun prodotto monitorato. Usa «+ Aggiungi» per configurarne uno.</p>';
+        return;
+      }
+      const check = (idx, field, on, label) => `
+        <label class="checkline">
+          <input type="checkbox" data-field="${field}" data-idx="${idx}" ${on ? 'checked' : ''}>
+          <span>${label}</span>
+        </label>`;
+      const text = (idx, field, value, label) => `
+        <label class="field">
+          <span>${label}</span>
+          <input type="text" data-field="${field}" data-idx="${idx}" value="${esc(value)}">
+        </label>`;
+
+      el.innerHTML = state.formProducts.map((p, i) => `
+        <article class="tile">
+          <div class="tile-head">
+            <input type="text" class="prod-name" data-field="name" data-idx="${i}"
+                   value="${esc(p.name || '')}" placeholder="Nome prodotto" aria-label="Nome prodotto">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="removeProduct(${i})">Rimuovi</button>
+          </div>
+
+          <div class="prod-nums">
+            <label class="field">
+              <span>Prezzo limite €</span>
+              <input type="number" min="1" data-field="max_price" data-idx="${i}" value="${esc(p.max_price || 500)}">
+            </label>
+            <label class="field">
+              <span>Tolleranza €</span>
+              <input type="number" min="0" data-field="price_margin" data-idx="${i}" value="${esc(p.price_margin || 50)}">
+            </label>
+          </div>
+
+          <div class="prod-flags">
+            ${check(i, 'subito', p.subito !== false, 'Subito.it')}
+            ${check(i, 'amazon', p.amazon !== false, 'Amazon.it')}
+            ${check(i, 'search_in_description', p.search_in_description === true, 'Cerca in descrizione')}
+          </div>
+
+          <details>
+            <summary>Termini di ricerca</summary>
+            <div class="prod-terms">
+              ${text(i, 'keywords', p.keywords, 'Parole chiave (separate da virgola)')}
+              ${text(i, 'exclude_keywords', p.exclude_keywords, 'Parole da escludere')}
+              ${text(i, 'subito_urls', p.subito_urls, 'URL Subito forzati')}
+            </div>
+          </details>
+        </article>`).join('');
+    }
+
+    function addProduct() {
+      syncFormFromInputs();
+      state.formProducts.push({
+        name: '', keywords: '', exclude_keywords: '', subito_urls: '',
+        max_price: 500, price_margin: 50, subito: true, amazon: true, search_in_description: false
+      });
+      renderProducts(state.formProducts);
+      const inputs = document.querySelectorAll('#products-list [data-field="name"]');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    }
+
+    function removeProduct(i) {
+      syncFormFromInputs();
+      state.formProducts.splice(i, 1);
+      renderProducts(state.formProducts);
+    }
+
+    function collectFormProducts() {
+      const split = v => typeof v === 'string' ? v.split(',').map(s => s.trim()).filter(Boolean) : (v || []);
+      return state.formProducts.map(p => ({
+        name: p.name,
+        keywords: split(p.keywords),
+        exclude_keywords: split(p.exclude_keywords),
+        subito_urls: split(p.subito_urls),
+        max_price: parseInt(p.max_price) || 500,
+        price_margin: parseInt(p.price_margin) || 50,
+        subito: p.subito !== false,
+        amazon: p.amazon !== false,
+        search_in_description: p.search_in_description === true,
+      }));
+    }
+
+    function syncFormFromInputs() {
+      document.querySelectorAll('#products-list [data-idx]').forEach(el => {
+        const i = parseInt(el.dataset.idx);
+        const f = el.dataset.field;
+        if (!state.formProducts[i]) return;
+        state.formProducts[i][f] = el.type === 'checkbox' ? el.checked : el.value;
+      });
+    }
+
+    async function loadConfig() {
+      if (window.STATIC_CONFIG_DATA) {
+        const d = window.STATIC_CONFIG_DATA;
+        if (d.general) {
+          document.getElementById('cfg-interval').value = d.general.interval_minutes;
+          document.getElementById('cfg-shipping').checked = d.general.shipping_required;
+        }
+        if (d.telegram) {
+          document.getElementById('cfg-tg-enabled').checked = d.telegram.enabled;
+        }
+        if (d.subito) {
+          document.getElementById('cfg-subito-enabled').checked = d.subito.enabled;
+          document.getElementById('cfg-subito-pages').value = d.subito.max_pages;
+        }
+        if (d.amazon) {
+          document.getElementById('cfg-amazon-enabled').checked = d.amazon.enabled;
+          document.getElementById('cfg-amazon-pages').value = d.amazon.max_pages;
+        }
+        renderFilters(d.products || []);
+        if (CAN_WRITE) {
+          // Dove si puo' scrivere davvero, la bozza locale non serve piu' e
+          // anzi farebbe danno: mostrerebbe prodotti che il repository non ha.
+          renderProducts(d.products || []);
+          return;
+        }
+        // Le bozze locali hanno la precedenza: su GitHub Pages sono l'unica persistenza possibile
+        const draft = loadDraftProducts();
+        renderProducts(draft || d.products || []);
+        if (draft) {
+          const st = document.getElementById('config-save-status');
+          if (st) st.textContent = 'Bozza locale non ancora nel repository — usa «Copia» qui sotto.';
+          showStaticExport(collectFormProducts());
+        }
+        showDraftDivergence(draft, d.products || []);
+        return;
+      }
+      try {
+        const r = await fetch('/api/config/form');
+        if (!r.ok) return;
+        const d = await r.json();
+        document.getElementById('cfg-interval').value = d.general.interval_minutes;
+        document.getElementById('cfg-shipping').checked = d.general.shipping_required;
+        document.getElementById('cfg-tg-enabled').checked = d.telegram.enabled;
+        document.getElementById('cfg-subito-enabled').checked = d.subito.enabled;
+        document.getElementById('cfg-subito-pages').value = d.subito.max_pages;
+        document.getElementById('cfg-amazon-enabled').checked = d.amazon.enabled;
+        document.getElementById('cfg-amazon-pages').value = d.amazon.max_pages;
+        renderProducts(d.products);
+      } catch (e) { console.error(e); }
+    }
+
+    async function saveForm(e) {
+      e.preventDefault();
+      syncFormFromInputs();
+      const btn = document.getElementById('cfg-save-btn');
+      const status = document.getElementById('config-save-status');
+      if (CAN_WRITE) {
+        btn.textContent = 'Salvataggio…';
+        btn.disabled = true;
+        status.textContent = 'Scrittura sul repository in corso…';
+        try {
+          const d = await postStore({
+            general: {
+              interval_minutes: parseInt(document.getElementById('cfg-interval').value),
+              shipping_required: document.getElementById('cfg-shipping').checked
+            },
+            telegram: { enabled: document.getElementById('cfg-tg-enabled').checked },
+            products: collectFormProducts(),
+            subito: {
+              enabled: document.getElementById('cfg-subito-enabled').checked,
+              max_pages: parseInt(document.getElementById('cfg-subito-pages').value)
+            },
+            amazon: {
+              enabled: document.getElementById('cfg-amazon-enabled').checked,
+              max_pages: parseInt(document.getElementById('cfg-amazon-pages').value)
+            }
+          });
+          status.textContent = d.ok
+            ? (d.changed ? `${d.message} Commit ${d.commit}.` : d.message)
+            : (d.error || 'Errore di salvataggio.');
+        } catch (e) {
+          status.textContent = 'Errore di connessione con /api/store.';
+        }
+        btn.textContent = 'Salva e applica';
+        btn.disabled = false;
+        return;
+      }
+      if (IS_STATIC) {
+        // Nessun backend: si salva in locale e si espone lo YAML da portare nel repository.
+        const products = collectFormProducts();
+        const stored = saveDraftProducts(products);
+        showStaticExport(products);
+        status.textContent = stored
+          ? 'Salvato solo in questo browser: GitHub Pages è di sola lettura.'
+          : 'Storage non disponibile: copia lo YAML qui sotto.';
+        return;
+      }
+      btn.textContent = 'Salvataggio…';
+      btn.disabled = true;
+      try {
+        const r = await fetch('/api/config/form', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            general: {
+              interval_minutes: parseInt(document.getElementById('cfg-interval').value),
+              shipping_required: document.getElementById('cfg-shipping').checked
+            },
+            telegram: {
+              enabled: document.getElementById('cfg-tg-enabled').checked,
+              bot_token: document.getElementById('cfg-tg-token').value,
+              chat_id: document.getElementById('cfg-tg-chat').value
+            },
+            products: collectFormProducts(),
+            subito: {
+              enabled: document.getElementById('cfg-subito-enabled').checked,
+              max_pages: parseInt(document.getElementById('cfg-subito-pages').value)
+            },
+            amazon: {
+              enabled: document.getElementById('cfg-amazon-enabled').checked,
+              max_pages: parseInt(document.getElementById('cfg-amazon-pages').value)
+            },
+          })
+        });
+        const d = await r.json();
+        status.textContent = d.ok ? 'Configurazione applicata.' : (d.error || 'Errore di salvataggio.');
+      } catch (e) {
+        status.textContent = 'Errore di connessione.';
+      }
+      btn.textContent = 'Salva e applica';
+      btn.disabled = false;
+    }
+
+    /* ---- EDITOR YAML ---- */
+    function renderYamlTabs(files) {
+      document.getElementById('yaml-tabs').innerHTML = files.map(f =>
+        `<button type="button" class="yaml-tab-btn" data-file="${esc(f)}" onclick="loadYaml('${esc(f)}')">${esc(f)}</button>`
+      ).join('');
+    }
+
+    async function loadYamlList() {
+      if (window.STATIC_CONFIGS) {
+        const files = Object.keys(window.STATIC_CONFIGS);
+        renderYamlTabs(files);
+        if (files.length) loadYaml(files[0]);
+        return;
+      }
+      try {
+        const r = await fetch('/api/config');
+        if (!r.ok) return;
+        const d = await r.json();
+        renderYamlTabs(d.files);
+        if (d.files.length) loadYaml(d.files[0]);
+      } catch (e) { console.error(e); }
+    }
+
+    function markYamlTab(name) {
+      document.getElementById('yaml-filename').textContent = name;
+      state.currentConfig = name;
+      document.querySelectorAll('.yaml-tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.file === name);
+      });
+    }
+
+    async function loadYaml(name) {
+      if (window.STATIC_CONFIGS && window.STATIC_CONFIGS[name]) {
+        document.getElementById('yaml-editor').value = window.STATIC_CONFIGS[name];
+        markYamlTab(name);
+        return;
+      }
+      try {
+        const r = await fetch(`/api/config/${name}`);
+        if (!r.ok) return;
+        const d = await r.json();
+        document.getElementById('yaml-editor').value = d.content;
+        markYamlTab(name);
+      } catch (e) { console.error(e); }
+    }
+
+    async function saveYaml(e) {
+      e.preventDefault();
+      const status = document.getElementById('yaml-status');
+      if (CAN_WRITE) {
+        status.textContent = 'Scrittura sul repository in corso…';
+        try {
+          const d = await postStore({
+            yaml: { name: state.currentConfig, content: document.getElementById('yaml-editor').value }
+          });
+          status.textContent = d.ok
+            ? (d.changed ? `${d.message} Commit ${d.commit}.` : d.message)
+            : (d.error || 'Errore di salvataggio.');
+        } catch (e) {
+          status.textContent = 'Errore di connessione con /api/store.';
+        }
+        return;
+      }
+      if (IS_STATIC) {
+        // Su GitHub Pages non esiste POST /api/config: prima falliva con un errore generico.
+        status.textContent = `Sola lettura: modifica config/${state.currentConfig || 'config.yaml'} nel repository.`;
+        return;
+      }
+      try {
+        const r = await fetch(`/api/config/${state.currentConfig}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: document.getElementById('yaml-editor').value })
+        });
+        const d = await r.json();
+        status.textContent = d.ok ? 'Configurazione salvata.' : (d.error || 'Errore di salvataggio.');
+      } catch (e) {
+        status.textContent = 'Errore di connessione.';
+      }
+    }
+
+    /* ---- STATO DEL SERVIZIO ---- */
+    function setLive(text, uptime) {
+      const badge = document.getElementById('status-badge');
+      badge.classList.add('is-live');
+      document.getElementById('status-text').textContent = text;
+      document.getElementById('uptime').textContent = uptime;
+    }
+
+    async function fetchStatus() {
+      if (IS_STATIC) {
+        // La cadenza arriva dal workflow, non da una costante: quando il cron
+        // e' passato da 15 a 30 minuti questa riga mentiva.
+        setLive(CAN_WRITE ? 'Cloud Actions · scrivibile' : 'Cloud Actions',
+                `cron ${window.SCAN_CADENCE || 30}m`);
+        const eyebrow = document.getElementById('hero-eyebrow');
+        if (eyebrow) eyebrow.textContent = 'Scansione automatica via GitHub Actions';
+        return;
+      }
+      try {
+        const [status, latest] = await Promise.all([
+          fetch('/api/status').then(r => r.json()),
+          fetch('/api/latest').then(r => r.json())
+        ]);
+        if (status.products) renderFilters(status.products);
+        if (status.status === 'running') setLive('Monitor attivo', status.uptime || '00:00:00');
+        else document.getElementById('uptime').textContent = status.uptime || '00:00:00';
+        if (Array.isArray(latest) && latest.length) {
+          state.items = latest;
+          renderItems(latest);
+        }
+      } catch (e) {}
+    }
+
+    // Il polling ha senso solo col backend Flask: sul build statico i dati non cambiano mai.
+    if (!IS_STATIC) {
+      setInterval(fetchStatus, 10000);
+      setInterval(fetchServerLogs, 2000);
+    }
+
+    if (window.STATIC_CONFIGS || window.STATIC_CONFIG_DATA) {
+      loadConfig();
+      loadYamlList();
+    }
+    fetchStatus();
+    fetchServerLogs();
+  </script>
+
+    <script>
+      /* Il ponte verso il repository. Una sola richiesta: annunci,
+         configurazioni e registro tornano insieme, cosi' l'apertura della
+         pagina costa un giro di rete e non sei. */
+      (function () {
+        function avvia() {
+          fetch('/api/store', { cache: 'no-store' })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.error) throw new Error(d.error);
+              window.STATIC_ITEMS = d.items || [];
+              window.STATIC_CONFIGS = d.configs || {};
+              window.STATIC_CONFIG_DATA = d.config || {};
+              window.STATIC_LOGS = d.logs || [];
+              window.SCAN_CADENCE = d.cadence || 30;
+              if (!d.writable) {
+                window.STATIC_LOGS.push({
+                  message: 'Scrittura non disponibile: mancano GITHUB_TOKEN o '
+                         + 'APP_PASSWORD fra le variabili d\'ambiente su Vercel.',
+                  level: 'error',
+                  time: new Date().toTimeString().slice(0, 8)
+                });
+              }
+              if (typeof state === 'object') state.items = window.STATIC_ITEMS;
+              if (typeof renderItems === 'function') renderItems(window.STATIC_ITEMS);
+              if (typeof loadConfig === 'function') loadConfig();
+              if (typeof loadYamlList === 'function') loadYamlList();
+              if (typeof fetchServerLogs === 'function') fetchServerLogs();
+              if (typeof fetchStatus === 'function') fetchStatus();
+            })
+            .catch(function (e) {
+              /* Un tabellone vuoto e muto e' peggio di un tabellone che
+                 dichiara cosa non ha funzionato. */
+              window.STATIC_LOGS = [{
+                message: 'Nessuna risposta da /api/store: ' + e.message,
+                level: 'error',
+                time: new Date().toTimeString().slice(0, 8)
+              }];
+              if (typeof fetchServerLogs === 'function') fetchServerLogs();
+            });
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', avvia);
+        } else {
+          avvia();
+        }
+      })();
+    </script>
+    </body>
+
+</html>

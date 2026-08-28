@@ -457,6 +457,49 @@
       || location.hostname.endsWith('github.io')
       || location.protocol === 'file:';
     const LS_PRODUCTS_KEY = 'subito.products.draft';
+    const LS_TOKEN_KEY = 'subito.auth.token';
+
+    /* IS_STATIC diceva due cose insieme: «i dati arrivano da variabili
+       iniettate» e «non si puo' salvare». Su Vercel la prima resta vera e la
+       seconda no — la pagina e' sempre statica, ma dietro c'e' una funzione che
+       sa scrivere sul repository. Le due domande vanno separate. */
+    const CAN_WRITE = !!window.API_WRITE;
+    const API_STORE = '/api/store';
+
+    /* La password non finisce mai nella pagina: si digita una volta e resta in
+       questo browser. Il confronto avviene sul server, che e' l'unico posto
+       dove vive il token GitHub. */
+    function authToken(force) {
+      let t = force ? '' : (localStorage.getItem(LS_TOKEN_KEY) || '');
+      if (!t) {
+        t = window.prompt('Password del pannello (variabile APP_PASSWORD su Vercel):') || '';
+        if (t) { try { localStorage.setItem(LS_TOKEN_KEY, t); } catch (e) {} }
+      }
+      return t;
+    }
+
+    function forgetAuthToken() {
+      try { localStorage.removeItem(LS_TOKEN_KEY); } catch (e) {}
+    }
+
+    /* Una sola porta verso il repository: POST /api/store. Se il server
+       risponde 401 la password memorizzata e' sbagliata, quindi si butta e si
+       richiede una volta sola invece di far ricaricare la pagina. */
+    async function postStore(payload, riprova) {
+      const token = authToken(riprova === true);
+      if (!token) return { error: 'Salvataggio annullato: serve la password.' };
+      const r = await fetch(API_STORE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+        body: JSON.stringify(payload)
+      });
+      const d = await r.json().catch(() => ({ error: 'Risposta non leggibile dal server.' }));
+      if (r.status === 401) {
+        forgetAuthToken();
+        if (!riprova) return postStore(payload, true);
+      }
+      return d;
+    }
 
     function loadDraftProducts() {
       try {
@@ -681,6 +724,12 @@
           document.getElementById('cfg-amazon-pages').value = d.amazon.max_pages;
         }
         renderFilters(d.products || []);
+        if (CAN_WRITE) {
+          // Dove si puo' scrivere davvero, la bozza locale non serve piu' e
+          // anzi farebbe danno: mostrerebbe prodotti che il repository non ha.
+          renderProducts(d.products || []);
+          return;
+        }
         // Le bozze locali hanno la precedenza: su GitHub Pages sono l'unica persistenza possibile
         const draft = loadDraftProducts();
         renderProducts(draft || d.products || []);
@@ -712,6 +761,37 @@
       syncFormFromInputs();
       const btn = document.getElementById('cfg-save-btn');
       const status = document.getElementById('config-save-status');
+      if (CAN_WRITE) {
+        btn.textContent = 'Salvataggio…';
+        btn.disabled = true;
+        status.textContent = 'Scrittura sul repository in corso…';
+        try {
+          const d = await postStore({
+            general: {
+              interval_minutes: parseInt(document.getElementById('cfg-interval').value),
+              shipping_required: document.getElementById('cfg-shipping').checked
+            },
+            telegram: { enabled: document.getElementById('cfg-tg-enabled').checked },
+            products: collectFormProducts(),
+            subito: {
+              enabled: document.getElementById('cfg-subito-enabled').checked,
+              max_pages: parseInt(document.getElementById('cfg-subito-pages').value)
+            },
+            amazon: {
+              enabled: document.getElementById('cfg-amazon-enabled').checked,
+              max_pages: parseInt(document.getElementById('cfg-amazon-pages').value)
+            }
+          });
+          status.textContent = d.ok
+            ? (d.changed ? `${d.message} Commit ${d.commit}.` : d.message)
+            : (d.error || 'Errore di salvataggio.');
+        } catch (e) {
+          status.textContent = 'Errore di connessione con /api/store.';
+        }
+        btn.textContent = 'Salva e applica';
+        btn.disabled = false;
+        return;
+      }
       if (IS_STATIC) {
         // Nessun backend: si salva in locale e si espone lo YAML da portare nel repository.
         const products = collectFormProducts();
@@ -807,6 +887,20 @@
     async function saveYaml(e) {
       e.preventDefault();
       const status = document.getElementById('yaml-status');
+      if (CAN_WRITE) {
+        status.textContent = 'Scrittura sul repository in corso…';
+        try {
+          const d = await postStore({
+            yaml: { name: state.currentConfig, content: document.getElementById('yaml-editor').value }
+          });
+          status.textContent = d.ok
+            ? (d.changed ? `${d.message} Commit ${d.commit}.` : d.message)
+            : (d.error || 'Errore di salvataggio.');
+        } catch (e) {
+          status.textContent = 'Errore di connessione con /api/store.';
+        }
+        return;
+      }
       if (IS_STATIC) {
         // Su GitHub Pages non esiste POST /api/config: prima falliva con un errore generico.
         status.textContent = `Sola lettura: modifica config/${state.currentConfig || 'config.yaml'} nel repository.`;
@@ -835,7 +929,10 @@
 
     async function fetchStatus() {
       if (IS_STATIC) {
-        setLive('Cloud Actions', 'cron 15m');
+        // La cadenza arriva dal workflow, non da una costante: quando il cron
+        // e' passato da 15 a 30 minuti questa riga mentiva.
+        setLive(CAN_WRITE ? 'Cloud Actions · scrivibile' : 'Cloud Actions',
+                `cron ${window.SCAN_CADENCE || 30}m`);
         const eyebrow = document.getElementById('hero-eyebrow');
         if (eyebrow) eyebrow.textContent = 'Scansione automatica via GitHub Actions';
         return;
