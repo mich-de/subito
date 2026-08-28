@@ -14,6 +14,16 @@ on:
 # Rete di sicurezza contro l'accavallamento: un run per volta, in coda e non
 # annullato, cosi' una scansione lunga non si ritrova a spingere su main
 # insieme a quella partita dal cron successivo.
+#
+# ATTENZIONE, guasto visto il 28/08/2026: GitHub tiene UN SOLO run in attesa
+# per gruppo. Un run rimasto appeso in "queued" (nel nostro caso un
+# workflow_dispatch del 26/08 che non aveva creato nemmeno un job) occupa quel
+# posto per sempre, e da quel momento le esecuzioni da cron non partono piu'.
+# I push continuano a funzionare, quindi il guasto e' silenzioso: sembra tutto
+# a posto finche' non si guarda che l'ultima scansione automatica risale a ore
+# prima. Se il cron smette di girare, la prima cosa da controllare e':
+#   gh api "repos/mich-de/subito/actions/runs?status=queued"
+# e annullare a mano quello che ci trova appeso.
 concurrency:
   group: scanner
   cancel-in-progress: false
@@ -30,10 +40,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v7.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@v5.4.0
+        uses: actions/setup-python@v7.0.0
         with:
           python-version: '3.12'
           cache: 'pip'
