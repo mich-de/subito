@@ -193,11 +193,6 @@ scanner:
     - Google Pixel 3
     - Google Pixel 4
     - Google Pixel 5
-    - Pixel 1
-    - Pixel 2
-    - Pixel 3
-    - Pixel 4
-    - Pixel 5
     exclude_keywords:
     - custodi
     - cover
