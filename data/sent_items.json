@@ -332,8 +332,8 @@
     "timestamp": "2026-08-27T12:41:26.538164"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s25-5g-256gb-silver-shadow-nuovo-parma-657455628.htm|Samsung S25 256GB": {
-    "price": 430,
-    "timestamp": "2026-08-27T12:41:26.538746"
+    "price": 420,
+    "timestamp": "2026-08-28T10:42:57.975049"
   },
   "https://www.subito.it/telefonia/oppo-find-x9-pro-16-512-gb-titanium-oppo-store-vicenza-658478228.htm|OPPO Find X9 Pro": {
     "price": 750,
@@ -514,5 +514,13 @@
   "https://www.subito.it/telefonia/samsung-galaxy-s25-edge-256gb-nero-bologna-658587934.htm|Samsung S25 256GB": {
     "price": 410,
     "timestamp": "2026-08-28T08:32:31.969323"
+  },
+  "https://www.subito.it/telefonia/onor-magic-8-pro-512-d-ram-nero-cremona-658602067.htm|Honor Magic 8 Pro": {
+    "price": 650,
+    "timestamp": "2026-08-28T10:42:57.592419"
+  },
+  "https://www.subito.it/telefonia/accessori-google-pixel-10-pro-xl-roma-658607929.htm|Google Pixel 1-5": {
+    "price": 40,
+    "timestamp": "2026-08-28T10:42:57.593143"
   }
 }
