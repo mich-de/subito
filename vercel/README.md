@@ -111,7 +111,27 @@ Non solo la scrittura: **anche la lettura della configurazione**.
 | Chi apre il tabellone | Cosa vede |
 |---|---|
 | Chiunque | Gli annunci, i filtri, la stampa. |
-| Chi ha la password | In piu': prodotti, soglie, parole chiave, esclusioni, editor YAML, e i pulsanti per togliere un annuncio. |
+| Chi ha la password | In piu': prodotti, soglie, parole chiave, esclusioni, editor YAML, i pulsanti per togliere un annuncio, e le soglie sugli annunci. |
+
+**Chiudere la scheda non bastava.** Vale la pena scriverlo perche' e' il tipo
+di falla che si rifa': ogni annuncio in `data/*_results.json` si porta dietro
+il `max_price` del prodotto che l'ha trovato. La configurazione era chiusa a
+chiave e gli stessi numeri uscivano dalla finestra accanto, una riga per
+annuncio, con `product_name` a fianco.
+
+Da anonimo gli annunci escono ora senza `max_price` **ne' `near_miss`**: il
+secondo da solo e' un booleano, ma insieme al prezzo stringe la soglia fra il
+piu' caro «in soglia» e il piu' economico «oltre», e due annunci bastano per
+inquadrarla a poche decine di euro.
+
+Di conseguenza, a tabellone bloccato il badge di riserva dice **«trovato»** e
+non «in soglia» — che sarebbe una dichiarazione falsa su un dato nascosto — e
+il contatore dei fuori soglia mostra un trattino invece di zero: non sono zero,
+sono ignoti. Appena si sblocca, la pagina richiede gli annunci completi e i
+badge si correggono da soli.
+
+**Se aggiungi un campo agli annunci, chiediti se racconta la soglia.** Il posto
+dove si decide e' `SOGLIE_NEGLI_ANNUNCI` in `api/store.py`.
 
 Prima la configurazione usciva da `/api/store` a chiunque aprisse la pagina, e
 la password copriva solo il salvataggio. Ma quei dati sono soglie e parole
