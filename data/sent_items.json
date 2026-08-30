@@ -228,8 +228,8 @@
     "timestamp": "2026-08-26T16:58:42.163182"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-512-gb-udine-658334151.htm|Honor Magic 8 Pro": {
-    "price": 599,
-    "timestamp": "2026-08-28T15:41:59.092869"
+    "price": 100,
+    "timestamp": "2026-08-30T21:45:40.718685"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-genova-658063262.htm|Honor Magic 8 Pro": {
     "price": 670,
@@ -606,5 +606,9 @@
   "https://www.subito.it/telefonia/google-pixel-5-macerata-658865693.htm|Google Pixel 1-5": {
     "price": 129,
     "timestamp": "2026-08-30T15:27:12.000913"
+  },
+  "https://www.subito.it/telefonia/samsung-s24-da-256gb-ancora-in-garanzia-napoli-658916634.htm|Samsung S24 256GB": {
+    "price": 399,
+    "timestamp": "2026-08-30T21:45:41.186257"
   }
 }
