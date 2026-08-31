@@ -15,9 +15,6 @@ data/*.log
 data/*.txt
 data/
 
-# Vecchia cartella di pubblicazione, non piu' generata da niente
-public/
-
 # IDE & OS Files
 .vscode/
 .idea/
