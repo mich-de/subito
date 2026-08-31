@@ -488,8 +488,8 @@
     "timestamp": "2026-08-27T13:48:15.390512"
   },
   "https://www.subito.it/telefonia/cellulare-google-pixel-3-xl-64-gb-milano-618673110.htm|Google Pixel 1-5": {
-    "price": 130,
-    "timestamp": "2026-08-27T13:48:15.391244"
+    "price": 128,
+    "timestamp": "2026-08-31T22:48:39.104127"
   },
   "https://www.subito.it/telefonia/google-pixel-watch-3-45-mm-bari-657377730.htm|Google Pixel 1-5": {
     "price": 150,
@@ -614,5 +614,9 @@
   "https://www.subito.it/telefonia/kit-photography-per-oppo-find-x9-pro-pavia-658960499.htm|OPPO Find X9 Pro": {
     "price": 249,
     "timestamp": "2026-08-31T11:22:24.509145"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s24-5g-256-gb-milano-659037847.htm|Samsung S24 256GB": {
+    "price": 390,
+    "timestamp": "2026-08-31T22:48:39.103088"
   }
 }
