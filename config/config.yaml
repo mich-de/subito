@@ -30,7 +30,7 @@ scanner:
     - scambio
     - cerco
     subito_urls: []
-    max_price: 340
+    max_price: 360
     price_margin: 40
     subito: true
     amazon: true
