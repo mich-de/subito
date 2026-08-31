@@ -156,8 +156,8 @@
     "timestamp": "2026-08-14T12:20:44.099615"
   },
   "https://www.subito.it/telefonia/samsung-s24-256-gb-alessandria-657256571.htm|Samsung S24 256GB": {
-    "price": 350,
-    "timestamp": "2026-08-26T19:31:02.172840"
+    "price": 320,
+    "timestamp": "2026-08-31T11:22:24.508094"
   },
   "https://www.subito.it/telefonia/samsung-s25-256-giga-verona-657312073.htm|Samsung S25 256GB": {
     "price": 400,
@@ -610,5 +610,9 @@
   "https://www.subito.it/telefonia/samsung-s24-da-256gb-ancora-in-garanzia-napoli-658916634.htm|Samsung S24 256GB": {
     "price": 399,
     "timestamp": "2026-08-30T21:45:41.186257"
+  },
+  "https://www.subito.it/telefonia/kit-photography-per-oppo-find-x9-pro-pavia-658960499.htm|OPPO Find X9 Pro": {
+    "price": 249,
+    "timestamp": "2026-08-31T11:22:24.509145"
   }
 }
