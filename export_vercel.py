@@ -2,11 +2,10 @@
 
 Nella pagina non finisce nessun dato. Annunci, prodotti, configurazioni e
 registro arrivano da /api/store al momento in cui il browser apre il
-tabellone — al contrario di com'era su GitHub Pages, dove i risultati erano
-cotti dentro l'HTML e la pagina invecchiava. Percio' questo file
-va rigenerato solo quando cambiano il template o i fogli di stile, mai quando
-cambiano i risultati di una scansione — ed e' anche il motivo per cui il
-tabellone su Vercel non puo' invecchiare come faceva quello su Pages.
+tabellone. Percio' questo file va rigenerato solo quando cambiano il template
+o i fogli di stile, mai quando cambiano i risultati di una scansione — ed e'
+anche il motivo per cui il tabellone non puo' invecchiare: non contiene niente
+che possa invecchiare.
 """
 
 import os

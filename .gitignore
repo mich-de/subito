@@ -15,7 +15,7 @@ data/*.log
 data/*.txt
 data/
 
-# Build statico generato da export_pages.py (pubblicato via artifact, non dal branch)
+# Vecchia cartella di pubblicazione, non piu' generata da niente
 public/
 
 # IDE & OS Files

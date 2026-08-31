@@ -207,7 +207,6 @@
             </div>
             <!-- Compare solo quando la bozza locale differisce dal repository:
                  altrimenti la lista mostrata non e' quella che scansiona. -->
-            <div id="draft-warning" class="alert alert-warning no-print hidden"></div>
             <div id="products-list" class="prod-grid" style="margin-top:.85rem"></div>
           </section>
 
@@ -216,23 +215,6 @@
             <button type="submit" id="cfg-save-btn" class="btn btn-secondary">Salva e applica</button>
           </div>
 
-          <!-- Export YAML: su GitHub Pages non esiste un backend scrivibile -->
-          <section id="static-export" class="card hidden">
-            <div class="section-title"><h2>YAML da riportare nel repository</h2></div>
-            <div class="alert alert-warning">
-              <strong>Questo modulo non scrive sul repository.</strong>
-              GitHub Pages serve solo file statici: le modifiche restano in questo
-              browser. Copia il blocco qui sotto dentro <code>config/config.yaml</code>
-              e fai commit — al giro successivo di GitHub Actions lo scanner userà questi prodotti.
-            </div>
-            <textarea id="static-export-yaml" class="code-area" readonly spellcheck="false"
-                      style="min-height:18rem"></textarea>
-            <div class="save-row" style="justify-content:flex-start;margin-top:.7rem">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="copyStaticExport()">Copia</button>
-              <button type="button" class="btn btn-ghost btn-sm" onclick="downloadStaticExport()">Scarica products.yaml</button>
-              <span id="static-export-status" class="form-status"></span>
-            </div>
-          </section>
         </form>
 
         <!-- Fuori dal form apposta: e' un'azione a se', e un pulsante dentro
@@ -590,24 +572,22 @@
 
     /* ---- MODULO CONFIGURAZIONE ---- */
 
-    /* Build statico (GitHub Pages): nessun endpoint /api scrivibile.
-       Le modifiche restano in localStorage e si riversano in YAML da copiare. */
+    /* Pagina statica: i dati sono gia' dentro la pagina, non c'e' un server
+       Flask da interrogare. Vero su Vercel e vero aprendo il file da disco. */
     const IS_STATIC = !!(window.STATIC_CONFIG_DATA || window.STATIC_CONFIGS)
-      || location.hostname.endsWith('github.io')
       || location.protocol === 'file:';
-    const LS_PRODUCTS_KEY = 'subito.products.draft';
     const LS_TOKEN_KEY = 'subito.auth.token';
 
     /* IS_STATIC diceva due cose insieme: «i dati arrivano da variabili
        iniettate» e «non si puo' salvare». Su Vercel la prima resta vera e la
        seconda no — la pagina e' sempre statica, ma dietro c'e' una funzione che
-       sa scrivere sul repository. Le due domande vanno separate. */
+       sa scrivere sullo store. Le due domande vanno separate. */
     const CAN_WRITE = !!window.API_WRITE;
     const API_STORE = '/api/store';
 
     /* La password non finisce mai nella pagina: si digita una volta e resta in
        questo browser. Il confronto avviene sul server, che e' l'unico posto
-       dove vive il token GitHub. */
+       dove vive il segreto. */
     function authToken(force) {
       let t = force ? '' : (localStorage.getItem(LS_TOKEN_KEY) || '');
       if (!t) {
@@ -700,109 +680,6 @@
       return true;
     }
 
-    function loadDraftProducts() {
-      try {
-        const raw = localStorage.getItem(LS_PRODUCTS_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) && parsed.length ? parsed : null;
-      } catch (e) { return null; }
-    }
-
-    function saveDraftProducts(products) {
-      try { localStorage.setItem(LS_PRODUCTS_KEY, JSON.stringify(products)); return true; }
-      catch (e) { return false; }
-    }
-
-    /* La bozza locale ha la precedenza sul repository, quindi un prodotto
-       aggiunto al repository dopo l'ultimo salvataggio nel browser resta
-       invisibile: il pannello mostra la bozza, il tabellone il repository, e
-       i due non coincidono. Qui la divergenza si dichiara e si puo' annullare. */
-    function showDraftDivergence(draft, repoProducts) {
-      const box = document.getElementById('draft-warning');
-      if (!box) return;
-      const nomi = list => (list || []).map(p => p && p.name).filter(Boolean);
-      const soloNelRepo = draft ? nomi(repoProducts).filter(n => !nomi(draft).includes(n)) : [];
-      if (!draft || !soloNelRepo.length) { box.classList.add('hidden'); return; }
-      box.innerHTML = '<strong>Stai vedendo una bozza salvata in questo browser.</strong> '
-        + 'Nel repository c\'è anche ' + soloNelRepo.map(esc).join(', ')
-        + ', che la scansione usa già ma qui non compare. '
-        + '<button type="button" class="btn btn-ghost btn-sm" onclick="discardDraftProducts()">'
-        + 'Scarta la bozza</button>';
-      box.classList.remove('hidden');
-    }
-
-    function discardDraftProducts() {
-      try { localStorage.removeItem(LS_PRODUCTS_KEY); } catch (e) { /* storage negato: nulla da scartare */ }
-      const exp = document.getElementById('static-export');
-      if (exp) exp.classList.add('hidden');
-      const st = document.getElementById('config-save-status');
-      if (st) st.textContent = 'Bozza scartata: questi sono i prodotti del repository.';
-      loadConfig();
-    }
-
-    /* Serializza i prodotti nello stesso stile di config/config.yaml */
-    function yamlScalar(v) {
-      if (typeof v === 'boolean') return v ? 'true' : 'false';
-      if (typeof v === 'number') return String(v);
-      const s = String(v == null ? '' : v);
-      if (s === '' || /^[\s]|[\s]$|[:#\-?{}\[\],&*!|>'"%@`]|^(true|false|null|yes|no|on|off)$/i.test(s) || /^[\d.+-]+$/.test(s)) {
-        return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
-      }
-      return s;
-    }
-
-    function buildProductsYaml(products) {
-      const lines = ['scanner:', '  products:'];
-      products.forEach(p => {
-        lines.push('  - name: ' + yamlScalar(p.name || ''));
-        ['keywords', 'exclude_keywords', 'subito_urls'].forEach(key => {
-          const arr = Array.isArray(p[key]) ? p[key] : [];
-          lines.push('    ' + key + ':' + (arr.length ? '' : ' []'));
-          arr.forEach(v => lines.push('    - ' + yamlScalar(v)));
-        });
-        lines.push('    max_price: ' + (parseInt(p.max_price) || 0));
-        lines.push('    price_margin: ' + (parseInt(p.price_margin) || 0));
-        lines.push('    subito: ' + (p.subito !== false));
-        lines.push('    amazon: ' + (p.amazon !== false));
-        lines.push('    search_in_description: ' + (p.search_in_description === true));
-      });
-      return lines.join('\n') + '\n';
-    }
-
-    function showStaticExport(products) {
-      const box = document.getElementById('static-export');
-      const ta = document.getElementById('static-export-yaml');
-      if (!box || !ta) return;
-      ta.value = buildProductsYaml(products);
-      box.classList.remove('hidden');
-      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    async function copyStaticExport() {
-      const ta = document.getElementById('static-export-yaml');
-      const st = document.getElementById('static-export-status');
-      try {
-        await navigator.clipboard.writeText(ta.value);
-        st.textContent = 'Copiato negli appunti.';
-      } catch (e) {
-        ta.select();
-        st.textContent = document.execCommand('copy') ? 'Copiato negli appunti.' : 'Copia manuale con Ctrl+C.';
-      }
-      setTimeout(() => { st.textContent = ''; }, 3000);
-    }
-
-    function downloadStaticExport() {
-      const ta = document.getElementById('static-export-yaml');
-      const blob = new Blob([ta.value], { type: 'text/yaml;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'products.yaml';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    }
 
     function renderProducts(products) {
       state.formProducts = products.map(p => ({
@@ -990,21 +867,7 @@
           document.getElementById('cfg-amazon-pages').value = d.amazon.max_pages;
         }
         renderFilters(d.products || []);
-        if (CAN_WRITE) {
-          // Dove si puo' scrivere davvero, la bozza locale non serve piu' e
-          // anzi farebbe danno: mostrerebbe prodotti che il repository non ha.
-          renderProducts(d.products || []);
-          return;
-        }
-        // Le bozze locali hanno la precedenza: su GitHub Pages sono l'unica persistenza possibile
-        const draft = loadDraftProducts();
-        renderProducts(draft || d.products || []);
-        if (draft) {
-          const st = document.getElementById('config-save-status');
-          if (st) st.textContent = 'Bozza locale non ancora nel repository — usa «Copia» qui sotto.';
-          showStaticExport(collectFormProducts());
-        }
-        showDraftDivergence(draft, d.products || []);
+        renderProducts(d.products || []);
         return;
       }
       try {
@@ -1056,16 +919,6 @@
         }
         btn.textContent = 'Salva e applica';
         btn.disabled = false;
-        return;
-      }
-      if (IS_STATIC) {
-        // Nessun backend: si salva in locale e si espone lo YAML da portare nel repository.
-        const products = collectFormProducts();
-        const stored = saveDraftProducts(products);
-        showStaticExport(products);
-        status.textContent = stored
-          ? 'Salvato solo in questo browser: GitHub Pages è di sola lettura.'
-          : 'Storage non disponibile: copia lo YAML qui sotto.';
         return;
       }
       btn.textContent = 'Salvataggio…';
@@ -1165,11 +1018,6 @@
         } catch (e) {
           status.textContent = 'Errore di connessione con /api/store.';
         }
-        return;
-      }
-      if (IS_STATIC) {
-        // Su GitHub Pages non esiste POST /api/config: prima falliva con un errore generico.
-        status.textContent = `Sola lettura: modifica config/${state.currentConfig || 'config.yaml'} nel repository.`;
         return;
       }
       try {

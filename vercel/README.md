@@ -1,8 +1,11 @@
 # Tabellone su Vercel
 
-Questa cartella e' il sito da pubblicare su Vercel. Serve a una cosa sola che
-GitHub Pages non poteva fare: **salvare la configurazione dal pannello**, senza
-copiare YAML a mano e senza fare commit dal computer.
+Questa cartella e' il sito, e il sito e' **https://subito-it.vercel.app/**.
+Non c'e' un secondo indirizzo: quello e' il tabellone.
+
+Sta su Vercel per una ragione precisa — perche' un sito di soli file statici
+non puo' **salvare la configurazione dal pannello**. Qui si cambia una soglia e
+si preme Salva, senza copiare YAML a mano e senza fare commit dal computer.
 
 Di GitHub qui non si usa **nessuna credenziale**: niente personal access token,
 niente da creare, niente da incollare. Solo servizi gratuiti di Vercel.
@@ -60,9 +63,10 @@ cambiare le soglie, cambiale dal pannello.
 
 ## Perche' il tabellone non invecchia
 
-Su Pages i dati erano cotti dentro `index.html`: se la ricostruzione del sito
-non partiva, Telegram diceva una cosa e il tabellone un'altra. Qui `index.html`
-non contiene nessun annuncio. Li chiede a `/api/store` quando lo apri, e
+`index.html` non contiene nessun annuncio: non c'e' niente, dentro, che possa
+invecchiare. Se i dati fossero cotti nella pagina, basterebbe una ricostruzione
+del sito non partita perche' Telegram dicesse una cosa e il tabellone un'altra.
+Invece li chiede a `/api/store` quando lo apri, e
 `/api/store` li legge in quel momento da `raw.githubusercontent.com` — file
 pubblici via CDN, senza token.
 

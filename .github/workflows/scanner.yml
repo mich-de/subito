@@ -36,9 +36,9 @@ concurrency:
   group: scanner
   cancel-in-progress: false
 
-# Niente piu' pages/deployments/id-token: dal 28/08/2026 la dashboard sta su
-# Vercel e questo workflow non pubblica piu' niente su GitHub Pages. Restano i
-# due permessi che servono davvero: committare i dati e ripulire i run vecchi.
+# Solo i due permessi che servono davvero: committare i dati e ripulire i run
+# vecchi. Questo workflow non pubblica niente — il tabellone sta su
+# https://subito-it.vercel.app/ e si aggiorna da solo leggendo data/*.json.
 permissions:
   contents: write
   actions: write
@@ -126,6 +126,6 @@ jobs:
                   "https://api.github.com/repos/$REPO/actions/runs/$run_id"
               done
 
-# Qui c'era il job "deploy", che pubblicava su GitHub Pages. Non esiste piu':
-# GitHub e' il repository e lo scanner, la pagina web sta su Vercel. Un solo
-# tabellone, quindi nessun dubbio su quale dei due dica il vero.
+# Nessun job di pubblicazione, ed e' voluto: qui girano il repository e lo
+# scanner, il tabellone sta su https://subito-it.vercel.app/. Uno solo, quindi
+# nessun dubbio su quale dica il vero.
