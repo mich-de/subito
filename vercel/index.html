@@ -1217,7 +1217,8 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
    riservato al passaggio del mouse, perche' una colonna di croci accese
    urlerebbe piu' del prezzo, che e' la cosa da leggere. */
 .board .btn-hide,
-.board .btn-scam {
+.board .btn-scam,
+.board .btn-skip {
   opacity: .38;
   padding: .1rem .34rem;
   line-height: 1;
@@ -1226,10 +1227,19 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
 }
 .board tbody tr:hover .btn-hide,
 .board tbody tr:hover .btn-scam,
+.board tbody tr:hover .btn-skip,
 .board .btn-hide:focus-visible,
-.board .btn-scam:focus-visible { opacity: 1; }
+.board .btn-scam:focus-visible,
+.board .btn-skip:focus-visible { opacity: 1; }
 .board .btn-hide:hover { color: oklch(var(--s)); }
 .board .btn-scam:hover { color: oklch(var(--a)); }
+
+/* Escludere e' l'azione piu' definitiva delle tre, ma non e' un allarme: si
+   scurisce e basta, senza prendere un colore. L'ambra e' gia' della
+   segnalazione e il rosso e' di chi agisce sul tabellone; un terzo colore qui
+   farebbe solo sembrare tutte e tre urgenti, che e' il modo piu' rapido per
+   non farne notare nessuna. */
+.board .btn-skip:hover { color: oklch(var(--bc)); }
 
 /* Segnalato: il triangolo resta acceso in ambra, perche' da quel momento e'
    uno stato della riga e non un pulsante in attesa. */
@@ -1245,11 +1255,12 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
 .board tbody tr.is-scam .flap { opacity: .6; }
 .board tbody tr.is-scam:hover { background: oklch(var(--er) / .08); }
 
-/* Su touch il passaggio del dito non esiste: senza questo i due comandi
+/* Su touch il passaggio del dito non esiste: senza questo i tre comandi
    resterebbero smorzati per sempre e mai del tutto leggibili. */
 @media (hover: none) {
   .board .btn-hide,
-  .board .btn-scam { opacity: .62; }
+  .board .btn-scam,
+  .board .btn-skip { opacity: .62; }
 }
 
 .board-time {
@@ -1719,6 +1730,22 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
             <span id="scam-status" class="form-status"></span>
           </div>
         </section>
+
+        <section id="skip-box" class="card hidden">
+          <div class="section-title"><h2>Annunci esclusi dalla ricerca</h2></div>
+          <div class="alert alert-info">
+            <strong id="skip-count">Nessuno.</strong>
+            Questi non vengono piu' nemmeno raccolti: lo scanner li scarta
+            appena li rivede, quindi non tornano in tabellone, non contano per
+            il minimo e non fanno scattare Telegram. E' la differenza con
+            «tolti dal tabellone», che invece li nasconde soltanto.
+          </div>
+          <div class="save-row" style="justify-content:flex-start;margin-top:.7rem">
+            <button type="button" class="btn btn-secondary btn-sm"
+                    onclick="rimettiInRicerca(this)">Rimetti tutti in ricerca</button>
+            <span id="skip-status" class="form-status"></span>
+          </div>
+        </section>
       </div>
 
       <!-- ================================================================= YAML -->
@@ -1816,6 +1843,7 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
           loadConfig();
           aggiornaBoxNascosti();
           aggiornaBoxSegnalati();
+          aggiornaBoxIgnorati();
         }
         else loadYamlList();
       });
@@ -1951,6 +1979,10 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
                       aria-pressed="${i.scam ? 'true' : 'false'}"
                       aria-label="${i.scam ? 'Ritira la segnalazione di truffa' : 'Segnala come truffa'}: ${esc(i.title)}"
                       title="${i.scam ? 'Ritira la segnalazione' : 'Segnala come truffa'}">⚠</button>
+              <button type="button" class="btn btn-ghost btn-sm btn-icon btn-skip"
+                      data-skip="${esc(i.url)}"
+                      aria-label="Escludi dalla ricerca: ${esc(i.title)}"
+                      title="Non mi interessa: non cercarlo piu'">⊘</button>
               <button type="button" class="btn btn-ghost btn-sm btn-icon btn-hide"
                       data-hide="${esc(i.url)}"
                       aria-label="Togli dal tabellone: ${esc(i.title)}"
@@ -1967,9 +1999,47 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
     document.getElementById('board-body').addEventListener('click', function (e) {
       const daTogliere = e.target.closest('[data-hide]');
       if (daTogliere) { nascondiAnnuncio(daTogliere); return; }
+      const daEscludere = e.target.closest('[data-skip]');
+      if (daEscludere) { escludiDallaRicerca(daEscludere); return; }
       const daSegnalare = e.target.closest('[data-scam]');
       if (daSegnalare) segnalaTruffa(daSegnalare);
     });
+
+    /* Escludere e' piu' forte che nascondere, ed e' l'unica delle tre azioni
+       che esce dal tabellone: l'elenco lo ritira sync_config.py a ogni giro e
+       lo scanner scarta quegli indirizzi alla fonte, prima di classificarli.
+       Quindi l'annuncio non torna nei risultati, non entra nel minimo e non
+       fa scattare Telegram — mentre la ✕ lo nasconde soltanto, e la scansione
+       continua a raccoglierlo.
+
+       Sparisce anche subito da qui, senza aspettare il giro seguente: il
+       filtro e' applicato pure in lettura da /api/store, altrimenti premere
+       il pulsante non farebbe niente di visibile per mezz'ora. */
+    async function escludiDallaRicerca(bottone) {
+      const url = bottone.dataset.skip;
+      if (!url) return;
+      const riga = bottone.closest('tr');
+      const titolo = riga && riga.querySelector('.board-title')
+        ? riga.querySelector('.board-title').textContent : url;
+      if (!window.confirm('Escluderlo dalla ricerca?\n\n' + titolo
+            + '\n\nLo scanner smette di raccoglierlo: non tornera\' in '
+            + 'tabellone e non fara\' piu\' scattare Telegram. Si rimette '
+            + 'dalla scheda Configurazione.')) return;
+
+      bottone.disabled = true;
+      const d = await postStore({ skip: [url] });
+      if (d && d.ok) {
+        state.items = (state.items || []).filter(i => i.url !== url);
+        window.STATIC_ITEMS = state.items;
+        window.IGNORED_COUNT = d.ignoredCount;
+        renderItems(state.items);
+        appendLog(d.message, 'info');
+        aggiornaBoxIgnorati();
+      } else {
+        bottone.disabled = false;
+        appendLog((d && d.error) || 'Non sono riuscito a escludere l\'annuncio.', 'error');
+      }
+    }
 
     /* Segnalare non toglie: l'annuncio resta dov'e', marcato in rosso, fuori
        dal conto del minimo e della media. Serve a ricordarsi perche' quel
@@ -2138,6 +2208,7 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
       window.PANEL_UNLOCKED = true;
       window.HIDDEN_COUNT = d.hiddenCount || 0;
       window.SCAM_COUNT = d.scamCount || 0;
+      window.IGNORED_COUNT = d.ignoredCount || 0;
       if (Array.isArray(d.items) && d.items.length) {
         window.STATIC_ITEMS = d.items;
         state.items = d.items;
@@ -2311,6 +2382,39 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
         appendLog(d.message, 'info');
       } else if (stato) {
         stato.textContent = (d && d.error) || 'Ritiro non riuscito.';
+      }
+    }
+
+    function aggiornaBoxIgnorati() {
+      const box = document.getElementById('skip-box');
+      if (!box) return;
+      const quanti = window.IGNORED_COUNT || 0;
+      box.classList.toggle('hidden', !(CAN_WRITE && quanti));
+      const etichetta = document.getElementById('skip-count');
+      if (etichetta) {
+        etichetta.textContent = quanti === 1
+          ? '1 annuncio e\' escluso dalla ricerca.'
+          : quanti + ' annunci sono esclusi dalla ricerca.';
+      }
+    }
+
+    async function rimettiInRicerca(bottone) {
+      const stato = document.getElementById('skip-status');
+      if (!window.confirm('Rimettere in ricerca tutti gli annunci esclusi?')) return;
+      bottone.disabled = true;
+      if (stato) stato.textContent = 'Ripristino in corso…';
+      const d = await postStore({ unskipAll: true });
+      bottone.disabled = false;
+      if (d && d.ok) {
+        window.IGNORED_COUNT = d.ignoredCount || 0;
+        if (stato) stato.textContent = d.message;
+        aggiornaBoxIgnorati();
+        /* Qui non basta ridisegnare: gli annunci non sono in memoria, li ha
+           tolti il server. Tornano alla scansione seguente, che e' quella che
+           li raccoglie di nuovo. */
+        appendLog(d.message + ' Torneranno alla prossima scansione.', 'info');
+      } else if (stato) {
+        stato.textContent = (d && d.error) || 'Ripristino non riuscito.';
       }
     }
 
@@ -2574,6 +2678,7 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
               window.PANEL_HAS_PASSWORD = d.hasPassword !== false;
               window.PANEL_UNLOCKED = d.unlocked === true;
               window.HIDDEN_COUNT = d.hiddenCount || 0;
+              window.IGNORED_COUNT = d.ignoredCount || 0;
               if (!d.writable) {
                 window.STATIC_LOGS.push({
                   message: 'Scrittura non disponibile: manca lo store Blob o '

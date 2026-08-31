@@ -185,7 +185,8 @@
    riservato al passaggio del mouse, perche' una colonna di croci accese
    urlerebbe piu' del prezzo, che e' la cosa da leggere. */
 .board .btn-hide,
-.board .btn-scam {
+.board .btn-scam,
+.board .btn-skip {
   opacity: .38;
   padding: .1rem .34rem;
   line-height: 1;
@@ -194,10 +195,19 @@
 }
 .board tbody tr:hover .btn-hide,
 .board tbody tr:hover .btn-scam,
+.board tbody tr:hover .btn-skip,
 .board .btn-hide:focus-visible,
-.board .btn-scam:focus-visible { opacity: 1; }
+.board .btn-scam:focus-visible,
+.board .btn-skip:focus-visible { opacity: 1; }
 .board .btn-hide:hover { color: oklch(var(--s)); }
 .board .btn-scam:hover { color: oklch(var(--a)); }
+
+/* Escludere e' l'azione piu' definitiva delle tre, ma non e' un allarme: si
+   scurisce e basta, senza prendere un colore. L'ambra e' gia' della
+   segnalazione e il rosso e' di chi agisce sul tabellone; un terzo colore qui
+   farebbe solo sembrare tutte e tre urgenti, che e' il modo piu' rapido per
+   non farne notare nessuna. */
+.board .btn-skip:hover { color: oklch(var(--bc)); }
 
 /* Segnalato: il triangolo resta acceso in ambra, perche' da quel momento e'
    uno stato della riga e non un pulsante in attesa. */
@@ -213,11 +223,12 @@
 .board tbody tr.is-scam .flap { opacity: .6; }
 .board tbody tr.is-scam:hover { background: oklch(var(--er) / .08); }
 
-/* Su touch il passaggio del dito non esiste: senza questo i due comandi
+/* Su touch il passaggio del dito non esiste: senza questo i tre comandi
    resterebbero smorzati per sempre e mai del tutto leggibili. */
 @media (hover: none) {
   .board .btn-hide,
-  .board .btn-scam { opacity: .62; }
+  .board .btn-scam,
+  .board .btn-skip { opacity: .62; }
 }
 
 .board-time {

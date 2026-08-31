@@ -170,18 +170,36 @@ che aggiungi tu dal pannello, che non ne hanno.
 
 Salvare senza aver cambiato niente non scrive niente.
 
-## Le due azioni di riga: togliere e segnalare
+## Le tre azioni di riga: togliere, segnalare, escludere
 
-A destra di ogni riga, per chi ha la password, ci sono due pulsanti:
+A destra di ogni riga, per chi ha la password, ci sono tre pulsanti:
 
 | | Cosa fa |
 |---|---|
-| **✕** | Toglie l'annuncio dal tabellone. Chiede conferma. |
 | **⚠** | Lo segnala come truffa. Resta visibile, marcato. Si preme di nuovo per ritirare la segnalazione. |
+| **⊘** | «Non mi interessa»: lo esclude dalla ricerca. Sparisce, e lo scanner smette di raccoglierlo. Chiede conferma. |
+| **✕** | Toglie l'annuncio dal tabellone. Chiede conferma. |
 
 Sono **grigi finche' non ci passi sopra**, non invisibili: prima la ✕ compariva
 solo al passaggio del mouse, ed e' un modo eccellente per avere una funzione che
 non usa nessuno perche' nessuno sa che c'e'.
+
+Solo due dei tre prendono un colore al passaggio — rosso la ✕, ambra il ⚠. Il ⊘
+si limita a scurirsi: un terzo colore qui farebbe sembrare urgenti tutte e tre
+le azioni, che e' il modo piu' rapido per non farne notare nessuna.
+
+### ⊘ e ✕ non sono la stessa cosa
+
+È la distinzione che vale la pena tenere a mente:
+
+* **✕ nasconde.** L'annuncio esiste ancora, lo scanner continua a trovarlo, e
+  continua a contare per il minimo e per la media. Semplicemente non lo vedi.
+* **⊘ esclude.** Questi non vengono piu' nemmeno raccolti: lo scanner li scarta
+  appena li rivede, quindi non tornano in tabellone, non contano per il minimo e
+  non fanno scattare Telegram.
+
+La ✕ e' per «ho gia' guardato questo». Il ⊘ e' per «questo non e' quello che
+cerco, smetti di propormelo».
 
 ### Perche' non cancellano davvero
 
@@ -190,19 +208,41 @@ riscrive da capo a ogni giro, e la funzione su Vercel non ha — di proposito �
 nessuna credenziale per scrivere nel repository. Un annuncio cancellato
 tornerebbe alla scansione successiva.
 
-Quindi si tengono due elenchi di indirizzi e si applicano **in lettura**:
+Quindi si tengono tre elenchi di indirizzi e si applicano **in lettura**:
 
 ```
 state/nascosti.json    chi sparisce dal tabellone
 state/segnalati.json   chi resta ma e' marcato come truffa
+state/ignorati.json    chi non va piu' nemmeno cercato
 ```
 
-Due file e non uno: una scrittura andata male rovina un elenco solo. Stanno
+Tre file e non uno: una scrittura andata male rovina un elenco solo. Stanno
 fuori dal prefisso `config/` cosi' `sync_config.py` non li ritira insieme agli
 YAML. Il filtro sopravvive a qualunque riscrittura dei risultati, vale per tutti
 e non solo per chi ha premuto il pulsante, ed e' reversibile: l'annuncio non e'
 distrutto, e' escluso o qualificato. Nella scheda **Configurazione** ci sono i
-due riquadri con i conteggi e i pulsanti **Rimetti tutti** e **Ritira tutte**.
+riquadri con i conteggi e i pulsanti **Rimetti tutti**, **Ritira tutte** e
+**Rimetti in ricerca**.
+
+### Il terzo elenco e' l'unico che esce dal pannello
+
+`state/ignorati.json` non si ferma alla lettura: `sync_config.py` se lo porta a
+casa a ogni giro — e' l'unico file di `state/` che ritira, e lo chiede per nome —
+e lo scrive in `data/ignorati.json`. Da li' `scanner/base.py` lo carica una volta
+all'avvio e scarta quegli indirizzi **in cima a `classify_results`**, prima di
+qualunque altro controllo: cosi' non entrano nei risultati salvati, non arrivano
+a `is_new` e quindi non finiscono su Telegram, e non contano per il minimo ne'
+per la media. Lo scanner NorthLadder non passa da `classify_results` — costruisce
+il suo unico risultato da se' — quindi ha il filtro anche a casa sua.
+
+Se lo store non risponde, `data/ignorati.json` resta quello del giro prima; se
+manca del tutto, si scansiona tutto. Un giro con un annuncio di troppo e' un
+guaio molto piu' piccolo di un giro che non parte.
+
+Il filtro c'e' comunque anche in lettura su `/api/store`, e non e' una
+ridondanza: la scansione successiva puo' essere fra mezz'ora, e un pulsante che
+per mezz'ora sembra non aver fatto niente e' un pulsante che verra' premuto
+cinque volte.
 
 ### Cosa cambia per un annuncio segnalato
 
@@ -230,12 +270,14 @@ resta una nota di lavoro.
 vercel/
 ├─ index.html        generato da export_vercel.py — non modificarlo a mano
 ├─ api/store.py      GET: annunci a tutti, configurazione solo con password.
-│                    POST: scrive su Blob (config, nascosti, segnalati),
-│                    con password.
+│                    POST: scrive su Blob (config, nascosti, segnalati,
+│                    ignorati), con password.
 ├─ vercel.json       intestazioni e salto della build sui commit di soli dati
 └─ requirements.txt  ruamel.yaml, per non perdere i commenti
 
-../sync_config.py    il postino: Blob -> config/, all'inizio di ogni scansione
+../sync_config.py    il postino: Blob -> config/ e data/ignorati.json,
+                     all'inizio di ogni scansione
+../scanner/base.py   legge data/ignorati.json e scarta gli esclusi alla fonte
 ```
 
 `index.html` si rigenera con `python export_vercel.py` dalla radice del

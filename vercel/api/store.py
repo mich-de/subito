@@ -4,7 +4,8 @@
                       con password: in piu' prodotti, configurazioni, YAML,
                       e gli annunci completi di soglia.
     POST /api/store   riscrive i config/*.yaml su Vercel Blob, oppure aggiorna
-                      l'elenco degli annunci nascosti. Password obbligatoria.
+                      uno degli elenchi di annunci — nascosti, segnalati come
+                      truffa, esclusi dalla ricerca. Password obbligatoria.
 
 La password non protegge piu' soltanto la scrittura: la configurazione non esce
 da qui senza. Prima usciva a chiunque aprisse il tabellone, e chiunque poteva
@@ -68,17 +69,22 @@ CONFIG_FILES = ["config.yaml", "subito.yaml", "amazon.yaml", "northladder.yaml"]
 DATA_FILES = ["subitoscanner_results.json", "amazonscanner_results.json",
               "northladderscanner_results.json"]
 WORKFLOW = ".github/workflows/scanner.yml"
-# Le due annotazioni che il tabellone tiene sugli annunci: quelli tolti di
-# mezzo e quelli marcati come truffa. Stanno fuori da config/ perche' l'indice
-# dei config si legge per prefisso e non devono finirci in mezzo; sync_config.py,
-# che ritira solo i quattro YAML, non li vede nemmeno.
+# Le tre annotazioni che il tabellone tiene sugli annunci: quelli tolti di
+# mezzo, quelli marcati come truffa, e quelli che non interessano e che lo
+# scanner non deve piu' nemmeno raccogliere. Stanno fuori da config/ perche'
+# l'indice dei config si legge per prefisso e non devono finirci in mezzo.
 #
-# Sono due elenchi separati e non un file solo con due chiavi: un salvataggio
-# che va storto rovina una sola delle due cose, e nascondere resta possibile
-# anche se le segnalazioni sono illeggibili.
+# Sono elenchi separati e non un file solo con tre chiavi: un salvataggio che
+# va storto rovina una cosa sola, e nascondere resta possibile anche se le
+# segnalazioni sono illeggibili.
+#
+# I primi due li usa solo questo file, in lettura. Il terzo esce di qui: lo
+# ritira sync_config.py a ogni giro e lo consegna allo scanner, che lo applica
+# alla fonte. E' l'unico che cambia il comportamento della scansione.
 NASCOSTI = "state/nascosti.json"
 SEGNALATI = "state/segnalati.json"
-ELENCHI = (NASCOSTI, SEGNALATI)
+IGNORATI = "state/ignorati.json"
+ELENCHI = (NASCOSTI, SEGNALATI, IGNORATI)
 
 # Round-trip: senza questo i commenti dentro config.yaml — quelli che spiegano
 # perche' esiste la keyword "256gb" o l'esclusione "custodi" — sparirebbero al
@@ -232,9 +238,9 @@ def _indirizzi(testo):
 
 
 def leggi_elenchi():
-    """I due elenchi che il tabellone tiene su Blob: {percorso: set(url)}.
+    """I tre elenchi che il tabellone tiene su Blob: {percorso: set(url)}.
 
-    Nascondere o segnalare un annuncio non puo' voler dire scriverlo in
+    Annotare un annuncio non puo' voler dire scriverlo in
     data/*_results.json: quei file li riscrive lo scanner da capo a ogni giro,
     e la funzione non ha — di proposito — nessuna credenziale per scrivere nel
     repository. Un'annotazione messa li' sparirebbe alla scansione successiva.
@@ -243,8 +249,13 @@ def leggi_elenchi():
     sopravvivono a qualunque riscrittura dei risultati e sono reversibili —
     l'annuncio non e' toccato, gli si mette accanto un cartellino.
 
-    Un solo giro di indice per tutti e due: stanno sotto lo stesso prefisso, e
-    chiederlo due volte sarebbe una richiesta buttata a ogni apertura.
+    Il terzo elenco, gli esclusi, e' l'unico che non si ferma qui: sync_config.py
+    se lo porta a casa a ogni giro e lo scanner lo usa per non raccoglierli piu'.
+    Anche cosi' va applicato in lettura, o premere il pulsante non farebbe
+    niente di visibile fino alla scansione dopo.
+
+    Un solo giro di indice per tutti e tre: stanno sotto lo stesso prefisso, e
+    chiederlo tre volte sarebbe una richiesta buttata a ogni apertura.
     """
     indice = blob_index("state/")
     voci = {p: indice[p] for p in ELENCHI if p in indice}
@@ -343,7 +354,13 @@ def build_payload(autorizzato):
     elenchi = leggi_elenchi()
     # Il filtro vale per tutti, non solo per chi ha la password: un annuncio
     # tolto dal tabellone deve sparire dal tabellone, non solo dal tuo.
-    nascosti = elenchi[NASCOSTI]
+    #
+    # Gli ignorati spariscono qui come i nascosti, e non e' un doppione: lo
+    # scanner li scarta al giro dopo, ma il giro dopo puo' essere fra mezz'ora
+    # e nel frattempo l'annuncio resta scritto in data/*_results.json. Senza
+    # questa riga premere il pulsante non farebbe niente di visibile.
+    nascosti = elenchi[NASCOSTI] | elenchi[IGNORATI]
+    ignorati = elenchi[IGNORATI]
     # La segnalazione invece no. Dire «questa e' una truffa» e' un'accusa a un
     # annuncio identificabile, e non ha motivo di comparire su una pagina che
     # apre chiunque: e' un appunto per chi cerca, non un cartello per la
@@ -373,10 +390,23 @@ def build_payload(autorizzato):
         configs, dal_blob = leggi_config()
         config_data = forma_config(configs)
 
+    # La cadenza si legge dal workflow, non da una costante, cosi' il tabellone
+    # non puo' dire una cosa mentre il cron ne fa un'altra. Due scritture da
+    # riconoscere: '*/30' e la lista esplicita '7,37', che e' la stessa cadenza
+    # spostata fuori dai minuti affollati.
     cadenza = 30
-    m = re.search(r"cron:\s*['\"]\*/(\d+)", grezzi.get(WORKFLOW) or "")
+    testo_wf = grezzi.get(WORKFLOW) or ""
+    m = re.search(r"cron:\s*['\"]\*/(\d+)", testo_wf)
     if m:
         cadenza = int(m.group(1))
+    else:
+        m = re.search(r"cron:\s*['\"]([\d,]+)\s", testo_wf)
+        if m:
+            minuti = sorted({int(x) for x in m.group(1).split(",") if x != ""})
+            if len(minuti) > 1:
+                cadenza = min(b - a for a, b in zip(minuti, minuti[1:]))
+            elif minuti:
+                cadenza = 60
 
     ora = datetime.now(timezone(timedelta(hours=2))).strftime("%H:%M:%S")
     if autorizzato:
@@ -400,9 +430,14 @@ def build_payload(autorizzato):
         else:
             logs.append({"message": f"[{etichetta}] {n} annunci dall'ultima scansione.",
                          "level": "found" if n else "scan", "time": ora})
-    if nascosti:
-        logs.append({"message": f"{len(nascosti)} annunci nascosti dal pannello — "
-                                "si ripristinano dalla scheda Configurazione.",
+    if elenchi[NASCOSTI]:
+        logs.append({"message": f"{len(elenchi[NASCOSTI])} annunci nascosti dal "
+                                "pannello — si ripristinano dalla scheda "
+                                "Configurazione.",
+                     "level": "info", "time": ora})
+    if ignorati:
+        logs.append({"message": f"{len(ignorati)} annunci esclusi dalla ricerca: "
+                                "lo scanner non li raccoglie piu'.",
                      "level": "info", "time": ora})
     if segnalati:
         logs.append({"message": f"{len(segnalati)} annunci segnalati come truffa: "
@@ -428,17 +463,18 @@ def build_payload(autorizzato):
         # pannello e' spento e non fa comparire un prompt inutile.
         "hasPassword": bool(PASSWORD),
         "unlocked": autorizzato,
-        "hiddenCount": len(nascosti),
+        "hiddenCount": len(elenchi[NASCOSTI]),
         "scamCount": len(segnalati),
+        "ignoredCount": len(ignorati),
     }
 
 
 # ----------------------------------------------------------------- POST ----
 
-# Le due annotazioni si comportano allo stesso modo — aggiungi, togli, azzera —
-# e la sola differenza e' come si raccontano. Descriverle in una tabella invece
-# di scrivere due rami gemelli: quando ne servira' una terza, si aggiunge una
-# riga qui e non si copia niente.
+# Le annotazioni si comportano tutte allo stesso modo — aggiungi, togli,
+# azzera — e la sola differenza e' come si raccontano. Descriverle in una
+# tabella invece di scrivere rami gemelli: la terza, "skip", e' costata questa
+# riga e nient'altro.
 ANNOTAZIONI = {
     "hide": {
         "elenco": NASCOSTI,
@@ -458,11 +494,20 @@ ANNOTAZIONI = {
         "tolti": "{n} segnalazioni ritirate. Ne restano {resto}.",
         "vuoto": "Nessun annuncio segnalato come truffa.",
     },
+    "skip": {
+        "elenco": IGNORATI,
+        "togli": "unskip",
+        "azzera": "unskipAll",
+        "conteggio": "ignoredCount",
+        "aggiunti": "{n} annunci esclusi: lo scanner non li cerchera' piu'.",
+        "tolti": "{n} annunci rimessi in ricerca. Ne restano {resto} esclusi.",
+        "vuoto": "Nessun annuncio escluso dalla ricerca.",
+    },
 }
 
 
 def applica_annotazione(dati):
-    """Aggiorna nascosti o segnalati. None se la richiesta non ne parla.
+    """Aggiorna uno degli elenchi. None se la richiesta non ne parla.
 
     Restituire None invece di sollevare tiene il POST leggibile: chi chiama
     prova, e se la richiesta era per gli YAML prosegue per la sua strada.

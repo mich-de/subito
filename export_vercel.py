@@ -49,6 +49,7 @@ CODA = """
               window.PANEL_HAS_PASSWORD = d.hasPassword !== false;
               window.PANEL_UNLOCKED = d.unlocked === true;
               window.HIDDEN_COUNT = d.hiddenCount || 0;
+              window.IGNORED_COUNT = d.ignoredCount || 0;
               if (!d.writable) {
                 window.STATIC_LOGS.push({
                   message: 'Scrittura non disponibile: manca lo store Blob o '

@@ -8,6 +8,29 @@ ROME_TZ = timezone(timedelta(hours=2))
 PRICE_MARGIN = 50
 SENT_HISTORY_FILE = "data/sent_items.json"
 
+# Gli annunci esclusi dal pannello con «non mi interessa». Lo scrive
+# sync_config.py all'inizio di ogni giro, ritirandolo dalla cassetta postale su
+# Vercel Blob; qui si legge e basta.
+IGNORED_FILE = "data/ignorati.json"
+
+
+def load_ignored():
+    """Gli indirizzi da non raccogliere. Insieme vuoto se il file non c'e'.
+
+    Il file manca alla prima scansione dopo il deploy, e manca ogni volta che
+    lo store non risponde. In entrambi i casi si scansiona tutto: un giro con
+    un annuncio di troppo e' un guaio molto piu' piccolo di un giro che non
+    parte.
+    """
+    if not os.path.exists(IGNORED_FILE):
+        return set()
+    try:
+        with open(IGNORED_FILE, encoding="utf-8") as f:
+            data = json.load(f)
+        return {u for u in data if isinstance(u, str)} if isinstance(data, list) else set()
+    except (json.JSONDecodeError, OSError):
+        return set()
+
 class Product:
     def __init__(self, title, price, url, source, location="", shipping=False, condition="", date=None, product_name="", near_miss=False, max_price=0):
         self.title = title
@@ -51,6 +74,10 @@ class BaseScanner(ABC):
         self.shipping_required = global_config["scanner"]["shipping_required"]
         self.products = global_config["scanner"].get("products", [])
         self.results_file = f"data/{self.__class__.__name__.lower()}_results.json"
+        # Una volta sola, all'avvio: l'elenco non cambia durante la scansione e
+        # rileggerlo per ogni annuncio di ogni parola chiave sarebbe una lettura
+        # da disco a vuoto qualche migliaio di volte.
+        self.ignored = load_ignored()
 
     @abstractmethod
     def search(self, keyword):
@@ -87,6 +114,12 @@ class BaseScanner(ABC):
         matched = []
         near_miss = []
         for p in results:
+            # Prima di tutto il resto: un annuncio escluso dal pannello non
+            # deve nemmeno essere classificato. Scartandolo qui non entra nei
+            # risultati salvati, non arriva a is_new e quindi non finisce su
+            # Telegram, e non conta per il minimo ne' per la media.
+            if p.url in self.ignored:
+                continue
             if not p.price or p.price <= 1 or (not p.shipping and self.shipping_required):
                 continue
             if p.price <= max_price:

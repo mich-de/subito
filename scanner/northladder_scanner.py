@@ -49,11 +49,14 @@ class NorthLadderScanner(BaseScanner):
                 max_price=self.target_price_threshold
             )
             
-            if is_above_threshold:
-                matched.append(p)
-            else:
-                near_miss.append(p)
+            # Questo scanner non passa da classify_results — costruisce l'unico
+            # risultato da se' — quindi il filtro degli esclusi va applicato
+            # anche qui, o escludere la permuta dal pannello non farebbe nulla.
+            if p.url not in self.ignored:
+                (matched if is_above_threshold else near_miss).append(p)
 
+            # Lo storico si scrive comunque: e' la serie delle valutazioni nel
+            # tempo, e vale anche per un annuncio che non si vuole piu' vedere.
             self._save_history_entry(val)
 
         self._save_results(matched + near_miss)
