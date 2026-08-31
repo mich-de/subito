@@ -8,7 +8,15 @@ on:
     # 3, il resto sono Amazon e NorthLadder via Playwright) e a 15 minuti il
     # margine era di novanta secondi. A 30 il turno successivo parte sempre a
     # tavolo libero.
-    - cron: '*/30 * * * *'
+    #
+    # Ai minuti 7 e 37, non ':00' e ':30'. GitHub non garantisce i cron: quando
+    # i runner sono carichi scarta le esecuzioni programmate, e ':00' e ':30'
+    # sono i due minuti piu' affollati dell'ora, perche' ci finisce il cron di
+    # chiunque scriva '*/30'. Con quella scrittura, il 31/08/2026, ne partivano
+    # sette al giorno su quarantotto, e sempre in ritardo di dieci-venti
+    # minuti. Spostarsi di sette minuti non cambia niente per noi e toglie di
+    # mezzo la coda.
+    - cron: '7,37 * * * *'
   workflow_dispatch:
 
 # Rete di sicurezza contro l'accavallamento: un run per volta, in coda e non
