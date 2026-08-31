@@ -178,24 +178,46 @@
   white-space: nowrap;
 }
 
-/* Togliere un annuncio e' un'azione, quindi il rosso di sistema — ma solo
-   quando ci si passa sopra. Una colonna di croci rosse accese urlerebbe piu'
-   del prezzo, che e' la cosa da leggere. */
-.board .btn-hide {
-  opacity: 0;
+/* Le due azioni di riga: segnalare una truffa e togliere dal tabellone.
+   Erano invisibili finche' non ci passavi sopra, e una funzione che si vede
+   solo per caso e' una funzione che non c'e'. Ora stanno sempre in pagina,
+   ma smorzate: prendono colore quando le sfiori. Il rosso di sistema resta
+   riservato al passaggio del mouse, perche' una colonna di croci accese
+   urlerebbe piu' del prezzo, che e' la cosa da leggere. */
+.board .btn-hide,
+.board .btn-scam {
+  opacity: .38;
   padding: .1rem .34rem;
   line-height: 1;
   color: oklch(var(--bc) / .55);
   transition: opacity .14s, color .14s;
 }
 .board tbody tr:hover .btn-hide,
-.board .btn-hide:focus-visible { opacity: 1; }
+.board tbody tr:hover .btn-scam,
+.board .btn-hide:focus-visible,
+.board .btn-scam:focus-visible { opacity: 1; }
 .board .btn-hide:hover { color: oklch(var(--s)); }
+.board .btn-scam:hover { color: oklch(var(--a)); }
 
-/* Su touch il passaggio del dito non esiste: senza questo la croce resterebbe
-   invisibile e la funzione irraggiungibile. */
+/* Segnalato: il triangolo resta acceso in ambra, perche' da quel momento e'
+   uno stato della riga e non un pulsante in attesa. */
+.board .btn-scam.is-on { opacity: 1; color: oklch(var(--a)); }
+
+/* La riga segnalata si smorza: c'e' ancora, si legge ancora, ma smette di
+   competere con gli annunci veri. Il titolo resta pienamente leggibile —
+   sbiadire quello sarebbe punire chi legge, non l'annuncio.
+   Il fondo usa --er, l'errore semantico, e non --s: quello e' il rosso delle
+   azioni, e tingere di --s una riga per qualificarla gli toglierebbe il
+   significato che ha sui pulsanti. */
+.board tbody tr.is-scam { background: oklch(var(--er) / .045); }
+.board tbody tr.is-scam .flap { opacity: .6; }
+.board tbody tr.is-scam:hover { background: oklch(var(--er) / .08); }
+
+/* Su touch il passaggio del dito non esiste: senza questo i due comandi
+   resterebbero smorzati per sempre e mai del tutto leggibili. */
 @media (hover: none) {
-  .board .btn-hide { opacity: .55; }
+  .board .btn-hide,
+  .board .btn-scam { opacity: .62; }
 }
 
 .board-time {

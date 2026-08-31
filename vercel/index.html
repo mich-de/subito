@@ -1210,24 +1210,46 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
   white-space: nowrap;
 }
 
-/* Togliere un annuncio e' un'azione, quindi il rosso di sistema — ma solo
-   quando ci si passa sopra. Una colonna di croci rosse accese urlerebbe piu'
-   del prezzo, che e' la cosa da leggere. */
-.board .btn-hide {
-  opacity: 0;
+/* Le due azioni di riga: segnalare una truffa e togliere dal tabellone.
+   Erano invisibili finche' non ci passavi sopra, e una funzione che si vede
+   solo per caso e' una funzione che non c'e'. Ora stanno sempre in pagina,
+   ma smorzate: prendono colore quando le sfiori. Il rosso di sistema resta
+   riservato al passaggio del mouse, perche' una colonna di croci accese
+   urlerebbe piu' del prezzo, che e' la cosa da leggere. */
+.board .btn-hide,
+.board .btn-scam {
+  opacity: .38;
   padding: .1rem .34rem;
   line-height: 1;
   color: oklch(var(--bc) / .55);
   transition: opacity .14s, color .14s;
 }
 .board tbody tr:hover .btn-hide,
-.board .btn-hide:focus-visible { opacity: 1; }
+.board tbody tr:hover .btn-scam,
+.board .btn-hide:focus-visible,
+.board .btn-scam:focus-visible { opacity: 1; }
 .board .btn-hide:hover { color: oklch(var(--s)); }
+.board .btn-scam:hover { color: oklch(var(--a)); }
 
-/* Su touch il passaggio del dito non esiste: senza questo la croce resterebbe
-   invisibile e la funzione irraggiungibile. */
+/* Segnalato: il triangolo resta acceso in ambra, perche' da quel momento e'
+   uno stato della riga e non un pulsante in attesa. */
+.board .btn-scam.is-on { opacity: 1; color: oklch(var(--a)); }
+
+/* La riga segnalata si smorza: c'e' ancora, si legge ancora, ma smette di
+   competere con gli annunci veri. Il titolo resta pienamente leggibile —
+   sbiadire quello sarebbe punire chi legge, non l'annuncio.
+   Il fondo usa --er, l'errore semantico, e non --s: quello e' il rosso delle
+   azioni, e tingere di --s una riga per qualificarla gli toglierebbe il
+   significato che ha sui pulsanti. */
+.board tbody tr.is-scam { background: oklch(var(--er) / .045); }
+.board tbody tr.is-scam .flap { opacity: .6; }
+.board tbody tr.is-scam:hover { background: oklch(var(--er) / .08); }
+
+/* Su touch il passaggio del dito non esiste: senza questo i due comandi
+   resterebbero smorzati per sempre e mai del tutto leggibili. */
 @media (hover: none) {
-  .board .btn-hide { opacity: .55; }
+  .board .btn-hide,
+  .board .btn-scam { opacity: .62; }
 }
 
 .board-time {
@@ -1683,7 +1705,7 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
              il form si porterebbe dietro il salvataggio della configurazione.
              Compare solo quando c'e' qualcosa da rimettere. -->
         <section id="hidden-box" class="card hidden">
-          <div class="section-title"><h2>Annuncio tolti dal tabellone</h2></div>
+          <div class="section-title"><h2>Annunci tolti dal tabellone</h2></div>
           <div class="alert alert-info">
             <strong id="hidden-count">Nessuno.</strong>
             Non sono cancellati da Subito: restano fuori dal tabellone anche
@@ -1693,6 +1715,26 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
             <button type="button" class="btn btn-secondary btn-sm"
                     onclick="ripristinaNascosti(this)">Rimetti tutti</button>
             <span id="hidden-status" class="form-status"></span>
+          </div>
+        </section>
+
+        <section id="scam-box" class="card hidden">
+          <div class="section-title"><h2>Annunci segnalati come truffa</h2></div>
+          <div class="alert alert-warning">
+            <span>⚠️</span>
+            <span>
+              <strong id="scam-count">Nessuno.</strong>
+              Restano sul tabellone, marcati in rosso, ma fuori dal conto del
+              minimo e della media — un prezzo finto e' quasi sempre il piu'
+              basso, e falserebbe la cifra che si guarda per prima. La
+              segnalazione la vedi solo tu: chi apre la pagina senza password
+              vede l'annuncio come tutti gli altri.
+            </span>
+          </div>
+          <div class="save-row" style="justify-content:flex-start;margin-top:.7rem">
+            <button type="button" class="btn btn-secondary btn-sm"
+                    onclick="ritiraSegnalazioni(this)">Ritira tutte</button>
+            <span id="scam-status" class="form-status"></span>
           </div>
         </section>
       </div>
@@ -1788,7 +1830,11 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
       // rotta.
       sbloccaConfig().then(function (ok) {
         if (!ok) { switchTab('dashboard'); return; }
-        if (name === 'config') { loadConfig(); aggiornaBoxNascosti(); }
+        if (name === 'config') {
+          loadConfig();
+          aggiornaBoxNascosti();
+          aggiornaBoxSegnalati();
+        }
         else loadYamlList();
       });
     }
@@ -1856,8 +1902,14 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
         .filter(i => i.price)
         .sort((a, b) => a.price - b.price);
 
-      const best = rows.length ? rows[0].price : null;
-      const prices = rows.map(i => i.price).filter(p => p > 1);
+      /* Un annuncio segnalato come truffa non e' un affare: se restasse nel
+         conto sarebbe quasi sempre lui il minimo — e' proprio il prezzo fuori
+         mercato a farlo sospettare — e la cifra grossa in cima alla pagina,
+         quella che si guarda per prima, direbbe una bugia. Resta sul
+         tabellone, marcato, ma fuori dalle statistiche. */
+      const onesti = rows.filter(i => !i.scam);
+      const best = onesti.length ? onesti[0].price : null;
+      const prices = onesti.map(i => i.price).filter(p => p > 1);
       const avg = prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
       // Le soglie viaggiano con gli annunci solo per chi ha la password: da
       // anonimo il conteggio dei fuori soglia non e' zero, e' ignoto — e uno
@@ -1886,11 +1938,13 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
       }
 
       body.innerHTML = rows.map(i => {
-        const isBest = i.price === best;
+        const isBest = !i.scam && i.price === best;
         const isFresh = i.date && (Date.now() - new Date(i.date).getTime()) < 3600000;
         // Un solo distintivo per riga, in ordine di importanza: due badge
-        // accanto si annullano a vicenda.
-        const state_ = isBest ? '<span class="badge badge-success">minimo</span>'
+        // accanto si annullano a vicenda. «truffa» viene prima di tutto: e' la
+        // sola cosa che cambia cosa fare dell'annuncio.
+        const state_ = i.scam ? '<span class="badge badge-error">truffa</span>'
+          : isBest ? '<span class="badge badge-success">minimo</span>'
           : i.near_miss ? '<span class="badge badge-warning">oltre soglia</span>'
           : isFresh ? '<span class="badge badge-info">nuovo</span>'
           : soglieNote ? '<span class="badge badge-ghost">in soglia</span>'
@@ -1898,7 +1952,7 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
         const meta = [i.location, i.shipping ? 'spedizione' : null, i.condition]
           .filter(Boolean).map(esc).join(' · ');
         return `
-          <tr class="${isBest ? 'is-best' : ''}">
+          <tr class="${isBest ? 'is-best' : ''}${i.scam ? ' is-scam' : ''}">
             <td class="col-time"><span class="board-time">${esc(fmtTime(i.date))}<small>${esc(fmtDate(i.date))}</small></span></td>
             <td class="col-product"><span class="board-product">${esc(i.product_name || '—')}</span></td>
             <td>
@@ -1910,6 +1964,11 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
             <td class="col-price"><span class="flap">€${esc(i.price)}</span></td>
             <td class="col-state">${state_}</td>
             ${CAN_WRITE ? `<td class="col-del no-print">
+              <button type="button" class="btn btn-ghost btn-sm btn-icon btn-scam${i.scam ? ' is-on' : ''}"
+                      data-scam="${esc(i.url)}" data-on="${i.scam ? '1' : ''}"
+                      aria-pressed="${i.scam ? 'true' : 'false'}"
+                      aria-label="${i.scam ? 'Ritira la segnalazione di truffa' : 'Segnala come truffa'}: ${esc(i.title)}"
+                      title="${i.scam ? 'Ritira la segnalazione' : 'Segnala come truffa'}">⚠</button>
               <button type="button" class="btn btn-ghost btn-sm btn-icon btn-hide"
                       data-hide="${esc(i.url)}"
                       aria-label="Togli dal tabellone: ${esc(i.title)}"
@@ -1924,9 +1983,39 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
        spezzerebbe il gestore. Un solo ascoltatore sul corpo della tabella
        vale anche per le righe ridisegnate dopo un filtro. */
     document.getElementById('board-body').addEventListener('click', function (e) {
-      const bottone = e.target.closest('[data-hide]');
-      if (bottone) nascondiAnnuncio(bottone);
+      const daTogliere = e.target.closest('[data-hide]');
+      if (daTogliere) { nascondiAnnuncio(daTogliere); return; }
+      const daSegnalare = e.target.closest('[data-scam]');
+      if (daSegnalare) segnalaTruffa(daSegnalare);
     });
+
+    /* Segnalare non toglie: l'annuncio resta dov'e', marcato in rosso, fuori
+       dal conto del minimo e della media. Serve a ricordarsi perche' quel
+       prezzo era troppo bello, non a far finta di non averlo visto — per
+       quello c'e' la ✕ accanto. Il bottone e' un interruttore: ripremuto
+       ritira la segnalazione, senza chiedere conferma perche' non distrugge
+       niente. */
+    async function segnalaTruffa(bottone) {
+      const url = bottone.dataset.scam;
+      if (!url) return;
+      const attiva = !bottone.dataset.on;
+
+      bottone.disabled = true;
+      const d = await postStore(attiva ? { scam: [url] } : { unscam: [url] });
+      bottone.disabled = false;
+      if (!d || !d.ok) {
+        appendLog((d && d.error) || 'Non sono riuscito a cambiare la segnalazione.', 'error');
+        return;
+      }
+      (state.items || []).forEach(function (i) {
+        if (i.url === url) { if (attiva) i.scam = true; else delete i.scam; }
+      });
+      window.STATIC_ITEMS = state.items;
+      window.SCAM_COUNT = d.scamCount;
+      renderItems(state.items);
+      appendLog(d.message, attiva ? 'warning' : 'info');
+      aggiornaBoxSegnalati();
+    }
 
     async function nascondiAnnuncio(bottone) {
       const url = bottone.dataset.hide;
@@ -2067,6 +2156,8 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
       window.STATIC_CONFIG_DATA = d.config || {};
       configSbloccata = true;
       window.PANEL_UNLOCKED = true;
+      window.HIDDEN_COUNT = d.hiddenCount || 0;
+      window.SCAM_COUNT = d.scamCount || 0;
       if (Array.isArray(d.items) && d.items.length) {
         window.STATIC_ITEMS = d.items;
         state.items = d.items;
@@ -2308,6 +2399,41 @@ tbody tr:hover { background: oklch(var(--bc) / .04); }
         appendLog(d.message + ' Ricarica il tabellone per rivederli.', 'info');
       } else if (stato) {
         stato.textContent = (d && d.error) || 'Ripristino non riuscito.';
+      }
+    }
+
+    function aggiornaBoxSegnalati() {
+      const box = document.getElementById('scam-box');
+      if (!box) return;
+      const quanti = window.SCAM_COUNT || 0;
+      box.classList.toggle('hidden', !(CAN_WRITE && quanti));
+      const etichetta = document.getElementById('scam-count');
+      if (etichetta) {
+        etichetta.textContent = quanti === 1
+          ? '1 annuncio e\' segnalato come truffa.'
+          : quanti + ' annunci sono segnalati come truffa.';
+      }
+    }
+
+    async function ritiraSegnalazioni(bottone) {
+      const stato = document.getElementById('scam-status');
+      if (!window.confirm('Ritirare tutte le segnalazioni di truffa?')) return;
+      bottone.disabled = true;
+      if (stato) stato.textContent = 'Ritiro in corso…';
+      const d = await postStore({ unscamAll: true });
+      bottone.disabled = false;
+      if (d && d.ok) {
+        window.SCAM_COUNT = d.scamCount || 0;
+        if (stato) stato.textContent = d.message;
+        /* Le righe portano ancora il marchio: si toglie qui invece di
+           richiedere tutto al server, che per un dato che gia' conosciamo
+           sarebbe una richiesta buttata. */
+        (state.items || []).forEach(function (i) { delete i.scam; });
+        renderItems(state.items);
+        aggiornaBoxSegnalati();
+        appendLog(d.message, 'info');
+      } else if (stato) {
+        stato.textContent = (d && d.error) || 'Ritiro non riuscito.';
       }
     }
 

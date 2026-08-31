@@ -34,14 +34,15 @@ sei kilobyte).
   └────────┘ /api/store  │  *.yaml    │  indirizzo └──────┬───────┘
        │                 ├────────────┤   pubblico        ▼
        └───────────────► │ state/     │             run_once.py
-          annunci tolti  │ nascosti   │                   │
+        annunci tolti e  │  nascosti  │                   │
+          segnalati      │  segnalati │                   │
                          └─────┬──────┘                   │
                                │ filtro in lettura        │
    tabellone ◄─────────────────┴─── raw.githubusercontent.com ◄── data/*.json
 ```
 
 `state/` sta fuori da `config/` apposta: `sync_config.py` ritira solo i quattro
-YAML, e l'elenco dei nascosti non deve finire in mezzo.
+YAML, e gli elenchi non devono finire in mezzo.
 
 1. Premi **Salva e applica**: `/api/store` riscrive gli YAML e li mette su Blob.
 2. Alla scansione successiva `sync_config.py` li ritira e li mette in `config/`.
@@ -111,7 +112,7 @@ Non solo la scrittura: **anche la lettura della configurazione**.
 | Chi apre il tabellone | Cosa vede |
 |---|---|
 | Chiunque | Gli annunci, i filtri, la stampa. |
-| Chi ha la password | In piu': prodotti, soglie, parole chiave, esclusioni, editor YAML, i pulsanti per togliere un annuncio, e le soglie sugli annunci. |
+| Chi ha la password | In piu': prodotti, soglie, parole chiave, esclusioni, editor YAML, i pulsanti di riga, le segnalazioni di truffa, e le soglie sugli annunci. |
 
 **Chiudere la scheda non bastava.** Vale la pena scriverlo perche' e' il tipo
 di falla che si rifa': ogni annuncio in `data/*_results.json` si porta dietro
@@ -165,27 +166,59 @@ che aggiungi tu dal pannello, che non ne hanno.
 
 Salvare senza aver cambiato niente non scrive niente.
 
-## Togliere un annuncio dal tabellone
+## Le due azioni di riga: togliere e segnalare
 
-Passando su una riga compare una **✕** a destra: toglie quell'annuncio. Serve la
-password, come per salvare.
+A destra di ogni riga, per chi ha la password, ci sono due pulsanti:
 
-Non lo cancella davvero, e non potrebbe: gli annunci stanno in
-`data/*_results.json`, che lo scanner riscrive da capo a ogni giro, e la
-funzione su Vercel non ha — di proposito — nessuna credenziale per scrivere nel
-repository. Un annuncio cancellato tornerebbe alla scansione successiva.
+| | Cosa fa |
+|---|---|
+| **✕** | Toglie l'annuncio dal tabellone. Chiede conferma. |
+| **⚠** | Lo segnala come truffa. Resta visibile, marcato. Si preme di nuovo per ritirare la segnalazione. |
 
-Quindi si tiene l'elenco di cio' che va nascosto e lo si applica **in lettura**:
+Sono **grigi finche' non ci passi sopra**, non invisibili: prima la ✕ compariva
+solo al passaggio del mouse, ed e' un modo eccellente per avere una funzione che
+non usa nessuno perche' nessuno sa che c'e'.
+
+### Perche' non cancellano davvero
+
+Non potrebbero: gli annunci stanno in `data/*_results.json`, che lo scanner
+riscrive da capo a ogni giro, e la funzione su Vercel non ha — di proposito —
+nessuna credenziale per scrivere nel repository. Un annuncio cancellato
+tornerebbe alla scansione successiva.
+
+Quindi si tengono due elenchi di indirizzi e si applicano **in lettura**:
 
 ```
-state/nascosti.json   su Blob, fuori dal prefisso config/ cosi' sync_config.py
-                      non lo ritira insieme agli YAML
+state/nascosti.json    chi sparisce dal tabellone
+state/segnalati.json   chi resta ma e' marcato come truffa
 ```
 
-Il filtro sopravvive a qualunque riscrittura dei risultati, vale per tutti e non
-solo per chi ha premuto la ✕, ed e' reversibile: l'annuncio non e' distrutto,
-e' escluso. Nella scheda **Configurazione** c'e' il riquadro che dice quanti ne
-sono nascosti e il pulsante **Rimetti tutti**.
+Due file e non uno: una scrittura andata male rovina un elenco solo. Stanno
+fuori dal prefisso `config/` cosi' `sync_config.py` non li ritira insieme agli
+YAML. Il filtro sopravvive a qualunque riscrittura dei risultati, vale per tutti
+e non solo per chi ha premuto il pulsante, ed e' reversibile: l'annuncio non e'
+distrutto, e' escluso o qualificato. Nella scheda **Configurazione** ci sono i
+due riquadri con i conteggi e i pulsanti **Rimetti tutti** e **Ritira tutte**.
+
+### Cosa cambia per un annuncio segnalato
+
+Resta in tabella, con il badge **truffa** e la riga velata di rosso — nasconderlo
+sarebbe la ✕, e serve poterlo rivedere per ricordarsi perche' era sospetto.
+
+Ma **esce dal minimo e dalla media**. È il punto della funzione: un prezzo finto
+e' finto verso il basso, quindi diventa sempre il minimo del tabellone e sposta
+la media. Una volta segnalato, le statistiche tornano a descrivere gli annunci
+onesti.
+
+Su Telegram non arriva niente di nuovo: lo scanner tiene gia' il conto di cosa
+ha notificato (`is_new` / `mark_sent` in `run_once.py`), quindi un annuncio gia'
+visto non viene rimandato, segnalato o no.
+
+**La segnalazione non e' pubblica.** Il campo `scam` viaggia solo verso chi ha
+la password, e chi apre il tabellone da anonimo non vede ne' il badge ne' il
+conteggio. Accusare di truffa un annuncio identificabile su un indirizzo aperto
+a chiunque e' un'affermazione su una persona vera, fatta senza contraddittorio:
+resta una nota di lavoro.
 
 ## I file
 
@@ -193,7 +226,8 @@ sono nascosti e il pulsante **Rimetti tutti**.
 vercel/
 ├─ index.html        generato da export_vercel.py — non modificarlo a mano
 ├─ api/store.py      GET: annunci a tutti, configurazione solo con password.
-│                    POST: scrive su Blob (config e nascosti), con password.
+│                    POST: scrive su Blob (config, nascosti, segnalati),
+│                    con password.
 ├─ vercel.json       intestazioni e salto della build sui commit di soli dati
 └─ requirements.txt  ruamel.yaml, per non perdere i commenti
 

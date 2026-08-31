@@ -68,10 +68,17 @@ CONFIG_FILES = ["config.yaml", "subito.yaml", "amazon.yaml", "northladder.yaml"]
 DATA_FILES = ["subitoscanner_results.json", "amazonscanner_results.json",
               "northladderscanner_results.json"]
 WORKFLOW = ".github/workflows/scanner.yml"
-# Fuori da config/: l'indice dei config si legge per prefisso, e questo file
-# non deve finirci in mezzo. sync_config.py, che ritira solo i quattro YAML,
-# non lo vede nemmeno.
+# Le due annotazioni che il tabellone tiene sugli annunci: quelli tolti di
+# mezzo e quelli marcati come truffa. Stanno fuori da config/ perche' l'indice
+# dei config si legge per prefisso e non devono finirci in mezzo; sync_config.py,
+# che ritira solo i quattro YAML, non li vede nemmeno.
+#
+# Sono due elenchi separati e non un file solo con due chiavi: un salvataggio
+# che va storto rovina una sola delle due cose, e nascondere resta possibile
+# anche se le segnalazioni sono illeggibili.
 NASCOSTI = "state/nascosti.json"
+SEGNALATI = "state/segnalati.json"
+ELENCHI = (NASCOSTI, SEGNALATI)
 
 # Round-trip: senza questo i commenti dentro config.yaml — quelli che spiegano
 # perche' esiste la keyword "256gb" o l'esclusione "custodi" — sparirebbero al
@@ -207,34 +214,46 @@ def leggi_config():
     return fuori, set(da_blob)
 
 
-def leggi_nascosti():
-    """Gli indirizzi degli annunci tolti dal tabellone. Insieme vuoto se non ce ne sono.
+def _indirizzi(testo):
+    """Gli URL dentro un elenco JSON. Insieme vuoto per qualunque guaio.
 
-    Cancellare un annuncio non puo' voler dire cancellarlo da
-    data/*_results.json: quei file li riscrive lo scanner da capo a ogni giro,
-    e la funzione non ha — di proposito — nessuna credenziale per scrivere nel
-    repository. Un annuncio tolto cosi' tornerebbe alla scansione successiva.
-
-    Quindi si tiene l'elenco di cio' che va nascosto, e lo si applica in
-    lettura. Il filtro sopravvive a qualunque riscrittura dei risultati, ed e'
-    reversibile: l'annuncio non e' distrutto, e' solo escluso.
+    Un elenco illeggibile non deve fermare il tabellone: nel peggiore dei casi
+    si perde un'annotazione, e questo e' meglio di una pagina che non si apre.
     """
-    indice = blob_index(NASCOSTI)
-    voce = indice.get(NASCOSTI)
-    if not voce:
-        return set()
-    testo = blob_get(*voce)
     if not testo:
         return set()
     try:
         dati = json.loads(testo)
     except json.JSONDecodeError:
         return set()
-    return {u for u in dati if isinstance(u, str)} if isinstance(dati, list) else set()
+    if not isinstance(dati, list):
+        return set()
+    return {u for u in dati if isinstance(u, str)}
 
 
-def scrivi_nascosti(url_nascosti):
-    blob_put(NASCOSTI, json.dumps(sorted(url_nascosti), ensure_ascii=False),
+def leggi_elenchi():
+    """I due elenchi che il tabellone tiene su Blob: {percorso: set(url)}.
+
+    Nascondere o segnalare un annuncio non puo' voler dire scriverlo in
+    data/*_results.json: quei file li riscrive lo scanner da capo a ogni giro,
+    e la funzione non ha — di proposito — nessuna credenziale per scrivere nel
+    repository. Un'annotazione messa li' sparirebbe alla scansione successiva.
+
+    Quindi le annotazioni stanno da parte e si applicano in lettura:
+    sopravvivono a qualunque riscrittura dei risultati e sono reversibili —
+    l'annuncio non e' toccato, gli si mette accanto un cartellino.
+
+    Un solo giro di indice per tutti e due: stanno sotto lo stesso prefisso, e
+    chiederlo due volte sarebbe una richiesta buttata a ogni apertura.
+    """
+    indice = blob_index("state/")
+    voci = {p: indice[p] for p in ELENCHI if p in indice}
+    testi = parallel(lambda p: blob_get(*voci[p]), list(voci)) if voci else {}
+    return {p: _indirizzi(testi.get(p)) for p in ELENCHI}
+
+
+def scrivi_elenco(percorso, urls):
+    blob_put(percorso, json.dumps(sorted(urls), ensure_ascii=False),
              "application/json; charset=utf-8")
 
 
@@ -321,9 +340,15 @@ def build_payload(autorizzato):
     """
     grezzi = parallel(raw_file, [f"data/{n}" for n in DATA_FILES] + [WORKFLOW])
 
+    elenchi = leggi_elenchi()
     # Il filtro vale per tutti, non solo per chi ha la password: un annuncio
     # tolto dal tabellone deve sparire dal tabellone, non solo dal tuo.
-    nascosti = leggi_nascosti()
+    nascosti = elenchi[NASCOSTI]
+    # La segnalazione invece no. Dire «questa e' una truffa» e' un'accusa a un
+    # annuncio identificabile, e non ha motivo di comparire su una pagina che
+    # apre chiunque: e' un appunto per chi cerca, non un cartello per la
+    # strada. Chi ha la password la vede, gli altri vedono l'annuncio e basta.
+    segnalati = elenchi[SEGNALATI] if autorizzato else set()
 
     items = []
     conteggi = {}
@@ -335,7 +360,10 @@ def build_payload(autorizzato):
         if isinstance(dati, list):
             visibili = [i for i in dati
                         if not (isinstance(i, dict) and i.get("url") in nascosti)]
-            if not autorizzato:
+            if autorizzato:
+                visibili = [dict(i, scam=True) if i.get("url") in segnalati else i
+                            for i in visibili]
+            else:
                 visibili = [spoglia(i) for i in visibili]
             items.extend(visibili)
             conteggi[nome] = len(visibili)
@@ -376,6 +404,11 @@ def build_payload(autorizzato):
         logs.append({"message": f"{len(nascosti)} annunci nascosti dal pannello — "
                                 "si ripristinano dalla scheda Configurazione.",
                      "level": "info", "time": ora})
+    if segnalati:
+        logs.append({"message": f"{len(segnalati)} annunci segnalati come truffa: "
+                                "restano sul tabellone marcati, ma non contano "
+                                "per il minimo e la media.",
+                     "level": "warning", "time": ora})
     scrivibile = bool(BLOB_TOKEN and PASSWORD)
     logs.append({"message": f"Scansione ogni {cadenza} minuti. " + (
         "Il pannello salva su Vercel Blob e la scansione seguente lo raccoglie."
@@ -396,10 +429,77 @@ def build_payload(autorizzato):
         "hasPassword": bool(PASSWORD),
         "unlocked": autorizzato,
         "hiddenCount": len(nascosti),
+        "scamCount": len(segnalati),
     }
 
 
 # ----------------------------------------------------------------- POST ----
+
+# Le due annotazioni si comportano allo stesso modo — aggiungi, togli, azzera —
+# e la sola differenza e' come si raccontano. Descriverle in una tabella invece
+# di scrivere due rami gemelli: quando ne servira' una terza, si aggiunge una
+# riga qui e non si copia niente.
+ANNOTAZIONI = {
+    "hide": {
+        "elenco": NASCOSTI,
+        "togli": "unhide",
+        "azzera": "unhideAll",
+        "conteggio": "hiddenCount",
+        "aggiunti": "{n} annunci tolti dal tabellone.",
+        "tolti": "{n} annunci rimessi. Ne restano {resto} nascosti.",
+        "vuoto": "Tabellone ripristinato: nessun annuncio nascosto.",
+    },
+    "scam": {
+        "elenco": SEGNALATI,
+        "togli": "unscam",
+        "azzera": "unscamAll",
+        "conteggio": "scamCount",
+        "aggiunti": "{n} annunci segnalati come truffa.",
+        "tolti": "{n} segnalazioni ritirate. Ne restano {resto}.",
+        "vuoto": "Nessun annuncio segnalato come truffa.",
+    },
+}
+
+
+def applica_annotazione(dati):
+    """Aggiorna nascosti o segnalati. None se la richiesta non ne parla.
+
+    Restituire None invece di sollevare tiene il POST leggibile: chi chiama
+    prova, e se la richiesta era per gli YAML prosegue per la sua strada.
+    """
+    def indirizzi(chiave):
+        valore = dati.get(chiave) or []
+        if isinstance(valore, str):
+            valore = [valore]
+        return {u for u in valore if isinstance(u, str) and u.strip()}
+
+    for aggiungi, regole in ANNOTAZIONI.items():
+        if not (aggiungi in dati or regole["togli"] in dati
+                or dati.get(regole["azzera"])):
+            continue
+
+        prima = leggi_elenchi()[regole["elenco"]]
+        if dati.get(regole["azzera"]):
+            dopo = set()
+        else:
+            dopo = (prima | indirizzi(aggiungi)) - indirizzi(regole["togli"])
+
+        if dopo == prima:
+            return {"ok": True, "changed": False,
+                    regole["conteggio"]: len(prima), "message": "Nessuna modifica."}
+
+        scrivi_elenco(regole["elenco"], dopo)
+        quanti = len(dopo) - len(prima)
+        if quanti > 0:
+            messaggio = regole["aggiunti"].format(n=quanti)
+        elif dopo:
+            messaggio = regole["tolti"].format(n=-quanti, resto=len(dopo))
+        else:
+            messaggio = regole["vuoto"]
+        return {"ok": True, "changed": True,
+                regole["conteggio"]: len(dopo), "message": messaggio}
+    return None
+
 
 def merge_products(esistenti, in_arrivo):
     """Aggiorna la lista dei prodotti sul posto invece di sostituirla.
@@ -569,36 +669,11 @@ class handler(BaseHTTPRequestHandler):
             return
 
         try:
-            # Nascondere annunci non c'entra con gli YAML, quindi sta prima di
+            # Annotare annunci non c'entra con gli YAML, quindi sta prima di
             # leggi_config(): non deve pagarne le quattro letture.
-            if "hide" in dati or "unhide" in dati or dati.get("unhideAll"):
-                def indirizzi(chiave):
-                    valore = dati.get(chiave) or []
-                    if isinstance(valore, str):
-                        valore = [valore]
-                    return {u for u in valore if isinstance(u, str) and u.strip()}
-
-                prima = leggi_nascosti()
-                if dati.get("unhideAll"):
-                    dopo = set()
-                else:
-                    dopo = (prima | indirizzi("hide")) - indirizzi("unhide")
-
-                if dopo == prima:
-                    self._send(200, {"ok": True, "changed": False,
-                                     "hiddenCount": len(prima),
-                                     "message": "Nessuna modifica."})
-                    return
-                scrivi_nascosti(dopo)
-                quanti = len(dopo) - len(prima)
-                if quanti > 0:
-                    testo_esito = f"{quanti} annunci tolti dal tabellone."
-                elif dopo:
-                    testo_esito = f"{-quanti} annunci rimessi. Ne restano {len(dopo)} nascosti."
-                else:
-                    testo_esito = "Tabellone ripristinato: nessun annuncio nascosto."
-                self._send(200, {"ok": True, "changed": True,
-                                 "hiddenCount": len(dopo), "message": testo_esito})
+            esito = applica_annotazione(dati)
+            if esito is not None:
+                self._send(200, esito)
                 return
 
             configs, _ = leggi_config()
