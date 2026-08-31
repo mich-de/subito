@@ -176,10 +176,10 @@
               <div class="section-title"><h2>Notifiche</h2></div>
 
               <div class="alert alert-info">
-                <strong>Telegram gestito dai GitHub Secrets.</strong>
-                Token e chat ID non vivono in questo modulo: stanno in
-                <code>TELEGRAM_BOT_TOKEN</code> e <code>TELEGRAM_CHAT_ID</code>,
-                e da qui si possono solo leggere.
+                <strong>Telegram si configura fuori da qui.</strong>
+                Token e chat ID non vivono in questo modulo: stanno fra i segreti
+                del workflow di scansione, in <code>TELEGRAM_BOT_TOKEN</code> e
+                <code>TELEGRAM_CHAT_ID</code>, e da qui si possono solo leggere.
               </div>
 
               <label class="checkline">
@@ -190,12 +190,12 @@
               <label class="field">
                 <span>Bot token</span>
                 <input type="text" id="cfg-tg-token" readonly disabled
-                       value="Impostato nei GitHub Secrets">
+                       value="Impostato nei segreti del workflow">
               </label>
               <label class="field">
                 <span>Chat ID</span>
                 <input type="text" id="cfg-tg-chat" readonly disabled
-                       value="Impostato nei GitHub Secrets">
+                       value="Impostato nei segreti del workflow">
               </label>
             </section>
           </div>
@@ -302,7 +302,6 @@
 
   <script>
     const state = { items: [], currentConfig: '', formProducts: [], selectedProduct: 'all' };
-    let lastLogIndex = 0;
 
     /* ---- TEMA ---- */
     (function () {
@@ -392,26 +391,16 @@
       if (el.children.length > 500) el.removeChild(el.firstChild);
     }
 
-    async function fetchServerLogs() {
+    /* Il registro arriva gia' fatto da /api/store: qui si disegna e basta.
+       appendLog() resta per le righe che nascono nel browser — l'esito di un
+       salvataggio, un errore di rete — ma quelle si aggiungono in coda, e
+       questa funzione non gira piu' dopo l'avvio, quindi non le cancella. */
+    function fetchServerLogs() {
       const el = document.getElementById('log');
-      if (window.STATIC_LOGS && window.STATIC_LOGS.length) {
-        if (el) {
-          el.innerHTML = window.STATIC_LOGS.map(l =>
-            `<div class="log-entry ${esc(l.level || 'info')}"><span class="log-entry timestamp">[${esc(l.time || '')}]</span>${esc(l.message)}</div>`
-          ).join('');
-        }
-        return;
-      }
-      if (IS_STATIC) return;
-      try {
-        const r = await fetch(`/api/logs?since=${lastLogIndex}`);
-        if (!r.ok) return;
-        const d = await r.json();
-        (d.logs || []).forEach(l => {
-          appendLog(l.message, l.level, l.time);
-          lastLogIndex = Math.max(lastLogIndex, l.index);
-        });
-      } catch (e) { console.error('Errore fetch logs:', e); }
+      if (!el || !window.STATIC_LOGS || !window.STATIC_LOGS.length) return;
+      el.innerHTML = window.STATIC_LOGS.map(l =>
+        `<div class="log-entry ${esc(l.level || 'info')}"><span class="log-entry timestamp">[${esc(l.time || '')}]</span>${esc(l.message)}</div>`
+      ).join('');
     }
 
     /* ---- TABELLONE ---- */
@@ -631,16 +620,11 @@
 
     /* ---- MODULO CONFIGURAZIONE ---- */
 
-    /* Pagina statica: i dati sono gia' dentro la pagina, non c'e' un server
-       Flask da interrogare. Vero su Vercel e vero aprendo il file da disco. */
-    const IS_STATIC = !!(window.STATIC_CONFIG_DATA || window.STATIC_CONFIGS)
-      || location.protocol === 'file:';
     const LS_TOKEN_KEY = 'subito.auth.token';
 
-    /* IS_STATIC diceva due cose insieme: «i dati arrivano da variabili
-       iniettate» e «non si puo' salvare». Su Vercel la prima resta vera e la
-       seconda no — la pagina e' sempre statica, ma dietro c'e' una funzione che
-       sa scrivere sullo store. Le due domande vanno separate. */
+    /* La pagina e' sempre statica — non contiene dati, li chiede a /api/store
+       all'apertura. Quello che cambia e' se dietro c'e' una funzione che sa
+       anche scrivere: su Vercel si', aprendo il file da disco no. */
     const CAN_WRITE = !!window.API_WRITE;
     const API_STORE = '/api/store';
 
@@ -690,7 +674,7 @@
 
     async function sbloccaConfig(riprova) {
       if (configSbloccata) return true;
-      // Build statico o backend Flask: percorsi che non hanno /api/store.
+      // La pagina aperta da disco non ha /api/store dietro: niente da sbloccare.
       if (!CAN_WRITE) return true;
       if (window.PANEL_HAS_PASSWORD === false) {
         appendLog('APP_PASSWORD non configurata su Vercel: la configurazione '
@@ -961,21 +945,7 @@
         }
         renderFilters(d.products || []);
         renderProducts(d.products || []);
-        return;
       }
-      try {
-        const r = await fetch('/api/config/form');
-        if (!r.ok) return;
-        const d = await r.json();
-        document.getElementById('cfg-interval').value = d.general.interval_minutes;
-        document.getElementById('cfg-shipping').checked = d.general.shipping_required;
-        document.getElementById('cfg-tg-enabled').checked = d.telegram.enabled;
-        document.getElementById('cfg-subito-enabled').checked = d.subito.enabled;
-        document.getElementById('cfg-subito-pages').value = d.subito.max_pages;
-        document.getElementById('cfg-amazon-enabled').checked = d.amazon.enabled;
-        document.getElementById('cfg-amazon-pages').value = d.amazon.max_pages;
-        renderProducts(d.products);
-      } catch (e) { console.error(e); }
     }
 
     async function saveForm(e) {
@@ -983,68 +953,35 @@
       syncFormFromInputs();
       const btn = document.getElementById('cfg-save-btn');
       const status = document.getElementById('config-save-status');
-      if (CAN_WRITE) {
-        btn.textContent = 'Salvataggio…';
-        btn.disabled = true;
-        status.textContent = 'Salvataggio in corso…';
-        try {
-          const d = await postStore({
-            general: {
-              interval_minutes: parseInt(document.getElementById('cfg-interval').value),
-              shipping_required: document.getElementById('cfg-shipping').checked
-            },
-            telegram: { enabled: document.getElementById('cfg-tg-enabled').checked },
-            products: collectFormProducts(),
-            subito: {
-              enabled: document.getElementById('cfg-subito-enabled').checked,
-              max_pages: parseInt(document.getElementById('cfg-subito-pages').value)
-            },
-            amazon: {
-              enabled: document.getElementById('cfg-amazon-enabled').checked,
-              max_pages: parseInt(document.getElementById('cfg-amazon-pages').value)
-            }
-          });
-          status.textContent = d.ok
-            ? (d.changed ? `${d.message} (${d.files.join(', ')})` : d.message)
-            : (d.error || 'Errore di salvataggio.');
-        } catch (e) {
-          status.textContent = 'Errore di connessione con /api/store.';
-        }
-        btn.textContent = 'Salva e applica';
-        btn.disabled = false;
+      if (!CAN_WRITE) {
+        status.textContent = 'Questa copia della pagina non può salvare.';
         return;
       }
       btn.textContent = 'Salvataggio…';
       btn.disabled = true;
+      status.textContent = 'Salvataggio in corso…';
       try {
-        const r = await fetch('/api/config/form', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            general: {
-              interval_minutes: parseInt(document.getElementById('cfg-interval').value),
-              shipping_required: document.getElementById('cfg-shipping').checked
-            },
-            telegram: {
-              enabled: document.getElementById('cfg-tg-enabled').checked,
-              bot_token: document.getElementById('cfg-tg-token').value,
-              chat_id: document.getElementById('cfg-tg-chat').value
-            },
-            products: collectFormProducts(),
-            subito: {
-              enabled: document.getElementById('cfg-subito-enabled').checked,
-              max_pages: parseInt(document.getElementById('cfg-subito-pages').value)
-            },
-            amazon: {
-              enabled: document.getElementById('cfg-amazon-enabled').checked,
-              max_pages: parseInt(document.getElementById('cfg-amazon-pages').value)
-            },
-          })
+        const d = await postStore({
+          general: {
+            interval_minutes: parseInt(document.getElementById('cfg-interval').value),
+            shipping_required: document.getElementById('cfg-shipping').checked
+          },
+          telegram: { enabled: document.getElementById('cfg-tg-enabled').checked },
+          products: collectFormProducts(),
+          subito: {
+            enabled: document.getElementById('cfg-subito-enabled').checked,
+            max_pages: parseInt(document.getElementById('cfg-subito-pages').value)
+          },
+          amazon: {
+            enabled: document.getElementById('cfg-amazon-enabled').checked,
+            max_pages: parseInt(document.getElementById('cfg-amazon-pages').value)
+          }
         });
-        const d = await r.json();
-        status.textContent = d.ok ? 'Configurazione applicata.' : (d.error || 'Errore di salvataggio.');
+        status.textContent = d.ok
+          ? (d.changed ? `${d.message} (${d.files.join(', ')})` : d.message)
+          : (d.error || 'Errore di salvataggio.');
       } catch (e) {
-        status.textContent = 'Errore di connessione.';
+        status.textContent = 'Errore di connessione con /api/store.';
       }
       btn.textContent = 'Salva e applica';
       btn.disabled = false;
@@ -1057,20 +994,11 @@
       ).join('');
     }
 
-    async function loadYamlList() {
-      if (window.STATIC_CONFIGS) {
-        const files = Object.keys(window.STATIC_CONFIGS);
-        renderYamlTabs(files);
-        if (files.length) loadYaml(files[0]);
-        return;
-      }
-      try {
-        const r = await fetch('/api/config');
-        if (!r.ok) return;
-        const d = await r.json();
-        renderYamlTabs(d.files);
-        if (d.files.length) loadYaml(d.files[0]);
-      } catch (e) { console.error(e); }
+    function loadYamlList() {
+      if (!window.STATIC_CONFIGS) return;
+      const files = Object.keys(window.STATIC_CONFIGS);
+      renderYamlTabs(files);
+      if (files.length) loadYaml(files[0]);
     }
 
     function markYamlTab(name) {
@@ -1081,48 +1009,29 @@
       });
     }
 
-    async function loadYaml(name) {
-      if (window.STATIC_CONFIGS && window.STATIC_CONFIGS[name]) {
-        document.getElementById('yaml-editor').value = window.STATIC_CONFIGS[name];
-        markYamlTab(name);
-        return;
-      }
-      try {
-        const r = await fetch(`/api/config/${name}`);
-        if (!r.ok) return;
-        const d = await r.json();
-        document.getElementById('yaml-editor').value = d.content;
-        markYamlTab(name);
-      } catch (e) { console.error(e); }
+    function loadYaml(name) {
+      if (!window.STATIC_CONFIGS || !window.STATIC_CONFIGS[name]) return;
+      document.getElementById('yaml-editor').value = window.STATIC_CONFIGS[name];
+      markYamlTab(name);
     }
 
     async function saveYaml(e) {
       e.preventDefault();
       const status = document.getElementById('yaml-status');
-      if (CAN_WRITE) {
-        status.textContent = 'Salvataggio in corso…';
-        try {
-          const d = await postStore({
-            yaml: { name: state.currentConfig, content: document.getElementById('yaml-editor').value }
-          });
-          status.textContent = d.ok
-            ? (d.changed ? `${d.message} (${d.files.join(', ')})` : d.message)
-            : (d.error || 'Errore di salvataggio.');
-        } catch (e) {
-          status.textContent = 'Errore di connessione con /api/store.';
-        }
+      if (!CAN_WRITE) {
+        status.textContent = 'Questa copia della pagina non può salvare.';
         return;
       }
+      status.textContent = 'Salvataggio in corso…';
       try {
-        const r = await fetch(`/api/config/${state.currentConfig}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: document.getElementById('yaml-editor').value })
+        const d = await postStore({
+          yaml: { name: state.currentConfig, content: document.getElementById('yaml-editor').value }
         });
-        const d = await r.json();
-        status.textContent = d.ok ? 'Configurazione salvata.' : (d.error || 'Errore di salvataggio.');
+        status.textContent = d.ok
+          ? (d.changed ? `${d.message} (${d.files.join(', ')})` : d.message)
+          : (d.error || 'Errore di salvataggio.');
       } catch (e) {
-        status.textContent = 'Errore di connessione.';
+        status.textContent = 'Errore di connessione con /api/store.';
       }
     }
 
@@ -1134,35 +1043,13 @@
       document.getElementById('uptime').textContent = uptime;
     }
 
-    async function fetchStatus() {
-      if (IS_STATIC) {
-        // La cadenza arriva dal workflow, non da una costante: quando il cron
-        // e' passato da 15 a 30 minuti questa riga mentiva.
-        setLive(CAN_WRITE ? 'Cloud Actions · scrivibile' : 'Cloud Actions',
-                `cron ${window.SCAN_CADENCE || 30}m`);
-        const eyebrow = document.getElementById('hero-eyebrow');
-        if (eyebrow) eyebrow.textContent = 'Scansione automatica via GitHub Actions';
-        return;
-      }
-      try {
-        const [status, latest] = await Promise.all([
-          fetch('/api/status').then(r => r.json()),
-          fetch('/api/latest').then(r => r.json())
-        ]);
-        if (status.products) renderFilters(status.products);
-        if (status.status === 'running') setLive('Monitor attivo', status.uptime || '00:00:00');
-        else document.getElementById('uptime').textContent = status.uptime || '00:00:00';
-        if (Array.isArray(latest) && latest.length) {
-          state.items = latest;
-          renderItems(latest);
-        }
-      } catch (e) {}
-    }
-
-    // Il polling ha senso solo col backend Flask: sul build statico i dati non cambiano mai.
-    if (!IS_STATIC) {
-      setInterval(fetchStatus, 10000);
-      setInterval(fetchServerLogs, 2000);
+    function fetchStatus() {
+      // La cadenza arriva dal workflow, non da una costante: quando il cron
+      // e' passato da 15 a 30 minuti questa riga mentiva.
+      setLive(CAN_WRITE ? 'Scansione in cloud · scrivibile' : 'Scansione in cloud',
+              `cron ${window.SCAN_CADENCE || 30}m`);
+      const eyebrow = document.getElementById('hero-eyebrow');
+      if (eyebrow) eyebrow.textContent = 'Scansione automatica in cloud';
     }
 
     /* Dove non si puo' scrivere, la colonna della croce non ha ragione di
