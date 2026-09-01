@@ -192,8 +192,8 @@
     "timestamp": "2026-08-24T14:15:45.297402"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-256gb-grigio-batteria-98-roma-657666898.htm|Samsung S24 256GB": {
-    "price": 330,
-    "timestamp": "2026-08-26T09:54:31.785428"
+    "price": 300,
+    "timestamp": "2026-09-01T17:29:19.986294"
   },
   "https://www.subito.it/telefonia/oppo-find-x9-pro-16-512gb-savona-649840724.htm|OPPO Find X9 Pro": {
     "price": 600,
@@ -626,5 +626,9 @@
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-16-512-reggio-calabria-659059264.htm|Honor Magic 8 Pro": {
     "price": 650,
     "timestamp": "2026-09-01T13:31:05.129070"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-12gb-512gb-perugia-659166669.htm|Honor Magic 8 Pro": {
+    "price": 630,
+    "timestamp": "2026-09-01T17:29:19.987406"
   }
 }
