@@ -128,8 +128,8 @@
     "timestamp": "2026-08-02T12:28:37.452744"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-256-gb-milano-656539746.htm|Samsung S24 256GB": {
-    "price": 370,
-    "timestamp": "2026-08-27T13:11:09.022465"
+    "price": 360,
+    "timestamp": "2026-09-02T18:59:24.884929"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-256-gb-lecce-656556061.htm|Samsung S24 256GB": {
     "price": 350,
@@ -638,5 +638,25 @@
   "https://www.subito.it/telefonia/smartphone-android-honor-magic-8-pro-512-gb-varese-659243602.htm|Honor Magic 8 Pro": {
     "price": 700,
     "timestamp": "2026-09-02T11:13:04.145673"
+  },
+  "https://www.subito.it/telefonia/samsung-s24-256gb-salerno-659289813.htm|Samsung S24 256GB": {
+    "price": 350,
+    "timestamp": "2026-09-02T18:59:24.885958"
+  },
+  "https://www.subito.it/telefonia/samsung-s24-256gb-salerno-659289301.htm|Samsung S24 256GB": {
+    "price": 350,
+    "timestamp": "2026-09-02T18:59:24.886984"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-12-512-verona-659292031.htm|Honor Magic 8 Pro": {
+    "price": 619,
+    "timestamp": "2026-09-02T18:59:24.887935"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-nuovissimo-napoli-659279638.htm|Honor Magic 8 Pro": {
+    "price": 640,
+    "timestamp": "2026-09-02T18:59:24.888866"
+  },
+  "https://www.subito.it/telefonia/s25-blu-256-gb-come-nuovo-salerno-659294202.htm|Samsung S25 256GB": {
+    "price": 430,
+    "timestamp": "2026-09-02T18:59:25.249714"
   }
 }
