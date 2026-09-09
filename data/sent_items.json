@@ -604,8 +604,8 @@
     "timestamp": "2026-08-30T11:21:43.158609"
   },
   "https://www.subito.it/telefonia/google-pixel-5-macerata-658865693.htm|Google Pixel 1-5": {
-    "price": 119,
-    "timestamp": "2026-09-02T21:48:22.661341"
+    "price": 109,
+    "timestamp": "2026-09-09T13:56:19.368630"
   },
   "https://www.subito.it/telefonia/samsung-s24-da-256gb-ancora-in-garanzia-napoli-658916634.htm|Samsung S24 256GB": {
     "price": 399,
@@ -734,5 +734,9 @@
   "https://www.subito.it/telefonia/samsung-s24-256gb-perugia-660049319.htm|Samsung S24 256GB": {
     "price": 300,
     "timestamp": "2026-09-09T09:12:01.591812"
+  },
+  "https://www.subito.it/telefonia/telefono-google-pixel-3xl-64gb-ancona-660068779.htm|Google Pixel 1-5": {
+    "price": 70,
+    "timestamp": "2026-09-09T13:56:18.766718"
   }
 }
