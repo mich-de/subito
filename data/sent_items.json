@@ -720,8 +720,8 @@
     "timestamp": "2026-09-08T05:58:55.409347"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-16-512-reggio-calabria-659960637.htm|Honor Magic 8 Pro": {
-    "price": 600,
-    "timestamp": "2026-09-08T21:50:38.913206"
+    "price": 589,
+    "timestamp": "2026-09-10T16:22:05.698379"
   },
   "https://www.subito.it/telefonia/samsung-s24-256-gb-97-batteria-padova-659933017.htm|Samsung S24 256GB": {
     "price": 379,
@@ -742,5 +742,9 @@
   "https://www.subito.it/telefonia/oppo-find-x9-pro-bianco-rieti-660124686.htm|OPPO Find X9 Pro": {
     "price": 600,
     "timestamp": "2026-09-09T17:49:35.532859"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s24-256gb-padova-660239517.htm|Samsung S24 256GB": {
+    "price": 390,
+    "timestamp": "2026-09-10T16:22:06.166135"
   }
 }
