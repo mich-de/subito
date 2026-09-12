@@ -228,8 +228,8 @@
     "timestamp": "2026-08-26T16:58:42.163182"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-512-gb-udine-658334151.htm|Honor Magic 8 Pro": {
-    "price": 599,
-    "timestamp": "2026-09-01T13:31:05.128246"
+    "price": 549,
+    "timestamp": "2026-09-12T09:15:46.127036"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-genova-658063262.htm|Honor Magic 8 Pro": {
     "price": 650,
@@ -774,5 +774,9 @@
   "https://www.subito.it/telefonia/samsung-galaxy-s25-edge-256gb-titanium-jetblack-parma-660353882.htm|Samsung S25 256GB": {
     "price": 420,
     "timestamp": "2026-09-11T17:12:18.591666"
+  },
+  "https://www.subito.it/telefonia/smartphone-android-honor-magic-8-pro-512-gb-nero-varese-660042919.htm|Honor Magic 8 Pro": {
+    "price": 700,
+    "timestamp": "2026-09-12T09:15:46.648978"
   }
 }
