@@ -728,8 +728,8 @@
     "timestamp": "2026-09-08T15:20:49.246037"
   },
   "https://www.subito.it/telefonia/samsung-s24-256-gb-onyx-black-novara-660019283.htm|Samsung S24 256GB": {
-    "price": 340,
-    "timestamp": "2026-09-14T19:19:41.155132"
+    "price": 300,
+    "timestamp": "2026-09-15T21:17:50.901679"
   },
   "https://www.subito.it/telefonia/samsung-s24-256gb-perugia-660049319.htm|Samsung S24 256GB": {
     "price": 300,
@@ -822,5 +822,9 @@
   "https://www.subito.it/telefonia/honor-magic-8-pro-milano-660785727.htm|Honor Magic 8 Pro": {
     "price": 630,
     "timestamp": "2026-09-15T12:40:50.033493"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-12-512-gb-garanzia-italia-messina-660867386.htm|Honor Magic 8 Pro": {
+    "price": 670,
+    "timestamp": "2026-09-15T21:17:51.459874"
   }
 }
