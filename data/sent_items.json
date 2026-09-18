@@ -228,8 +228,8 @@
     "timestamp": "2026-08-26T16:58:42.163182"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-512-gb-udine-658334151.htm|Honor Magic 8 Pro": {
-    "price": 549,
-    "timestamp": "2026-09-17T15:20:24.363134"
+    "price": 599,
+    "timestamp": "2026-09-18T18:23:19.340281"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-genova-658063262.htm|Honor Magic 8 Pro": {
     "price": 650,
@@ -862,5 +862,9 @@
   "https://www.subito.it/telefonia/oppo-find-x9-pro-napoli-661113643.htm|OPPO Find X9 Pro": {
     "price": 700,
     "timestamp": "2026-09-18T11:07:56.292308"
+  },
+  "https://www.subito.it/telefonia/samsung-s25-edge-256-gb-napoli-661234414.htm|Samsung S25 256GB": {
+    "price": 425,
+    "timestamp": "2026-09-18T18:23:19.849738"
   }
 }
