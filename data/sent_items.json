@@ -914,5 +914,13 @@
   "https://www.subito.it/telefonia/samsung-s25-12gb-256gb-padova-661693646.htm|Samsung S25 256GB": {
     "price": 400,
     "timestamp": "2026-09-22T12:36:05.552907"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s24-5g-256gb-8gb-dual-sim-aosta-661710164.htm|Samsung S24 256GB": {
+    "price": 350,
+    "timestamp": "2026-09-22T17:17:17.021941"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-air-padova-660425167.htm|Honor Magic 8 Pro": {
+    "price": 599,
+    "timestamp": "2026-09-22T17:17:17.023323"
   }
 }
