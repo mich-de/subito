@@ -230,6 +230,16 @@ scanner:
     subito: true
     amazon: true
     search_in_description: false
+  - name: Vivo X300
+    keywords:
+    - Vivo X300
+    exclude_keywords: []
+    subito_urls: []
+    max_price: 400
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
 web:
   host: 0.0.0.0
   port: 5000
