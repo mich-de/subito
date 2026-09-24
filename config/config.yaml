@@ -233,7 +233,9 @@ scanner:
   - name: Vivo X300
     keywords:
     - Vivo X300
-    exclude_keywords: []
+    exclude_keywords:
+    - x200
+    - cover
     subito_urls: []
     max_price: 400
     price_margin: 50
