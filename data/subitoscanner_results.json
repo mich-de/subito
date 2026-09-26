@@ -7,7 +7,7 @@
     "location": "Porto Sant'Elpidio (FM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:05.225530+02:00",
+    "date": "2026-09-26T14:23:50.039269+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -20,7 +20,7 @@
     "location": "Cameri (NO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:05.225569+02:00",
+    "date": "2026-09-26T14:23:50.039296+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -33,7 +33,7 @@
     "location": "Trezzano Rosa (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:05.225588+02:00",
+    "date": "2026-09-26T14:23:50.039305+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -46,7 +46,7 @@
     "location": "Salerno (SA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:05.225611+02:00",
+    "date": "2026-09-26T14:23:50.039316+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -59,7 +59,7 @@
     "location": "Sciacca (AG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:31.647225+02:00",
+    "date": "2026-09-26T14:24:14.235491+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -72,7 +72,7 @@
     "location": "Chatillon (AO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:31.647248+02:00",
+    "date": "2026-09-26T14:24:14.235516+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -85,7 +85,7 @@
     "location": "Padova (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:31.647261+02:00",
+    "date": "2026-09-26T14:24:14.235522+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -98,7 +98,7 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:31.647275+02:00",
+    "date": "2026-09-26T14:24:14.235529+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -111,7 +111,7 @@
     "location": "Basiano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:59.807967+02:00",
+    "date": "2026-09-26T14:24:39.625250+02:00",
     "product_name": "Samsung S24 512GB",
     "near_miss": false,
     "max_price": 400
@@ -124,10 +124,23 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:33:40.876957+02:00",
+    "date": "2026-09-26T14:25:16.768034+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": false,
     "max_price": 380
+  },
+  {
+    "title": "Samsung Galaxy s25 512gb",
+    "price": 380,
+    "url": "https://www.subito.it/telefonia/samsung-galaxy-s25-512gb-napoli-640616251.htm",
+    "source": "Subito.it",
+    "location": "Napoli (NA)",
+    "shipping": true,
+    "condition": "usato",
+    "date": "2026-09-26T14:25:30.197699+02:00",
+    "product_name": "Samsung S25 512GB",
+    "near_miss": false,
+    "max_price": 400
   },
   {
     "title": "Smartphone Android S25 Sbloccato 512GB Dual SIM,",
@@ -137,20 +150,7 @@
     "location": "Casteggio (PV)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:34:17.829297+02:00",
-    "product_name": "Samsung S25 512GB",
-    "near_miss": false,
-    "max_price": 400
-  },
-  {
-    "title": "Samsung S25 512gb navy",
-    "price": 390,
-    "url": "https://www.subito.it/telefonia/samsung-s25-512gb-navy-roma-661926955.htm",
-    "source": "Subito.it",
-    "location": "Roma (RM)",
-    "shipping": true,
-    "condition": "usato",
-    "date": "2026-09-26T09:34:17.829319+02:00",
+    "date": "2026-09-26T14:25:58.938576+02:00",
     "product_name": "Samsung S25 512GB",
     "near_miss": false,
     "max_price": 400
@@ -163,7 +163,7 @@
     "location": "Savona (SV)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:34:28.929590+02:00",
+    "date": "2026-09-26T14:26:09.877621+02:00",
     "product_name": "OPPO Find X9 Pro",
     "near_miss": false,
     "max_price": 650
@@ -176,7 +176,7 @@
     "location": "Catania (CT)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:34:39.431845+02:00",
+    "date": "2026-09-26T14:26:19.831485+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": false,
     "max_price": 650
@@ -189,7 +189,7 @@
     "location": "Padova (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:34:39.431859+02:00",
+    "date": "2026-09-26T14:26:19.831493+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": false,
     "max_price": 650
@@ -202,7 +202,7 @@
     "location": "Nola (NA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:34:39.431868+02:00",
+    "date": "2026-09-26T14:26:19.831497+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": false,
     "max_price": 650
@@ -215,7 +215,7 @@
     "location": "Aquileia (UD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:34:48.747577+02:00",
+    "date": "2026-09-26T14:26:29.328118+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": false,
     "max_price": 650
@@ -228,7 +228,7 @@
     "location": "Castelnuovo di Garfagnana (LU)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:35:13.091579+02:00",
+    "date": "2026-09-26T14:26:53.741462+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -241,7 +241,7 @@
     "location": "Trieste (TS)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:35:19.787151+02:00",
+    "date": "2026-09-26T14:27:00.302642+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -254,7 +254,7 @@
     "location": "Milano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:35:28.751687+02:00",
+    "date": "2026-09-26T14:27:09.056769+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -267,7 +267,7 @@
     "location": "Ancona (AN)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:35:30.931852+02:00",
+    "date": "2026-09-26T14:27:11.242836+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -280,7 +280,7 @@
     "location": "Piobesi Torinese (TO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:35:45.138125+02:00",
+    "date": "2026-09-26T14:27:25.658227+02:00",
     "product_name": "Vivo X300",
     "near_miss": false,
     "max_price": 400
@@ -293,7 +293,7 @@
     "location": "Aiello del Sabato (AV)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:35:45.138133+02:00",
+    "date": "2026-09-26T14:27:25.658230+02:00",
     "product_name": "Vivo X300",
     "near_miss": false,
     "max_price": 400
@@ -306,7 +306,7 @@
     "location": "Milano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:05.225622+02:00",
+    "date": "2026-09-26T14:23:50.039320+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -319,7 +319,7 @@
     "location": "Monza (MB)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:05.225632+02:00",
+    "date": "2026-09-26T14:23:50.039325+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -332,7 +332,7 @@
     "location": "Piacenza (PC)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:05.225642+02:00",
+    "date": "2026-09-26T14:23:50.039329+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -345,7 +345,7 @@
     "location": "Corigliano-Rossano (CS)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:05.225650+02:00",
+    "date": "2026-09-26T14:23:50.039333+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -358,7 +358,7 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:05.225680+02:00",
+    "date": "2026-09-26T14:23:50.039346+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -371,7 +371,7 @@
     "location": "Verona (VR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:05.225687+02:00",
+    "date": "2026-09-26T14:23:50.039349+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -384,7 +384,7 @@
     "location": "Buttigliera Alta (TO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:05.225697+02:00",
+    "date": "2026-09-26T14:23:50.039353+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -397,7 +397,7 @@
     "location": "Milano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:20.803776+02:00",
+    "date": "2026-09-26T14:24:03.760512+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -410,7 +410,7 @@
     "location": "Milano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:31.647286+02:00",
+    "date": "2026-09-26T14:24:14.235534+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -423,7 +423,7 @@
     "location": "Arpino (FR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:31.647294+02:00",
+    "date": "2026-09-26T14:24:14.235538+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -436,7 +436,7 @@
     "location": "Battipaglia (SA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:31.647306+02:00",
+    "date": "2026-09-26T14:24:14.235544+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -449,7 +449,7 @@
     "location": "Alpignano (TO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:33.830565+02:00",
+    "date": "2026-09-26T14:24:14.235554+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -462,7 +462,7 @@
     "location": "Conegliano (TV)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:33.830609+02:00",
+    "date": "2026-09-26T14:24:16.315869+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -475,7 +475,7 @@
     "location": "Salerno (SA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:33.830624+02:00",
+    "date": "2026-09-26T14:24:16.315902+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -488,7 +488,7 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:33.830633+02:00",
+    "date": "2026-09-26T14:24:16.315908+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -501,7 +501,7 @@
     "location": "Tortoli' (OG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:33.830642+02:00",
+    "date": "2026-09-26T14:24:16.315913+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -514,7 +514,7 @@
     "location": "Catania (CT)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:33.830655+02:00",
+    "date": "2026-09-26T14:24:16.315921+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -527,7 +527,7 @@
     "location": "Genova (GE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:32:33.830662+02:00",
+    "date": "2026-09-26T14:24:16.315924+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -540,7 +540,7 @@
     "location": "Pomezia (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:33:10.713174+02:00",
+    "date": "2026-09-26T14:24:47.069161+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
@@ -553,7 +553,7 @@
     "location": "Pavia (PV)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:33:10.713205+02:00",
+    "date": "2026-09-26T14:24:47.069182+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
@@ -566,7 +566,7 @@
     "location": "Casoria (NA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:33:10.713219+02:00",
+    "date": "2026-09-26T14:24:47.069189+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
@@ -579,7 +579,7 @@
     "location": "Eboli (SA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:33:29.695188+02:00",
+    "date": "2026-09-26T14:25:06.169089+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
@@ -592,7 +592,7 @@
     "location": "Cannobio (VB)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:33:40.876980+02:00",
+    "date": "2026-09-26T14:25:16.768044+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
@@ -605,7 +605,7 @@
     "location": "Milano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:33:40.877006+02:00",
+    "date": "2026-09-26T14:25:16.768057+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
@@ -618,7 +618,7 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:33:40.877027+02:00",
+    "date": "2026-09-26T14:25:16.768061+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
@@ -631,7 +631,7 @@
     "location": "Capoterra (CA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:34:39.431878+02:00",
+    "date": "2026-09-26T14:26:19.831502+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": true,
     "max_price": 650
@@ -644,7 +644,7 @@
     "location": "Legnano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:34:39.431887+02:00",
+    "date": "2026-09-26T14:26:19.831506+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": true,
     "max_price": 650
@@ -657,7 +657,20 @@
     "location": "Marino (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:34:39.431895+02:00",
+    "date": "2026-09-26T14:26:19.831510+02:00",
+    "product_name": "Honor Magic 8 Pro",
+    "near_miss": true,
+    "max_price": 650
+  },
+  {
+    "title": "honor magic 8 pro 512gb Gold",
+    "price": 699,
+    "url": "https://www.subito.it/telefonia/honor-magic-8-pro-512gb-gold-caserta-662202300.htm",
+    "source": "Subito.it",
+    "location": "Sant'Arpino (CE)",
+    "shipping": true,
+    "condition": "usato",
+    "date": "2026-09-26T14:26:19.831513+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": true,
     "max_price": 650
@@ -670,7 +683,7 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:34:39.431903+02:00",
+    "date": "2026-09-26T14:26:19.831517+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": true,
     "max_price": 650
@@ -683,7 +696,7 @@
     "location": "Desenzano del Garda (BS)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:34:39.431911+02:00",
+    "date": "2026-09-26T14:26:19.831520+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": true,
     "max_price": 650
@@ -696,7 +709,7 @@
     "location": "Altamura (BA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:35:15.176494+02:00",
+    "date": "2026-09-26T14:26:55.860009+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": true,
     "max_price": 100
@@ -709,7 +722,7 @@
     "location": "Paderno Dugnano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:35:22.263819+02:00",
+    "date": "2026-09-26T14:27:02.471641+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": true,
     "max_price": 100
@@ -722,7 +735,7 @@
     "location": "Lugo (RA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-09-26T09:35:22.263859+02:00",
+    "date": "2026-09-26T14:27:02.471678+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": true,
     "max_price": 100
