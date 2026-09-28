@@ -400,8 +400,8 @@
     "timestamp": "2026-08-27T13:48:06.350699"
   },
   "https://www.subito.it/telefonia/smartphone-google-pixel-3-xl-64gb-trieste-624996662.htm|Google Pixel 1-5": {
-    "price": 40,
-    "timestamp": "2026-09-20T17:41:44.812503"
+    "price": 45,
+    "timestamp": "2026-09-28T12:01:08.260072"
   },
   "https://www.subito.it/telefonia/samsung-s24-256gb-torino-646344566.htm|Samsung S24 256GB": {
     "price": 380,
@@ -1042,5 +1042,21 @@
   "https://www.subito.it/telefonia/samsung-galaxy-s24-256gb-marble-gray-treviso-662346324.htm|Samsung S24 256GB": {
     "price": 379,
     "timestamp": "2026-09-27T17:44:13.954018"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s24-256gb-onyx-black-caserta-662417492.htm|Samsung S24 256GB": {
+    "price": 350,
+    "timestamp": "2026-09-28T12:01:08.256704"
+  },
+  "https://www.subito.it/telefonia/google-pixel-2-catania-662442291.htm|Google Pixel 1-5": {
+    "price": 90,
+    "timestamp": "2026-09-28T12:01:08.258392"
+  },
+  "https://www.subito.it/telefonia/samsung-s24-puls-256gb-nuovo-funziona-bene-milano-662420633.htm|Samsung S24 256GB": {
+    "price": 399,
+    "timestamp": "2026-09-28T12:01:09.181577"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s25edge-12-256gb-pari-al-nuovo-roma-662433893.htm|Samsung S25 256GB": {
+    "price": 425,
+    "timestamp": "2026-09-28T12:01:09.183220"
   }
 }
