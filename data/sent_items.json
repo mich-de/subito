@@ -880,8 +880,8 @@
     "timestamp": "2026-09-19T18:00:06.483659"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-argento-12-512-milano-657817504.htm|Honor Magic 8 Pro": {
-    "price": 660,
-    "timestamp": "2026-09-20T14:11:58.929968"
+    "price": 630,
+    "timestamp": "2026-09-30T13:02:16.621398"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-da-256-gb-onyx-black-piacenza-661426636.htm|Samsung S24 256GB": {
     "price": 390,
@@ -1078,5 +1078,13 @@
   "https://www.subito.it/telefonia/samsung-s25-256-gb-silver-titanium-roma-662617028.htm|Samsung S25 256GB": {
     "price": 400,
     "timestamp": "2026-09-29T17:03:23.457527"
+  },
+  "https://www.subito.it/telefonia/borsa-rigida-oppo-find-x9-9-pro-aosta-662715100.htm|OPPO Find X9 Pro": {
+    "price": 10,
+    "timestamp": "2026-09-30T13:02:16.619543"
+  },
+  "https://www.subito.it/telefonia/samsung-s24-256gb-trento-662667434.htm|Samsung S24 256GB": {
+    "price": 380,
+    "timestamp": "2026-09-30T13:02:17.225187"
   }
 }
