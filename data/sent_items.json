@@ -728,8 +728,8 @@
     "timestamp": "2026-09-08T15:20:49.246037"
   },
   "https://www.subito.it/telefonia/samsung-s24-256-gb-onyx-black-novara-660019283.htm|Samsung S24 256GB": {
-    "price": 300,
-    "timestamp": "2026-09-15T21:17:50.901679"
+    "price": 299,
+    "timestamp": "2026-10-02T00:11:06.046846"
   },
   "https://www.subito.it/telefonia/samsung-s24-256gb-perugia-660049319.htm|Samsung S24 256GB": {
     "price": 300,
@@ -1134,5 +1134,9 @@
   "https://www.subito.it/telefonia/samsung-galaxy-s24-da-256-gb-onyx-black-piacenza-662931823.htm|Samsung S24 256GB": {
     "price": 370,
     "timestamp": "2026-10-01T20:31:59.900538"
+  },
+  "https://www.subito.it/telefonia/s25-edge-512gb-lecce-662940917.htm|Samsung S25 512GB": {
+    "price": 430,
+    "timestamp": "2026-10-02T00:11:07.537004"
   }
 }
