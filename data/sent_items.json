@@ -400,8 +400,8 @@
     "timestamp": "2026-08-27T13:48:06.350699"
   },
   "https://www.subito.it/telefonia/smartphone-google-pixel-3-xl-64gb-trieste-624996662.htm|Google Pixel 1-5": {
-    "price": 45,
-    "timestamp": "2026-09-28T12:01:08.260072"
+    "price": 40,
+    "timestamp": "2026-10-04T14:48:34.739257"
   },
   "https://www.subito.it/telefonia/samsung-s24-256gb-torino-646344566.htm|Samsung S24 256GB": {
     "price": 380,
@@ -1190,5 +1190,9 @@
   "https://www.subito.it/telefonia/oppo-find-x9-pro-avellino-663221116.htm|OPPO Find X9 Pro": {
     "price": 700,
     "timestamp": "2026-10-04T08:46:23.690000"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-argento-12-512-milano-663260215.htm|Honor Magic 8 Pro": {
+    "price": 590,
+    "timestamp": "2026-10-04T14:48:34.734217"
   }
 }
