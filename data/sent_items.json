@@ -1108,8 +1108,8 @@
     "timestamp": "2026-09-30T22:36:16.584537"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-brescia-662881051.htm|Honor Magic 8 Pro": {
-    "price": 650,
-    "timestamp": "2026-10-01T15:26:48.426695"
+    "price": 600,
+    "timestamp": "2026-10-05T15:56:56.117005"
   },
   "https://www.subito.it/telefonia/google-pixel-3a-64gb-black-usato-siena-662885577.htm|Google Pixel 1-5": {
     "price": 80,
@@ -1128,8 +1128,8 @@
     "timestamp": "2026-10-01T20:31:59.394116"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-16-512gb-caserta-662919692.htm|Honor Magic 8 Pro": {
-    "price": 600,
-    "timestamp": "2026-10-01T20:31:59.395873"
+    "price": 560,
+    "timestamp": "2026-10-05T15:56:56.115244"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-da-256-gb-onyx-black-piacenza-662931823.htm|Samsung S24 256GB": {
     "price": 370,
@@ -1198,5 +1198,9 @@
   "https://www.subito.it/telefonia/samsung-s25-edge-256gb-aosta-663285474.htm|Samsung S25 256GB": {
     "price": 400,
     "timestamp": "2026-10-04T18:39:53.637667"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s24-256gb-5g-grigio-lucca-663389668.htm|Samsung S24 256GB": {
+    "price": 380,
+    "timestamp": "2026-10-05T15:56:56.467248"
   }
 }
