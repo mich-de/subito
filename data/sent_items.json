@@ -1192,8 +1192,8 @@
     "timestamp": "2026-10-04T08:46:23.690000"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-argento-12-512-milano-663260215.htm|Honor Magic 8 Pro": {
-    "price": 590,
-    "timestamp": "2026-10-04T14:48:34.734217"
+    "price": 570,
+    "timestamp": "2026-10-06T09:23:48.472192"
   },
   "https://www.subito.it/telefonia/samsung-s25-edge-256gb-aosta-663285474.htm|Samsung S25 256GB": {
     "price": 400,
@@ -1206,5 +1206,13 @@
   "https://www.subito.it/telefonia/samsung-galaxy-s25-256-gb-come-nuovo-barletta-andria-trani-663417329.htm|Samsung S25 256GB": {
     "price": 380,
     "timestamp": "2026-10-05T22:36:07.189482"
+  },
+  "https://www.subito.it/telefonia/samsung-s25-edge-256gb-aosta-663455576.htm|Samsung S25 256GB": {
+    "price": 400,
+    "timestamp": "2026-10-06T09:23:49.306273"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s25-256gb-blu-navy-catania-662771207.htm|Samsung S25 256GB": {
+    "price": 420,
+    "timestamp": "2026-10-06T09:23:49.307804"
   }
 }
