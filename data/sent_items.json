@@ -1220,8 +1220,8 @@
     "timestamp": "2026-10-06T16:17:10.507621"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-black-brescia-663511290.htm|Honor Magic 8 Pro": {
-    "price": 670,
-    "timestamp": "2026-10-06T16:17:10.509347"
+    "price": 650,
+    "timestamp": "2026-10-07T20:37:30.665623"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-5g-256-gb-nero-modena-663545287.htm|Samsung S24 256GB": {
     "price": 400,
@@ -1238,5 +1238,17 @@
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-256gb-nuovo-brescia-663615288.htm|Honor Magic 8 Pro": {
     "price": 700,
     "timestamp": "2026-10-07T14:46:25.257082"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s24-512gb-siracusa-663661476.htm|Samsung S24 512GB": {
+    "price": 380,
+    "timestamp": "2026-10-07T20:37:30.661494"
+  },
+  "https://www.subito.it/telefonia/oppo-find-x9-pro-bologna-663655255.htm|OPPO Find X9 Pro": {
+    "price": 600,
+    "timestamp": "2026-10-07T20:37:30.663407"
+  },
+  "https://www.subito.it/telefonia/galaxy-s25-256gb-nuovo-modena-663660571.htm|Samsung S25 256GB": {
+    "price": 430,
+    "timestamp": "2026-10-07T20:37:31.108129"
   }
 }
