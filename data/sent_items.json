@@ -1140,8 +1140,8 @@
     "timestamp": "2026-10-02T00:11:07.537004"
   },
   "https://www.subito.it/telefonia/samsung-s24-256gb-treviso-662964935.htm|Samsung S24 256GB": {
-    "price": 379,
-    "timestamp": "2026-10-02T12:27:41.630910"
+    "price": 350,
+    "timestamp": "2026-10-08T14:01:43.524773"
   },
   "https://www.subito.it/telefonia/looking-for-oppo-find-x9-pro-agrigento-662528303.htm|OPPO Find X9 Pro": {
     "price": 550,
@@ -1254,5 +1254,13 @@
   "https://www.subito.it/telefonia/samsung-s25-esge-12-256gb-in-garanzia-ufficiale-napoli-663699647.htm|Samsung S25 256GB": {
     "price": 380,
     "timestamp": "2026-10-08T00:26:22.168300"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s24-256-gb-cremona-663768019.htm|Samsung S24 256GB": {
+    "price": 340,
+    "timestamp": "2026-10-08T14:01:43.522533"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-palermo-663723695.htm|Honor Magic 8 Pro": {
+    "price": 700,
+    "timestamp": "2026-10-08T14:01:44.000617"
   }
 }
