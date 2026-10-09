@@ -1256,8 +1256,8 @@
     "timestamp": "2026-10-08T00:26:22.168300"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-256-gb-cremona-663768019.htm|Samsung S24 256GB": {
-    "price": 340,
-    "timestamp": "2026-10-08T14:01:43.522533"
+    "price": 320,
+    "timestamp": "2026-10-09T13:46:44.461878"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-palermo-663723695.htm|Honor Magic 8 Pro": {
     "price": 700,
@@ -1270,5 +1270,9 @@
   "https://www.subito.it/telefonia/honor-magic-8-pro-chieti-663836085.htm|Honor Magic 8 Pro": {
     "price": 560,
     "timestamp": "2026-10-09T06:40:14.108085"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-12-512-nuovo-palermo-663907187.htm|Honor Magic 8 Pro": {
+    "price": 700,
+    "timestamp": "2026-10-09T13:46:44.836539"
   }
 }
