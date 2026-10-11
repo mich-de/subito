@@ -1280,8 +1280,8 @@
     "timestamp": "2026-10-10T09:46:12.938311"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-512-roma-663982674.htm|Honor Magic 8 Pro": {
-    "price": 670,
-    "timestamp": "2026-10-10T09:46:13.337554"
+    "price": 650,
+    "timestamp": "2026-10-11T09:18:48.707152"
   },
   "https://www.subito.it/telefonia/samsung-s25-edge-256-gb-nero-roma-663998622.htm|Samsung S25 256GB": {
     "price": 380,
@@ -1302,5 +1302,21 @@
   "https://www.subito.it/telefonia/samsung-galaxy-s25-edge-256gb-palermo-664082009.htm|Samsung S25 256GB": {
     "price": 400,
     "timestamp": "2026-10-10T23:30:31.999515"
+  },
+  "https://www.subito.it/telefonia/honor-magic-pro-8-256gb-si-alle-permute-brindisi-664098854.htm|Honor Magic 8 Pro": {
+    "price": 299,
+    "timestamp": "2026-10-11T09:18:48.703342"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-black-512gb-garanzia-roma-664101257.htm|Honor Magic 8 Pro": {
+    "price": 650,
+    "timestamp": "2026-10-11T09:18:48.705303"
+  },
+  "https://www.subito.it/telefonia/s25-edge-512-gb-napoli-664084527.htm|Samsung S25 512GB": {
+    "price": 415,
+    "timestamp": "2026-10-11T09:18:49.757067"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-12-512-nuovo-palermo-664097098.htm|Honor Magic 8 Pro": {
+    "price": 700,
+    "timestamp": "2026-10-11T09:18:49.758975"
   }
 }
