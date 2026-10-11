@@ -204,8 +204,8 @@
     "timestamp": "2026-08-26T13:56:15.965730"
   },
   "https://www.subito.it/telefonia/oppo-find-x9-pro-lecce-656930594.htm|OPPO Find X9 Pro": {
-    "price": 715,
-    "timestamp": "2026-08-26T13:56:16.326142"
+    "price": 670,
+    "timestamp": "2026-10-11T15:59:16.668722"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-512gb-verona-658075704.htm|Honor Magic 8 Pro": {
     "price": 550,
@@ -1318,5 +1318,9 @@
   "https://www.subito.it/telefonia/honor-magic-8-pro-12-512-nuovo-palermo-664097098.htm|Honor Magic 8 Pro": {
     "price": 700,
     "timestamp": "2026-10-11T09:18:49.758975"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-air-16-512-padova-664138085.htm|Honor Magic 8 Pro": {
+    "price": 549,
+    "timestamp": "2026-10-11T15:59:16.197577"
   }
 }
