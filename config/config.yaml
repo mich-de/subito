@@ -58,8 +58,8 @@ scanner:
     subito_urls: []
     max_price: 400
     price_margin: 40
-    subito: true
-    amazon: true
+    subito: false
+    amazon: false
     search_in_description: false
   - name: Samsung S25 256GB
     keywords:
@@ -242,10 +242,13 @@ scanner:
     subito: true
     amazon: true
     search_in_description: false
-  - name: Snapdragon x
+  - name: Lenovo IdeaPad slim 5
     keywords:
     - Snapdragon x
-    exclude_keywords: []
+    exclude_keywords:
+    - Intel
+    - 8gb
+    - 256gb
     subito_urls: []
     max_price: 500
     price_margin: 50
