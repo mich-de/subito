@@ -242,6 +242,16 @@ scanner:
     subito: true
     amazon: true
     search_in_description: false
+  - name: Snapdragon x
+    keywords:
+    - Snapdragon x
+    exclude_keywords: []
+    subito_urls: []
+    max_price: 500
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
 web:
   host: 0.0.0.0
   port: 5000
