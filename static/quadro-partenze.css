@@ -1,1009 +1,1456 @@
-/* ===========================================================================
-   QUADRO PARTENZE — design system portatile
-   ---------------------------------------------------------------------------
-   Un solo file, nessuna dipendenza, nessun CDN, nessun webfont: si copia in un
-   progetto e funziona anche offline. Framework-agnostico: sono classi CSS su
-   HTML normale, quindi va uguale con HTML statico, Go/html/template, Jinja,
-   PHP, Rails, Astro, React o qualunque altra cosa produca markup.
+/* ==========================================================================
+   quadro-partenze.css
+   Componente: Quadro Partenze / Departure Board
+   Obiettivo: production-ready, responsive, accessibile, themable, animabile
+   ========================================================================== */
 
-   DIREZIONE
-   Il tabellone delle partenze. Fascia scura in testa e in coda, etichette in
-   maiuscoletto spaziato, filetti sottili, cifre incolonnate su fondo nero.
-   Da qui discende tutto: angoli quasi vivi da 3px invece di pastiglie, ambra
-   come colore di segnale, un solo colore d'azione, e i numeri importanti
-   composti come palette girate.
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKEN / TEMI
+   Default: dark
+   Light: data-theme="light" oppure classe .quadro-partenze--light
+   Auto light: se prefers-color-scheme: light e nessun tema forzato
+   -------------------------------------------------------------------------- */
 
-   LE CINQUE REGOLE (se se ne rompe una, il sistema smette di funzionare)
-   1. Il colore d'azione (--s) sta SOLO dove si agisce. Se lo si usa anche per
-      qualificare, smette di segnalare le azioni.
-   2. L'ambra (--a) segnala e basta: non e' mai un fondo esteso, mai un testo
-      lungo. E' il filo sotto la testatina, l'anello di fuoco, la piega.
-   3. Niente angoli morbidi. Il riferimento e' un cartello, e i cartelli hanno
-      spigoli. --radius resta a 3px.
-   4. Maiuscoletto spaziato solo per etichette da tre parole. Un paragrafo in
-      maiuscoletto non si legge.
-   5. Il fondo non e' mai bianco puro ne' nero puro: e' avorio caldo o
-      inchiostro blu-nero. Il contrasto lo fa il flap, non la pagina.
+.quadro-partenze {
+  /* Layout e spacing */
+  --qp-density: 1;
+  --qp-space-1: 0.25rem;
+  --qp-space-2: 0.5rem;
+  --qp-space-3: 0.75rem;
+  --qp-space-4: 1rem;
+  --qp-space-5: 1.25rem;
+  --qp-space-6: 1.5rem;
+  --qp-gap: 0.9rem;
+  --qp-cell-padding: 0.72rem 0.85rem;
 
-   COME SI PERSONALIZZA
-   Si toccano solo i token nella sezione 1. Sono terne OKLCH (L C H) senza
-   funzione attorno, apposta: cosi' si possono diluire con
-   oklch(var(--a) / .12) senza dichiarare un secondo colore.
-   Per cambiare marchio bastano --p (struttura) e --s (azione).
-   Per cambiare densita' basta il font-size di html.
-   =========================================================================== */
+  /* Dimensioni */
+  --qp-radius: 18px;
+  --qp-radius-sm: 10px;
+  --qp-max-width: 1200px;
+  --qp-max-height: 72vh;
+  --qp-table-min-width: 860px;
 
-/* ---------------------------------------------------------------------------
-   1. Token — tema diurno: avorio e inchiostro
-   --------------------------------------------------------------------------- */
+  /* Animazioni */
+  --qp-animation-duration: 0.45s;
+  --qp-transition-fast: 140ms ease;
+  --qp-transition-base: 220ms ease;
 
-:root {
-  --p:  42% 0.085 218;   /* struttura: collegamenti, stato attivo, testate    */
-  --pc: 98% 0.008 90;    /* testo sopra --p                                   */
-  --s:  51% 0.21  27;    /* AZIONE: qui si preme, e solo qui                  */
-  --sc: 98% 0.008 90;
-  --a:  70% 0.155 68;    /* ambra: segnala e basta                            */
-  --ac: 20% 0.04  60;
-  --b1: 98.6% 0.006 86;  /* schede                                            */
-  --b2: 95.2% 0.015 84;  /* pagina                                            */
-  --b3: 90%   0.02  82;
-  --bc: 22%   0.018 62;  /* inchiostro caldo: il grigio non vira al blu       */
-  --in: 48% 0.12 235;
-  --su: 47% 0.11 148;
-  --wa: 60% 0.13 66;
-  --er: 50% 0.2  27;
+  /* Font */
+  --qp-font-sans:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    "Noto Sans",
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
+  --qp-font-mono:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "Courier New",
+    monospace;
 
-  --primary: oklch(var(--p));
-  --primary-content: oklch(var(--pc));
-  --secondary: oklch(var(--s));
-  --secondary-content: oklch(var(--sc));
-  --accent: oklch(var(--a));
-  --accent-content: oklch(var(--ac));
-  --base-100: oklch(var(--b1));
-  --base-200: oklch(var(--b2));
-  --base-300: oklch(var(--b3));
-  --base-content: oklch(var(--bc));
-  --info: oklch(var(--in));
-  --success: oklch(var(--su));
-  --warning: oklch(var(--wa));
-  --error: oklch(var(--er));
+  /* Colori default: DARK */
+  --qp-bg: #070b14;
+  --qp-panel: #0f172a;
+  --qp-surface: #111827;
+  --qp-border: rgba(148, 163, 184, 0.18);
+  --qp-text: #e2e8f0;
+  --qp-muted: #94a3b8;
 
-  /* Testata e pie' di pagina restano in inchiostro su ENTRAMBI i temi: sono
-     la cornice del tabellone, e una cornice che cambia colore col tema non
-     inquadra piu' niente. */
-  --ink: oklch(20% 0.022 252);
-  --ink-fg: 94% 0.012 86;              /* componenti, per poterlo diluire */
-  --ink-line: oklch(100% 0 0 / .13);
+  --qp-accent: #38bdf8;
+  --qp-on-accent: #04121f;
 
-  /* Il flap: fondo scuro e cifre ambra, come una paletta girata. Identico nei
-     due temi — e' il pezzo che tiene insieme l'identita' quando si commuta. */
-  --flap: oklch(18% 0.018 252);
-  --flap-ink: oklch(88% 0.13 80);
-  --flap-seam: oklch(0% 0 0 / .34);    /* leggera: vedi nota su .flap */
-  --flap-glint: oklch(100% 0 0 / .07);
+  --qp-success: #22c55e;
+  --qp-warning: #f59e0b;
+  --qp-danger: #f87171;
+  --qp-info: #60a5fa;
+  --qp-focus: #fde047;
 
-  /* Filetti derivati dal colore del testo: restano nitidi e si adattano da
-     soli al tema scuro, dove un grigio fisso sparirebbe. */
-  --line: oklch(var(--bc) / .16);
-  --line-strong: oklch(var(--bc) / .3);
+  --qp-accent-soft: rgba(56, 189, 248, 0.16);
+  --qp-success-soft: rgba(34, 197, 94, 0.16);
+  --qp-warning-soft: rgba(245, 158, 11, 0.16);
+  --qp-danger-soft: rgba(248, 113, 113, 0.16);
+  --qp-info-soft: rgba(96, 165, 250, 0.16);
 
-  --radius: 3px;
-  --radius-lg: 4px;
-  --shadow: 0 1px 0 oklch(var(--bc) / .06);
-  --shadow-lg: 0 2px 4px oklch(var(--bc) / .1), 0 12px 28px oklch(var(--bc) / .12);
+  --qp-shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
 
-  /* L'anello di fuoco e' ambra: e' l'unico colore che non compete con nessuno
-     stato semantico, quindi si vede sempre per quello che e'. --ring-gap va
-     ridichiarato sulle fasce scure, o l'anello sparisce nel fondo. */
-  --ring-gap: var(--base-100);
-  --ring: 0 0 0 2px var(--ring-gap), 0 0 0 4px oklch(var(--a) / .85);
+  --qp-row-alt: rgba(148, 163, 184, 0.05);
+  --qp-row-hover: rgba(56, 189, 248, 0.09);
+  --qp-row-selected: rgba(56, 189, 248, 0.16);
+  --qp-card-bg: rgba(15, 23, 42, 0.72);
+  --qp-header-bg: rgba(15, 23, 42, 0.94);
 
-  /* TIPOGRAFIA SENZA DOWNLOAD.
-     Il display e' un DIN, cioe' il carattere della segnaletica: Bahnschrift su
-     Windows, DIN Alternate su macOS, poi i condensati liberi diffusi su Linux,
-     infine i tagli ottici di Segoe UI Variable. Nessun salto di metrica grave.
-     Se il progetto puo' scaricare un font, i sostituti giusti sono Oswald,
-     Archivo Narrow, Barlow Condensed o D-DIN: si aggiungono in testa a
-     --font-display e basta, il resto del foglio non cambia.
-     Il corpo del testo resta un carattere da lettura: la segnaletica va bene
-     per tre parole, non per un paragrafo. */
-  --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
-  --font-display: "Bahnschrift SemiCondensed", "Bahnschrift", "DIN Alternate",
-                  "Liberation Sans Narrow", "DejaVu Sans Condensed",
-                  "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "Cascadia Mono", Consolas, ui-monospace, "SF Mono", "DejaVu Sans Mono", monospace;
+  --qp-platform-bg: rgba(148, 163, 184, 0.14);
+  --qp-platform-color: #e2e8f0;
+
+  --qp-skeleton-base: rgba(148, 163, 184, 0.18);
+  --qp-skeleton-highlight: rgba(226, 232, 240, 0.28);
+
+  --qp-scrollbar-thumb: rgba(148, 163, 184, 0.42);
+  --qp-scrollbar-track: rgba(2, 6, 23, 0.35);
+
+  --qp-message-bg: rgba(148, 163, 184, 0.07);
+  --qp-danger-border: rgba(248, 113, 113, 0.42);
 }
 
-/* ---------------------------------------------------------------------------
-   2. Token — tema notturno: il tabellone acceso
-   --------------------------------------------------------------------------- */
+/* Tema chiaro forzato */
+.quadro-partenze[data-theme="light"],
+.quadro-partenze--light {
+  --qp-bg: #f8fafc;
+  --qp-panel: #ffffff;
+  --qp-surface: #f1f5f9;
+  --qp-border: rgba(15, 23, 42, 0.14);
+  --qp-text: #0f172a;
+  --qp-muted: #475569;
 
-[data-theme="dark"] {
-  --p:  70% 0.1  215;
-  --pc: 16% 0.02 250;
-  --s:  66% 0.19 27;
-  --sc: 16% 0.02 250;
-  --a:  79% 0.15 72;
-  --ac: 16% 0.03 60;
-  --b1: 19.5% 0.018 252;
-  --b2: 14%   0.015 254;
-  --b3: 27%   0.022 252;
-  --bc: 92%   0.012 86;
-  --in: 71% 0.11 235;
-  --su: 71% 0.13 150;
-  --wa: 80% 0.13 70;
-  --er: 67% 0.17 27;
+  --qp-accent: #0284c7;
+  --qp-on-accent: #ffffff;
 
-  --ink: oklch(10.5% 0.012 252);
-  --ink-fg: 93% 0.012 86;
-  --ink-line: oklch(100% 0 0 / .1);
+  --qp-success: #15803d;
+  --qp-warning: #b45309;
+  --qp-danger: #b91c1c;
+  --qp-info: #1d4ed8;
+  --qp-focus: #b45309;
 
-  --flap: oklch(9% 0.01 252);
-  --flap-ink: oklch(85% 0.14 80);
+  --qp-accent-soft: rgba(2, 132, 199, 0.12);
+  --qp-success-soft: rgba(21, 128, 61, 0.12);
+  --qp-warning-soft: rgba(180, 83, 9, 0.14);
+  --qp-danger-soft: rgba(185, 28, 28, 0.12);
+  --qp-info-soft: rgba(29, 78, 216, 0.12);
 
-  --line: oklch(var(--bc) / .15);
-  --line-strong: oklch(var(--bc) / .3);
-  --shadow: 0 1px 0 oklch(0% 0 0 / .4);
-  --shadow-lg: 0 2px 4px oklch(0% 0 0 / .5), 0 12px 28px oklch(0% 0 0 / .5);
+  --qp-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+
+  --qp-row-alt: rgba(15, 23, 42, 0.035);
+  --qp-row-hover: rgba(2, 132, 199, 0.08);
+  --qp-row-selected: rgba(2, 132, 199, 0.13);
+  --qp-card-bg: #ffffff;
+  --qp-header-bg: rgba(255, 255, 255, 0.95);
+
+  --qp-platform-bg: rgba(15, 23, 42, 0.07);
+  --qp-platform-color: #0f172a;
+
+  --qp-skeleton-base: rgba(15, 23, 42, 0.08);
+  --qp-skeleton-highlight: rgba(15, 23, 42, 0.16);
+
+  --qp-scrollbar-thumb: rgba(15, 23, 42, 0.24);
+  --qp-scrollbar-track: rgba(15, 23, 42, 0.06);
+
+  --qp-message-bg: rgba(15, 23, 42, 0.04);
+  --qp-danger-border: rgba(185, 28, 28, 0.35);
 }
 
-/* ---------------------------------------------------------------------------
-   3. Fondamenta
-   --------------------------------------------------------------------------- */
+/* Tema chiaro automatico se non forzato */
+@media (prefers-color-scheme: light) {
+  .quadro-partenze:not([data-theme]):not(.quadro-partenze--dark):not(.quadro-partenze--light) {
+    --qp-bg: #f8fafc;
+    --qp-panel: #ffffff;
+    --qp-surface: #f1f5f9;
+    --qp-border: rgba(15, 23, 42, 0.14);
+    --qp-text: #0f172a;
+    --qp-muted: #475569;
 
-*, *::before, *::after { box-sizing: border-box; }
+    --qp-accent: #0284c7;
+    --qp-on-accent: #ffffff;
 
-/* La densita' si governa da qui: ogni misura del foglio e' in rem, quindi il
-   corpo base scala l'intera interfaccia in un colpo solo. */
-html {
-  font-size: 15px;
-  scroll-behavior: smooth;
-  background: var(--base-200);
-  scrollbar-color: var(--line-strong) transparent;
+    --qp-success: #15803d;
+    --qp-warning: #b45309;
+    --qp-danger: #b91c1c;
+    --qp-info: #1d4ed8;
+    --qp-focus: #b45309;
+
+    --qp-accent-soft: rgba(2, 132, 199, 0.12);
+    --qp-success-soft: rgba(21, 128, 61, 0.12);
+    --qp-warning-soft: rgba(180, 83, 9, 0.14);
+    --qp-danger-soft: rgba(185, 28, 28, 0.12);
+    --qp-info-soft: rgba(29, 78, 216, 0.12);
+
+    --qp-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+
+    --qp-row-alt: rgba(15, 23, 42, 0.035);
+    --qp-row-hover: rgba(2, 132, 199, 0.08);
+    --qp-row-selected: rgba(2, 132, 199, 0.13);
+    --qp-card-bg: #ffffff;
+    --qp-header-bg: rgba(255, 255, 255, 0.95);
+
+    --qp-platform-bg: rgba(15, 23, 42, 0.07);
+    --qp-platform-color: #0f172a;
+
+    --qp-skeleton-base: rgba(15, 23, 42, 0.08);
+    --qp-skeleton-highlight: rgba(15, 23, 42, 0.16);
+
+    --qp-scrollbar-thumb: rgba(15, 23, 42, 0.24);
+    --qp-scrollbar-track: rgba(15, 23, 42, 0.06);
+
+    --qp-message-bg: rgba(15, 23, 42, 0.04);
+    --qp-danger-border: rgba(185, 28, 28, 0.35);
+  }
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  font-family: var(--font);
+/* --------------------------------------------------------------------------
+   2. BASE COMPONENT
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze,
+.quadro-partenze * {
+  box-sizing: border-box;
+}
+
+.quadro-partenze {
+  position: relative;
+  display: grid;
+  gap: calc(var(--qp-gap) * var(--qp-density));
+  width: 100%;
+  max-width: var(--qp-max-width);
+  padding: calc(var(--qp-space-4) * var(--qp-density));
+  color: var(--qp-text);
+  background:
+    linear-gradient(135deg, var(--qp-accent-soft) 0%, transparent 42%),
+    var(--qp-panel);
+  border: 1px solid var(--qp-border);
+  border-radius: var(--qp-radius);
+  box-shadow: var(--qp-shadow);
+  font-family: var(--qp-font-sans);
+  line-height: 1.45;
+  container-type: inline-size;
+  container-name: quadro-partenze;
+  isolation: isolate;
+}
+
+/* Varianti contenitore */
+.quadro-partenze--flat {
+  box-shadow: none;
+}
+
+.quadro-partenze--borderless {
+  border-color: transparent;
+}
+
+.quadro-partenze--transparent {
   background: transparent;
-  color: var(--base-content);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  border-color: transparent;
+  box-shadow: none;
 }
 
-/* Trama diagonale finissima dietro tutto: e' quello che distingue un fondo da
-   una superficie. Sta a z-index negativo, quindi passa sotto le schede e non
-   sporca una sola riga di testo; il fondo pagina e' su <html> apposta, perche'
-   uno sfondo su <body> la coprirebbe. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    repeating-linear-gradient(135deg,
-      oklch(var(--bc) / .035) 0 1px,
-      transparent 1px 8px);
+.quadro-partenze--compact {
+  --qp-density: 0.84;
+  --qp-cell-padding: 0.48rem 0.62rem;
 }
 
-::selection { background: oklch(var(--a) / .35); }
-
-a { color: var(--primary); text-underline-offset: .15em; }
-a:hover { text-decoration-color: var(--accent); }
-
-/* Crenatura ottica: piu' stretta sui corpi grandi, nulla sui piccoli. E' la
-   regola tipografica che i fogli generici saltano, ed e' quella che distingue
-   un titolo composto da un titolo scritto. */
-h1, h2, h3, h4 {
-  font-family: var(--font-display);
-  line-height: 1.15;
-  margin: 0 0 .4rem;
-  font-weight: 600;
+.quadro-partenze--comfortable {
+  --qp-density: 1.14;
+  --qp-cell-padding: 0.88rem 0.95rem;
 }
-h1 { font-size: clamp(1.85rem, 3.4vw, 2.6rem); letter-spacing: -.005em; }
-h2 { font-size: clamp(1.2rem, 1.9vw, 1.45rem); letter-spacing: .002em; }
-h3 { font-size: 1.06rem; }
-h4 { font-size: .95rem; }
-p  { margin: 0 0 .6rem; }
 
-.container { width: min(1240px, 100% - 2.5rem); margin-inline: auto; }
-main { flex: 1; padding: 1.5rem 0 3.5rem; }
-.stack > * + * { margin-top: 1.2rem; }
-.muted  { color: oklch(var(--bc) / .62); }
-.small  { font-size: .8rem; }
-.mono   { font-family: var(--font-mono); font-size: .9em; letter-spacing: -.015em; }
-.center { text-align: center; }
+.quadro-partenze--full {
+  max-width: none;
+}
 
-/* Cifre a larghezza fissa ovunque si confrontino numeri in colonna: 9,90 e
-   11,00 devono allinearsi sulla virgola. Non e' una sfumatura estetica. */
-.price, .kv .v, .estimate, table, .flap, .badge, .picker-meta {
+/* --------------------------------------------------------------------------
+   3. HEADER / TITOLO / META / CONTROLLI
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--qp-space-3);
+  min-width: 0;
+}
+
+.quadro-partenze__heading {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.quadro-partenze__title {
+  margin: 0;
+  font:
+    800
+    clamp(1.1rem, 1.6vw + 0.75rem, 1.65rem)
+    /
+    1.1
+    var(--qp-font-sans);
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.quadro-partenze--sentence-case .quadro-partenze__title {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.quadro-partenze__subtitle,
+.quadro-partenze__description {
+  margin: 0;
+  color: var(--qp-muted);
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.quadro-partenze__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--qp-space-2) var(--qp-space-3);
+  color: var(--qp-muted);
+  font-size: 0.85rem;
+}
+
+.quadro-partenze__updated {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.quadro-partenze__live-dot {
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 999px;
+  background: var(--qp-success);
+  box-shadow: 0 0 0 0.28rem var(--qp-success-soft);
+  animation: qp-pulse 2s ease-in-out infinite;
+}
+
+.quadro-partenze--offline .quadro-partenze__live-dot {
+  background: var(--qp-muted);
+  box-shadow: 0 0 0 0.28rem rgba(148, 163, 184, 0.16);
+  animation: none;
+}
+
+.quadro-partenze__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quadro-partenze__button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.25rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--qp-border);
+  border-radius: 999px;
+  background: var(--qp-surface);
+  color: var(--qp-text);
+  font: 700 0.88rem / 1 var(--qp-font-sans);
+  cursor: pointer;
+  transition:
+    background-color var(--qp-transition-fast),
+    border-color var(--qp-transition-fast),
+    color var(--qp-transition-fast),
+    transform var(--qp-transition-fast),
+    box-shadow var(--qp-transition-fast);
+}
+
+.quadro-partenze__button:hover {
+  border-color: var(--qp-accent);
+  color: var(--qp-accent);
+  background: var(--qp-row-hover);
+}
+
+.quadro-partenze__button:active {
+  transform: translateY(1px);
+}
+
+.quadro-partenze__button:focus-visible {
+  outline: 3px solid var(--qp-focus);
+  outline-offset: 2px;
+}
+
+.quadro-partenze__button[aria-pressed="true"] {
+  background: var(--qp-accent);
+  border-color: var(--qp-accent);
+  color: var(--qp-on-accent);
+}
+
+.quadro-partenze__button--ghost {
+  background: transparent;
+}
+
+.quadro-partenze__button--danger {
+  color: var(--qp-danger);
+  border-color: var(--qp-danger-border);
+}
+
+.quadro-partenze__button--danger:hover {
+  background: var(--qp-danger-soft);
+  border-color: var(--qp-danger);
+  color: var(--qp-danger);
+}
+
+.quadro-partenze__link {
+  color: var(--qp-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.quadro-partenze__link:hover {
+  color: var(--qp-text);
+}
+
+.quadro-partenze__link:focus-visible {
+  outline: 3px solid var(--qp-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   4. VIEWPORT / SCROLL CONTENITORE
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__viewport {
+  position: relative;
+  overflow: auto;
+  overscroll-behavior-x: contain;
+  max-height: var(--qp-max-height);
+  border: 1px solid var(--qp-border);
+  border-radius: calc(var(--qp-radius) - 4px);
+  background: var(--qp-surface);
+  scrollbar-color: var(--qp-scrollbar-thumb) var(--qp-scrollbar-track);
+  scrollbar-width: thin;
+  contain: paint;
+}
+
+.quadro-partenze__viewport:focus-visible {
+  outline: 3px solid var(--qp-focus);
+  outline-offset: 2px;
+}
+
+.quadro-partenze__viewport::-webkit-scrollbar {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+.quadro-partenze__viewport::-webkit-scrollbar-track {
+  background: var(--qp-scrollbar-track);
+}
+
+.quadro-partenze__viewport::-webkit-scrollbar-thumb {
+  background: var(--qp-scrollbar-thumb);
+  border-radius: 999px;
+}
+
+.quadro-partenze__viewport::-webkit-scrollbar-thumb:hover {
+  background: var(--qp-muted);
+}
+
+/* --------------------------------------------------------------------------
+   5. TABELLA / HEAD / BODY
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__table {
+  width: 100%;
+  min-width: var(--qp-table-min-width);
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------------------------------------------------------------------------
-   4. Barra di avanzamento
-   ---------------------------------------------------------------------------
-   Gli indicatori locali stanno accanto al pulsante premuto, che dopo uno
-   scroll puo' essere fuori dalla vista: questa barra dice "sta lavorando" da
-   qualunque punto della pagina. Si accende aggiungendo .net-busy su <body>. */
-
-.net-bar {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 2px; z-index: 100;
-  opacity: 0; transition: opacity .18s;
-  pointer-events: none;
-  overflow: hidden;
-}
-.net-busy .net-bar { opacity: 1; }
-.net-bar::before {
-  content: ""; display: block;
-  height: 100%; width: 28%;
-  background: linear-gradient(90deg, transparent, var(--accent) 60%, var(--secondary));
-  animation: net-slide 1.05s cubic-bezier(.4, 0, .6, 1) infinite;
-}
-@keyframes net-slide {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(460%); }
+.quadro-partenze__head {
+  /* thead */
 }
 
-/* ---------------------------------------------------------------------------
-   5. Testata: la fascia del tabellone
-   --------------------------------------------------------------------------- */
-
-.site-header {
+.quadro-partenze__head-cell {
   position: sticky;
   top: 0;
-  z-index: 40;
-  background: var(--ink);
-  color: oklch(var(--ink-fg));
-  border-bottom: 1px solid var(--ink-line);
-  --ring-gap: var(--ink);
-}
-/* Filetto ambra in basso: unico segno di colore della fascia, dice dove
-   finisce la cornice e comincia la pagina. */
-.site-header::after {
-  content: "";
-  position: absolute; left: 0; right: 0; bottom: -1px;
-  height: 1px;
-  background: linear-gradient(90deg, var(--accent), transparent 62%);
-  opacity: .55;
-}
-/* L'header sticky coprirebbe il titolo raggiunto via ancora. */
-.card[id], [id].anchor-target { scroll-margin-top: 4.8rem; }
-
-.site-header .container {
-  display: flex;
-  align-items: center;
-  gap: 1.1rem;
-  min-height: 3.5rem;
-  flex-wrap: wrap;
-}
-
-.brand { display: flex; align-items: center; gap: .65rem; text-decoration: none; color: inherit; margin-right: auto; }
-/* Il marchio e' una targa, non un bottone: rettangolo pieno e lettere
-   condensate e spaziate, come su un cartello di scalo. */
-.brand-mark {
-  width: 2.35rem; height: 1.75rem;
-  display: grid; place-items: center;
-  border-radius: 2px;
-  background: var(--accent);
-  color: var(--accent-content);
-  font-family: var(--font-display);
-  font-weight: 700; font-size: .82rem; letter-spacing: .1em;
-  text-indent: .1em;  /* compensa la spaziatura sull'ultima lettera */
-}
-.brand-text strong {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 1rem; font-weight: 600; letter-spacing: .01em;
+  z-index: 3;
+  padding: var(--qp-space-2) var(--qp-space-3);
+  background: var(--qp-header-bg);
+  color: var(--qp-muted);
+  border-bottom: 1px solid var(--qp-border);
+  font:
+    800
+    0.74rem
+    /
+    1.1
+    var(--qp-font-sans);
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-}
-.brand-text span {
-  display: block;
-  font-size: .58rem; text-transform: uppercase; letter-spacing: .22em;
-  color: oklch(var(--a) / .85);
-}
-
-/* Le voci sono righe di tabellone: maiuscoletto spaziato, nessuna pastiglia.
-   L'attiva si accende in ambra col quadratino, come la riga in partenza. */
-.nav { display: flex; gap: .15rem; flex-wrap: wrap; }
-.nav a {
-  display: flex; align-items: center; gap: .4rem;
-  padding: .4rem .6rem;
-  border-radius: 2px;
-  text-decoration: none;
-  color: oklch(var(--ink-fg) / .62);
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: .82rem;
-  text-transform: uppercase;
-  letter-spacing: .075em;
   white-space: nowrap;
-  transition: color .16s, background .16s;
+  text-align: left;
 }
-.nav a::before {
-  content: "";
-  width: .3rem; height: .3rem;
-  background: currentColor;
-  opacity: 0;
-  transition: opacity .16s;
+
+.quadro-partenze__head-cell--right {
+  text-align: right;
 }
-.nav a:hover { color: oklch(var(--ink-fg)); background: oklch(100% 0 0 / .05); }
-.nav a[aria-current="page"] { color: oklch(var(--a)); }
-.nav a[aria-current="page"]::before { opacity: 1; }
 
-.site-header .btn-ghost {
-  border-color: oklch(100% 0 0 / .22);
-  color: oklch(var(--ink-fg));
+.quadro-partenze__head-cell--center {
+  text-align: center;
 }
-.site-header .btn-ghost:hover { background: oklch(100% 0 0 / .08); }
 
-/* ---------------------------------------------------------------------------
-   6. Testatina di pagina
-   ---------------------------------------------------------------------------
-   Occhiello, titolo grande in condensato, filetto a tutta larghezza: dice dove
-   si e' prima di dire cosa si fa. */
+/* Larghezza colonne desktop */
+.quadro-partenze__head-cell:nth-child(1),
+.quadro-partenze__cell--time {
+  width: 11%;
+}
 
-.hero {
-  padding: 1.4rem 0 1.2rem;
-  border-bottom: 1px solid var(--line-strong);
-  margin-bottom: 1.5rem;
+.quadro-partenze__head-cell:nth-child(2),
+.quadro-partenze__cell--destination {
+  width: 35%;
+}
+
+.quadro-partenze__head-cell:nth-child(3),
+.quadro-partenze__cell--platform {
+  width: 11%;
+}
+
+.quadro-partenze__head-cell:nth-child(4),
+.quadro-partenze__cell--status {
+  width: 20%;
+}
+
+.quadro-partenze__head-cell:nth-child(5),
+.quadro-partenze__cell--note {
+  width: 23%;
+}
+
+.quadro-partenze__body {
+  /* tbody */
+}
+
+/* --------------------------------------------------------------------------
+   6. RIGHE
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__row {
+  background: transparent;
+  transition:
+    background-color var(--qp-transition-base),
+    box-shadow var(--qp-transition-base),
+    opacity var(--qp-transition-base);
+}
+
+.quadro-partenze__row:nth-child(even) {
+  background: var(--qp-row-alt);
+}
+
+.quadro-partenze__row:hover {
+  background: var(--qp-row-hover);
+}
+
+.quadro-partenze__row:focus-visible {
+  outline: 3px solid var(--qp-focus);
+  outline-offset: -3px;
+}
+
+.quadro-partenze__row:focus-within {
   position: relative;
-}
-/* Il tratto ambra torna identico su ogni pagina: e' quello che le fa
-   riconoscere come parti dello stesso strumento. */
-.hero::after {
-  content: "";
-  position: absolute; left: 0; bottom: -1px;
-  width: 4.5rem; height: 3px;
-  background: var(--accent);
-}
-.hero h1 {
-  margin-bottom: .45rem;
-  max-width: 22ch;
-  text-transform: uppercase;
-  letter-spacing: .004em;
-}
-/* La parola che l'autore vuole far risaltare: evidenziata in ambra bassa, non
-   colorata. Un titolo con dentro una parola di un altro colore si legge come
-   un collegamento. */
-.hero h1 em {
-  font-style: normal;
-  background: linear-gradient(oklch(var(--a) / .38), oklch(var(--a) / .38)) bottom / 100% .42em no-repeat;
-  padding: 0 .1em;
-}
-.hero p { font-size: 1rem; color: oklch(var(--bc) / .68); margin: 0; max-width: 52ch; }
-.hero .eyebrow { margin-bottom: .5rem; }
-
-/* Entrata di pagina: occhiello, titolo e sommario arrivano sfalsati di pochi
-   centesimi. Un solo movimento all'apertura vale piu' di dieci micro-effetti
-   sparsi, e questo e' il momento in cui la pagina si presenta. */
-.hero .eyebrow, .hero h1, .hero p { animation: board-in .42s cubic-bezier(.2, .7, .3, 1) both; }
-.hero h1 { animation-delay: .05s; }
-.hero p  { animation-delay: .1s; }
-@keyframes board-in {
-  from { opacity: 0; transform: translateY(.5rem); }
-  to   { opacity: 1; transform: none; }
+  z-index: 1;
 }
 
-/* ---------------------------------------------------------------------------
-   7. Superfici
-   --------------------------------------------------------------------------- */
-
-.card {
-  background: var(--base-100);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: 1.2rem 1.3rem;
-}
-.card.flush { padding: 0; overflow: hidden; }
-/* La scheda dove si lavora porta la barra ambra in testa: si deve vedere da
-   lontano qual e'. Una sola per schermata, o non significa piu' niente. */
-.card-accent {
-  border-top: 3px solid var(--accent);
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-}
-.panel {
-  background: var(--base-200);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: .95rem 1.05rem;
+.quadro-partenze__row[aria-selected="true"],
+.quadro-partenze__row.is-selected {
+  background: var(--qp-row-selected);
+  box-shadow: inset 3px 0 0 var(--qp-accent);
 }
 
-/* La carta d'imbarco: per il pezzo che esce dallo strumento e finisce in mano
-   a qualcuno (riepilogo, ricevuta, biglietto). Gli intagli sono disegnati nel
-   fondo, quindi i bordi verticali vanno tolti — un filetto che attraversa
-   l'intaglio fa sembrare la scheda semplicemente rotta. */
-.ticket {
-  border-left: 0; border-right: 0;
-  border-top: 3px solid var(--accent);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  background:
-    radial-gradient(circle at left center,
-      transparent 0 .5rem, var(--base-100) .5rem) left  / 50.5% 100% no-repeat,
-    radial-gradient(circle at right center,
-      transparent 0 .5rem, var(--base-100) .5rem) right / 50.5% 100% no-repeat;
+.quadro-partenze__row--new {
+  animation: qp-fade-in 0.35s ease both;
 }
 
-.grid { display: grid; gap: .85rem; }
-.grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-.grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(225px, 1fr)); }
-.split { display: grid; gap: 1.4rem; grid-template-columns: minmax(0, 1fr); }
-/* 7/5 invece di 1/1: la colonna dove si lavora comanda, l'altra fa da spalla.
-   Due colonne uguali non dicono quale si compila per prima. */
-@media (min-width: 900px) { .split { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); } }
-
-/* Titolo di sezione come riga di tabellone: dopo il titolo e i suoi badge un
-   filetto tira fino al bordo destro. E' quello che trasforma un'intestazione
-   in una riga d'orario. */
-.section-title {
-  display: flex; align-items: center; gap: .65rem;
-  margin-bottom: .95rem;
-  flex-wrap: wrap;
-}
-.section-title h2 { margin: 0; text-transform: uppercase; }
-/* Il simbolo che apre la sezione sta per conto suo, alla dimensione a cui si
-   legge: un glifo dentro un badge e' solo un rettangolo colorato. */
-.section-icon { font-size: 1.25rem; line-height: 1; }
-.section-title::after {
-  content: "";
-  flex: 1 1 2rem;
-  height: 1px;
-  background: var(--line);
-  min-width: 1.5rem;
+.quadro-partenze__row--updated {
+  animation: qp-row-updated 0.9s ease both;
 }
 
-hr.divider {
-  border: 0;
-  border-top: 1px dashed var(--line-strong);
-  margin: 1.3rem 0;
+/* Stati riga */
+.quadro-partenze__row--on-time {
+  box-shadow: inset 3px 0 0 var(--qp-success);
 }
 
-/* ---------------------------------------------------------------------------
-   8. Controlli
-   --------------------------------------------------------------------------- */
-
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
-  padding: .46rem .95rem;
-  border-radius: 2px;
-  border: 1px solid transparent;
-  background: oklch(var(--bc) / .08);
-  color: var(--base-content);
-  font-family: var(--font-display);
-  font-weight: 600; font-size: .84rem;
-  letter-spacing: .045em;
-  text-transform: uppercase;
-  cursor: pointer;
-  text-decoration: none;
-  transition: filter .16s, box-shadow .16s, background .16s, transform .1s;
+.quadro-partenze__row--delayed {
+  box-shadow: inset 3px 0 0 var(--qp-warning);
 }
-.btn:hover { filter: brightness(1.06); }
-/* Un affondamento di un pixel alla pressione: e' la sola conferma tattile che
-   un'interfaccia server-rendered puo' dare prima che risponda la rete. */
-.btn:active { transform: translateY(1px); }
-.btn:focus-visible { outline: none; box-shadow: var(--ring); }
-.btn[disabled] { opacity: .45; cursor: not-allowed; }
-.btn-primary   { background: var(--primary); color: var(--primary-content); }
-.btn-secondary { background: var(--secondary); color: var(--secondary-content); }
-.btn-ghost     { background: transparent; border-color: var(--line-strong); }
-.btn-ghost:hover { background: oklch(var(--bc) / .06); filter: none; }
-.btn-sm    { padding: .26rem .6rem; font-size: .76rem; letter-spacing: .04em; }
-.btn-lg    { padding: .68rem 1.5rem; font-size: .95rem; }
-.btn-block { width: 100%; }
-.btn-icon  { padding: 0; width: 2rem; height: 2rem; letter-spacing: 0; }
 
-label.field { display: block; margin-bottom: .7rem; }
-/* Etichetta in maiuscoletto, condivisa fra campi del form e intestazioni di
-   pannello. L'involucro del campo di ricerca e' escluso: e' un contenitore,
-   non un'etichetta, e il maiuscoletto si eredita fin dentro l'input. */
-label.field > span:not(.picker-search), .eyebrow {
-  display: block;
-  font-family: var(--font-display);
-  font-size: .7rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: .13em;
-  color: oklch(var(--bc) / .55);
-  margin-bottom: .3rem;
+.quadro-partenze__row--boarding {
+  box-shadow: inset 3px 0 0 var(--qp-accent);
+  background: var(--qp-accent-soft);
 }
-/* Solo l'occhiello porta il quadratino: sui campi sarebbe un segno ripetuto
-   dieci volte in una schermata, e un segno ripetuto non segnala piu' nulla. */
-.eyebrow {
-  display: flex; align-items: center; gap: .45rem;
-  color: oklch(var(--bc) / .6);
+
+.quadro-partenze__row--cancelled {
+  box-shadow: inset 3px 0 0 var(--qp-danger);
+  opacity: 0.82;
 }
-.eyebrow::before {
-  content: "";
-  width: .38rem; height: .38rem;
-  background: var(--accent);
-  flex-shrink: 0;
+
+.quadro-partenze__row--arrived {
+  box-shadow: inset 3px 0 0 var(--qp-muted);
+  opacity: 0.72;
 }
-.eyebrow-primary { color: var(--primary); }
-.eyebrow-primary::before { background: var(--primary); }
 
-input[type="text"], input[type="search"], input[type="password"], input[type="email"],
-input[type="tel"], input[type="url"], input[type="date"], input[type="number"],
-select, textarea {
-  width: 100%;
-  padding: .46rem .65rem;
-  border-radius: 2px;
-  border: 1px solid var(--line-strong);
-  background: var(--base-100);
-  color: var(--base-content);
-  font: inherit; font-size: .9rem;
-  transition: border-color .16s, box-shadow .16s;
+.quadro-partenze__row--changed {
+  box-shadow: inset 3px 0 0 var(--qp-info);
 }
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: oklch(var(--a) / .8);
-  box-shadow: var(--ring);
-}
-textarea { resize: vertical; min-height: 4.4rem; }
-select { cursor: pointer; }
-input[type="number"] { font-variant-numeric: tabular-nums; }
-::placeholder { color: oklch(var(--bc) / .42); }
 
-.inline-form { display: flex; gap: .55rem; flex-wrap: wrap; align-items: flex-end; }
-.inline-form > * { flex: 1 1 12rem; }
-.inline-form > .btn { flex: 0 0 auto; }
-
-.checkline { display: flex; align-items: flex-start; gap: .55rem; padding: .3rem 0; cursor: pointer; }
-.checkline input { margin-top: .2rem; width: .95rem; height: .95rem; accent-color: var(--accent); cursor: pointer; }
-
-/* ---------------------------------------------------------------------------
-   9. Selettore ricercabile
-   ---------------------------------------------------------------------------
-   Sostituisce una <select> lunga. Una tendina da sessanta voci si naviga solo
-   a memoria: non si cerca, e non c'e' spazio per un secondo dato accanto al
-   nome. Qui il campo filtra, l'elenco resta aperto e il dato sta in colonna a
-   destra. Le righe sono <button>: navigabili da tastiera, e se sono
-   type="submit" dentro un form funzionano anche senza JavaScript. */
-
-.picker { display: grid; gap: .45rem; }
-.picker-search { position: relative; display: block; }
-.picker-icon {
-  position: absolute; left: .6rem; top: 50%; transform: translateY(-50%);
-  font-size: 1rem; line-height: 1;
-  color: oklch(var(--bc) / .45);
+.quadro-partenze__row--disabled {
+  opacity: 0.55;
   pointer-events: none;
 }
-.picker-search input { padding-left: 1.9rem; }
-/* La crocetta nativa di WebKit non e' stilizzabile e si appoggia sul bordo. */
-.picker-search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
 
-.picker-list {
-  display: grid; gap: 1px;
-  max-height: 15.5rem; overflow-y: auto;
-  border: 1px solid var(--line-strong); border-radius: 2px;
-  background: var(--line);
-  overscroll-behavior: contain;  /* arrivati in fondo non trascina la pagina */
-}
-.picker-list::-webkit-scrollbar { width: 9px; }
-.picker-list::-webkit-scrollbar-thumb { background: var(--line-strong); }
+/* --------------------------------------------------------------------------
+   7. CELLE / VALORI
+   -------------------------------------------------------------------------- */
 
-.picker-row {
-  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
-  width: 100%; text-align: left;
-  padding: .4rem .6rem .4rem .55rem;
-  border: 0; border-left: 3px solid transparent;
-  background: var(--base-100);
-  color: inherit; font: inherit; font-size: .86rem;
-  cursor: pointer;
-  transition: background .12s, border-color .12s;
-}
-.picker-row:hover:not([disabled]) { background: oklch(var(--a) / .09); border-left-color: oklch(var(--a) / .45); }
-/* z-index perche' l'anello di fuoco, altrimenti, lo copre la riga seguente. */
-.picker-row:focus-visible { outline: none; box-shadow: var(--ring); position: relative; z-index: 1; }
-.picker-row[disabled] { cursor: default; opacity: .5; }
-.picker-row.current {
-  border-left-color: var(--accent);
-  background: oklch(var(--a) / .12);
-  font-weight: 600;
-}
-.picker-main {
-  display: flex; align-items: center; gap: .4rem;
-  min-width: 0;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.picker-meta {
-  display: flex; align-items: center; gap: .45rem;
-  flex-shrink: 0;
-  font-size: .78rem; color: oklch(var(--bc) / .6);
-}
-.picker-note {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: .74rem; letter-spacing: .04em;
-  color: oklch(var(--bc) / .55);
-}
-.picker-empty { font-weight: 600; color: oklch(var(--bc) / .78); }
-
-/* ---------------------------------------------------------------------------
-   10. Badge e chip
-   ---------------------------------------------------------------------------
-   Etichette da cartello: rettangolari, in maiuscoletto spaziato. Il badge
-   qualifica; il chip e' una cosa che sta in un elenco e si puo' togliere. */
-
-.badge {
-  display: inline-flex; align-items: center; gap: .3rem;
-  padding: .14rem .42rem;
-  border-radius: 2px;
-  font-family: var(--font-display);
-  font-size: .68rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: .07em;
-  background: oklch(var(--bc) / .08);
-  color: oklch(var(--bc) / .78);
-  white-space: nowrap;
-}
-.badge-primary { background: var(--primary); color: var(--primary-content); }
-/* Pieno nel colore d'azione: si usa per «da fare», non per qualificare. */
-.badge-secondary { background: var(--secondary); color: var(--secondary-content); }
-.badge-success { background: oklch(var(--su) / .15); color: var(--success); box-shadow: inset 0 0 0 1px oklch(var(--su) / .3); }
-.badge-warning { background: oklch(var(--wa) / .18); color: oklch(var(--wa)); box-shadow: inset 0 0 0 1px oklch(var(--wa) / .35); }
-.badge-error   { background: oklch(var(--er) / .14); color: var(--error); box-shadow: inset 0 0 0 1px oklch(var(--er) / .3); }
-.badge-info    { background: oklch(var(--in) / .13); color: var(--info); box-shadow: inset 0 0 0 1px oklch(var(--in) / .28); }
-.badge-ghost   { background: transparent; color: oklch(var(--bc) / .68); box-shadow: inset 0 0 0 1px var(--line-strong); font-weight: 500; }
-/* Il tema chiaro ha bisogno di un giallo piu' scuro del riempimento, o il
-   testo ambra su fondo ambra scende sotto la soglia di contrasto. */
-:root .badge-warning { color: oklch(42% .1 66); }
-[data-theme="dark"] .badge-warning { color: oklch(var(--wa)); }
-
-.chips { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
-.chip {
-  display: inline-flex; align-items: center; gap: .4rem;
-  padding: .22rem .3rem .22rem .5rem;
-  border-radius: 2px;
-  background: var(--base-100);
-  border: 1px solid var(--line-strong);
-  font-weight: 500; font-size: .82rem;
-}
-.chip button {
-  border: 0; background: transparent; color: oklch(var(--bc) / .45);
-  width: 1.2rem; height: 1.2rem; border-radius: 2px;
-  cursor: pointer; font-size: .85rem; line-height: 1;
-  display: grid; place-items: center;
-  transition: background .16s, color .16s;
-}
-.chip button:hover { background: oklch(var(--er) / .14); color: var(--error); }
-.chip button:focus-visible { outline: none; box-shadow: var(--ring); }
-
-/* ---------------------------------------------------------------------------
-   11. Avvisi
-   ---------------------------------------------------------------------------
-   Barra piena a sinistra invece di un filetto: sono i messaggi che cambiano
-   quello che si sta per fare, e devono trovarsi con la coda dell'occhio.
-
-   Due forme convivono: «icona + testo», due <span> affiancati, e «titolo +
-   spiegazione», uno <strong> seguito da testo sciolto e da <code> o <p>. La
-   seconda non puo' stare in un contenitore flex — i frammenti di testo nudo
-   diventano elementi flex anonimi e la frase si spezza in colonne — quindi il
-   default e' block e il flex si accende solo quando c'e' un'icona da
-   allineare. Non riportare .alert a display:flex fisso. */
-
-.alert {
-  display: block;
-  padding: .7rem .9rem;
-  border-radius: 2px;
-  border-left: 4px solid var(--info);
-  background: oklch(var(--in) / .08);
-  font-size: .9rem;
-}
-.alert:has(> span:first-child) {
-  display: flex; gap: .65rem; align-items: flex-start;
-}
-.alert-info    { border-color: var(--info);    background: oklch(var(--in) / .08); }
-.alert-success { border-color: var(--success); background: oklch(var(--su) / .09); }
-.alert-warning { border-color: var(--warning); background: oklch(var(--wa) / .12); }
-.alert-error   { border-color: var(--error);   background: oklch(var(--er) / .09); }
-.alert strong { display: block; font-family: var(--font-display); letter-spacing: .01em; }
-
-/* ---------------------------------------------------------------------------
-   12. Tessera: la scheda di contenuto
-   ---------------------------------------------------------------------------
-   E' l'unita' che si ripete in griglia: prodotto, piano, risultato, record. */
-
-.tile {
-  position: relative;
-  background: var(--base-100);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: 1rem 1.1rem;
-  transition: box-shadow .18s, border-color .18s;
-}
-.tile:hover { border-color: var(--line-strong); box-shadow: var(--shadow); }
-/* Il rilievo passa da una barra laterale interna, non da un bordo piu' spesso:
-   il bordo doppio sposta di un pixel tutto il contenuto. */
-.tile.highlight {
-  border-color: oklch(var(--a) / .5);
-  box-shadow: inset 4px 0 0 var(--accent);
-}
-.tile.highlight:hover { box-shadow: inset 4px 0 0 var(--accent), var(--shadow); }
-.tile.active {
-  border-color: oklch(var(--su) / .45);
-  background: oklch(var(--su) / .04);
+.quadro-partenze__cell {
+  padding: var(--qp-cell-padding);
+  border-bottom: 1px solid var(--qp-border);
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.tile-head { display: flex; justify-content: space-between; gap: .9rem; align-items: flex-start; flex-wrap: wrap; }
-.tile-title {
-  font-family: var(--font-display);
-  font-size: 1.12rem; font-weight: 600;
-  letter-spacing: .01em;
-  text-transform: uppercase;
-  margin: 0;
-}
-.tile-desc { color: oklch(var(--bc) / .72); font-size: .88rem; margin: .55rem 0 .75rem; }
-.price { text-align: right; white-space: nowrap; }
-
-/* IL FLAP — l'elemento firma del sistema.
-   Il dato che si sta cercando (prezzo, punteggio, orario, stato) composto come
-   una paletta girata di tabellone: fondo scuro, cifre ambra in monospaziato,
-   la piega orizzontale. E' l'unica cosa nera in una pagina chiara, quindi e'
-   anche la lettura piu' rapida possibile. Usarlo per UN dato per scheda: due
-   flap accanto competono e non si legge piu' nessuno dei due.
-
-   La cucitura sta appena sotto la linea di base, non a meta' altezza: sul
-   tabellone vero la piega taglia le cifre, ma li' le palette sono alte dieci
-   centimetri. A 1.1rem una riga in mezzo alla parola si legge come testo
-   sbarrato — e sbarrare «Incluso» dice il contrario di quello che c'e'
-   scritto. L'offset e' in em, cosi' segue il corpo del carattere. Sotto la
-   cucitura il filo di luce: e' il bordo della paletta inferiore che prende
-   luce, ed e' quello che la fa leggere come una piega e non come un errore. */
-.flap {
-  display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 1.1rem; font-weight: 600;
-  letter-spacing: -.02em;
-  line-height: 1.28;
-  padding: .12rem .42rem;
-  border-radius: 2px;
-  color: var(--flap-ink);
-  background:
-    linear-gradient(to bottom,
-      var(--flap)       0                        calc(50% + .36em - 1px),
-      var(--flap-seam)  calc(50% + .36em - 1px)  calc(50% + .36em),
-      var(--flap-glint) calc(50% + .36em)        calc(50% + .36em + 1px),
-      var(--flap)       calc(50% + .36em + 1px)  100%);
-}
-.flap-lg { font-size: 1.6rem; padding: .18rem .55rem; }
-/* L'unita' di misura accanto al flap: piccola, in maiuscoletto, mai in ambra.
-   Il colore del flap deve restare uno solo. */
-.unit {
-  display: inline-block;
-  margin-left: .25rem;
-  font-family: var(--font-display);
-  font-size: .68rem; text-transform: uppercase; letter-spacing: .1em;
-  color: oklch(var(--bc) / .55);
-}
-/* Il dato derivato sta sotto il dato di listino: e' spesso quello che decide,
-   ma non deve rubare la scena al numero ufficiale. */
-.estimate { display: block; margin-top: .4rem; font-size: .86rem; color: oklch(var(--bc) / .8); }
-.estimate strong { color: var(--base-content); font-weight: 700; }
-.estimate-detail { display: block; font-size: .7rem; color: oklch(var(--bc) / .55); }
-
-/* Elenco chiave/valore: righe unite da filetti invece di riquadri staccati.
-   E' una tabella di quantita', e come tale si legge in colonna. */
-.kv {
-  display: grid; gap: 1px; margin: 0; padding: 0; list-style: none;
-  border: 1px solid var(--line); border-radius: 2px; overflow: hidden;
-  background: var(--line);
-}
-.kv li {
-  display: flex; justify-content: space-between; gap: 1rem;
-  padding: .32rem .6rem;
-  background: var(--base-100);
-  font-size: .84rem;
-}
-.kv .k {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: .8rem;
-  text-transform: uppercase; letter-spacing: .06em;
-  color: oklch(var(--bc) / .58);
-}
-.kv .v { text-align: right; font-weight: 600; }
-
-/* Caselle disegnate, non scritte: il glifo di spunta cambia forma e peso da un
-   sistema all'altro, un quadrato di CSS no. */
-.checklist { list-style: none; margin: .55rem 0 0; padding: 0; display: grid; gap: .3rem; }
-.checklist li {
-  display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
-  padding: .45rem .75rem;
-  background: var(--base-200);
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  font-size: .88rem;
-}
-.checklist li::before {
-  content: "";
-  width: .85rem; height: .85rem;
-  flex-shrink: 0;
-  border: 1.5px solid oklch(var(--bc) / .35);
-  border-radius: 1px;
-}
-
-/* La nota che spiega perche': filetto ambra, non rosso. Se il filetto della
-   spiegazione fosse del colore d'azione, apparirebbe su ogni scheda e il
-   colore smetterebbe di indicare dove si preme. */
-.note {
-  margin-top: .65rem;
-  padding: .55rem .8rem;
-  border-left: 3px solid oklch(var(--a) / .55);
-  background: oklch(var(--a) / .07);
-  border-radius: 0 2px 2px 0;
-  font-size: .85rem;
-}
-.note strong {
-  font-family: var(--font-display);
-  text-transform: uppercase; letter-spacing: .05em; font-size: .78rem;
-  color: oklch(var(--bc) / .8);
-  margin-right: .2rem;
-}
-
-/* Il gruppo tratteggiato: piu' tessere che valgono solo insieme. Il tratteggio
-   dice che i pezzi si tengono ma restano distinti. */
-.combo {
-  border: 1px dashed oklch(var(--a) / .55);
-  border-radius: var(--radius-lg);
-  padding: 1rem 1.1rem;
-  background: oklch(var(--a) / .05);
-}
-.combo h3 { text-transform: uppercase; letter-spacing: .04em; }
-.combo-items { display: grid; gap: .75rem; margin-top: .75rem; }
-
-/* ---------------------------------------------------------------------------
-   13. Tabelle e blocchi richiudibili
-   --------------------------------------------------------------------------- */
-
-details { border-top: 1px solid var(--line); padding-top: .65rem; margin-top: .65rem; }
-summary {
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-weight: 600; font-size: .82rem;
-  text-transform: uppercase; letter-spacing: .07em;
-  color: var(--primary);
-  list-style-position: inside;
-}
-summary:hover { color: var(--base-content); }
-summary:focus-visible { outline: none; box-shadow: var(--ring); border-radius: 2px; }
-
-.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 2px; }
-table { width: 100%; border-collapse: collapse; font-size: .85rem; background: var(--base-100); }
-th, td { padding: .42rem .7rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
-/* L'intestazione e' la riga fissa del tabellone: inchiostro pieno, lettere
-   chiare e spaziate. Resta leggibile mentre la tabella scorre sotto.
-   ATTENZIONE: --ink-fg e' una TERNA, non un colore. Va sempre avvolto in
-   oklch(), anche quando non lo si diluisce, o la dichiarazione e' invalida e
-   il testo ricade sul colore ereditato — cioe' scuro su scuro. */
-th {
-  background: var(--ink);
-  color: oklch(var(--ink-fg) / .78);
-  font-family: var(--font-display);
-  font-size: .68rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: .11em;
-  position: sticky; top: 0; z-index: 1;
+.quadro-partenze__row:last-child .quadro-partenze__cell {
   border-bottom: 0;
+}
+
+.quadro-partenze__value {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
-tbody tr:last-child td { border-bottom: 0; }
-/* Evidenziazione neutra, non colorata: un fondo colorato su una riga la fa
-   sembrare selezionata o cliccabile, e nessuna delle due cose e' vera. */
-tbody tr:hover { background: oklch(var(--bc) / .04); }
 
-/* ---------------------------------------------------------------------------
-   14. Attesa e movimento
-   --------------------------------------------------------------------------- */
-
-/* Indicatori compatibili con htmx; se non si usa htmx, .is-loading fa lo
-   stesso lavoro con una classe qualunque messa da JS. */
-.htmx-indicator { opacity: 0; transition: opacity .18s; }
-.htmx-request .htmx-indicator, .htmx-request.htmx-indicator,
-.is-loading .htmx-indicator { opacity: 1; }
-.spinner {
-  display: inline-block; width: 1rem; height: 1rem;
-  border: 2px solid oklch(var(--bc) / .2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
+.quadro-partenze__secondary {
+  display: block;
+  margin-top: 0.16rem;
+  color: var(--qp-muted);
+  font-size: 0.82rem;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-.fade-in { animation: board-in .24s ease-out both; }
-
-/* Le tessere entrano ruotando dall'alto, una dopo l'altra: e' il gesto del
-   tabellone che si aggiorna, ed e' anche il modo per far leggere l'ordine, che
-   spesso e' l'informazione principale. Si ferma alla sesta perche' oltre
-   diventa attesa invece di ritmo. */
-.fade-in .tile { animation: flap-in .34s cubic-bezier(.2, .75, .3, 1) both; transform-origin: top center; }
-@keyframes flap-in {
-  from { opacity: 0; transform: perspective(700px) rotateX(-32deg); }
-  to   { opacity: 1; transform: perspective(700px) rotateX(0); }
+.quadro-partenze__cell--time .quadro-partenze__value,
+.quadro-partenze__cell--platform .quadro-partenze__value {
+  font-family: var(--qp-font-mono);
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
-.fade-in .grid > .tile:nth-child(1) { animation-delay: .04s }
-.fade-in .grid > .tile:nth-child(2) { animation-delay: .09s }
-.fade-in .grid > .tile:nth-child(3) { animation-delay: .14s }
-.fade-in .grid > .tile:nth-child(4) { animation-delay: .19s }
-.fade-in .grid > .tile:nth-child(5) { animation-delay: .24s }
-.fade-in .grid > .tile:nth-child(n+6) { animation-delay: .28s }
 
-/* Chi ha chiesto meno animazioni al sistema operativo non deve vederne. */
+.quadro-partenze__cell--time .quadro-partenze__value {
+  font-size: 1.02rem;
+}
+
+.quadro-partenze__cell--destination .quadro-partenze__value {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.quadro-partenze__cell--note .quadro-partenze__value {
+  color: var(--qp-muted);
+  font-size: 0.9rem;
+}
+
+.quadro-partenze__cell--right {
+  text-align: right;
+}
+
+.quadro-partenze__cell--center {
+  text-align: center;
+}
+
+/* Testo lungo: permette wrapping controllato se serve */
+.quadro-partenze--wrap-destinations
+  .quadro-partenze__cell--destination
+  .quadro-partenze__value {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------------------
+   8. BINARIO / PLATFORM
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__platform {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.35rem;
+  height: 2.35rem;
+  padding: 0 0.6rem;
+  border-radius: var(--qp-radius-sm);
+  background: var(--qp-platform-bg);
+  color: var(--qp-platform-color);
+  font:
+    800
+    1rem
+    /
+    1
+    var(--qp-font-mono);
+  letter-spacing: 0.04em;
+}
+
+.quadro-partenze__platform--empty {
+  color: var(--qp-muted);
+  background: transparent;
+  border: 1px dashed var(--qp-border);
+}
+
+.quadro-partenze__platform--changed {
+  color: var(--qp-info);
+  box-shadow: 0 0 0 2px var(--qp-info-soft);
+  animation: qp-flash-info 1.2s ease-in-out 2;
+}
+
+.quadro-partenze__platform--closed {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+/* --------------------------------------------------------------------------
+   9. STATO / BADGE
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: 100%;
+  padding: 0.36rem 0.68rem;
+  border: 1px solid var(--qp-status-border, var(--qp-border));
+  border-radius: 999px;
+  background: var(--qp-status-bg, var(--qp-surface));
+  color: var(--qp-status-color, var(--qp-text));
+  font:
+    800
+    0.76rem
+    /
+    1
+    var(--qp-font-sans);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quadro-partenze__status::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.quadro-partenze__status--on-time {
+  --qp-status-color: var(--qp-success);
+  --qp-status-bg: var(--qp-success-soft);
+  --qp-status-border: transparent;
+}
+
+.quadro-partenze__status--delayed {
+  --qp-status-color: var(--qp-warning);
+  --qp-status-bg: var(--qp-warning-soft);
+  --qp-status-border: transparent;
+}
+
+.quadro-partenze__status--boarding {
+  --qp-status-color: var(--qp-accent);
+  --qp-status-bg: var(--qp-accent-soft);
+  --qp-status-border: transparent;
+  animation: qp-badge-pulse 1.6s ease-in-out infinite;
+}
+
+.quadro-partenze__status--last-call {
+  --qp-status-color: var(--qp-danger);
+  --qp-status-bg: var(--qp-danger-soft);
+  --qp-status-border: transparent;
+  animation: qp-badge-pulse 1s ease-in-out infinite;
+}
+
+.quadro-partenze__status--cancelled {
+  --qp-status-color: var(--qp-danger);
+  --qp-status-bg: var(--qp-danger-soft);
+  --qp-status-border: transparent;
+}
+
+.quadro-partenze__status--arrived {
+  --qp-status-color: var(--qp-muted);
+  --qp-status-bg: rgba(148, 163, 184, 0.12);
+  --qp-status-border: transparent;
+}
+
+.quadro-partenze__status--changed {
+  --qp-status-color: var(--qp-info);
+  --qp-status-bg: var(--qp-info-soft);
+  --qp-status-border: transparent;
+}
+
+.quadro-partenze__status--generic {
+  --qp-status-color: var(--qp-text);
+  --qp-status-bg: var(--qp-surface);
+  --qp-status-border: var(--qp-border);
+}
+
+.quadro-partenze__row--cancelled .quadro-partenze__status--cancelled,
+.quadro-partenze__row--cancelled .quadro-partenze__value {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   10. EFFETTO FLIP / SPLIT-FLAP OPZIONALE
+   HTML consigliato:
+   <span class="quadro-partenze__flip">
+     <span class="quadro-partenze__flap">14:30</span>
+   </span>
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__flip {
+  display: inline-block;
+  perspective: 750px;
+}
+
+.quadro-partenze__flap {
+  display: inline-block;
+  transform-origin: 50% 100%;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.quadro-partenze__flap.is-flipping {
+  animation: qp-flip var(--qp-animation-duration) cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.quadro-partenze__cell--updating .quadro-partenze__value {
+  animation: qp-update-flash 0.75s ease;
+  border-radius: 6px;
+}
+
+.quadro-partenze--no-animation
+  .quadro-partenze__flap.is-flipping,
+.quadro-partenze--no-animation
+  .quadro-partenze__cell--updating
+  .quadro-partenze__value,
+.quadro-partenze--no-animation
+  .quadro-partenze__status--boarding,
+.quadro-partenze--no-animation
+  .quadro-partenze__status--last-call,
+.quadro-partenze--no-animation
+  .quadro-partenze__live-dot {
+  animation: none;
+}
+
+/* --------------------------------------------------------------------------
+   11. LOADING / SKELETON
+   Aggiungere .quadro-partenze--loading al root
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze--loading {
+  pointer-events: none;
+}
+
+.quadro-partenze--loading .quadro-partenze__value,
+.quadro-partenze--loading .quadro-partenze__platform,
+.quadro-partenze--loading .quadro-partenze__status {
+  color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  text-shadow: none;
+  user-select: none;
+  background:
+    linear-gradient(
+      90deg,
+      var(--qp-skeleton-base) 25%,
+      var(--qp-skeleton-highlight) 37%,
+      var(--qp-skeleton-base) 63%
+    );
+  background-size: 400% 100%;
+  animation: qp-shimmer 1.35s ease infinite;
+}
+
+.quadro-partenze--loading .quadro-partenze__value {
+  min-height: 1.1em;
+  border-radius: 6px;
+}
+
+.quadro-partenze--loading .quadro-partenze__platform {
+  min-width: 2.35rem;
+  border-radius: var(--qp-radius-sm);
+}
+
+.quadro-partenze--loading .quadro-partenze__status {
+  min-width: 6.5rem;
+  border-radius: 999px;
+}
+
+.quadro-partenze--loading .quadro-partenze__status::before {
+  opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   12. MESSAGGI: VUOTO / ERRORE / INFO
+   Aggiungere al root:
+   .quadro-partenze--empty
+   .quadro-partenze--error
+   .quadro-partenze--info
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__message {
+  display: none;
+  place-items: center;
+  gap: 0.5rem;
+  padding: var(--qp-space-6);
+  border: 1px dashed var(--qp-border);
+  border-radius: 14px;
+  background: var(--qp-message-bg);
+  color: var(--qp-muted);
+  text-align: center;
+}
+
+.quadro-partenze__message strong {
+  color: var(--qp-text);
+}
+
+.quadro-partenze__message--empty {
+  border-color: var(--qp-border);
+}
+
+.quadro-partenze__message--error {
+  color: var(--qp-danger);
+  border-color: var(--qp-danger-border);
+  background: var(--qp-danger-soft);
+}
+
+.quadro-partenze__message--error strong {
+  color: var(--qp-danger);
+}
+
+.quadro-partenze__message--info {
+  color: var(--qp-info);
+  border-color: rgba(96, 165, 250, 0.35);
+  background: var(--qp-info-soft);
+}
+
+.quadro-partenze--empty .quadro-partenze__viewport,
+.quadro-partenze--error .quadro-partenze__viewport {
+  display: none;
+}
+
+.quadro-partenze--empty .quadro-partenze__message--empty,
+.quadro-partenze--error .quadro-partenze__message--error,
+.quadro-partenze--info .quadro-partenze__message--info {
+  display: grid;
+}
+
+/* --------------------------------------------------------------------------
+   13. LEGENDA
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--qp-muted);
+  font-size: 0.85rem;
+}
+
+.quadro-partenze__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.quadro-partenze__legend-swatch {
+  width: 0.78rem;
+  height: 0.78rem;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: inset 0 0 0 1px var(--qp-border);
+}
+
+.quadro-partenze__legend-item--on-time {
+  color: var(--qp-success);
+}
+
+.quadro-partenze__legend-item--delayed {
+  color: var(--qp-warning);
+}
+
+.quadro-partenze__legend-item--boarding {
+  color: var(--qp-accent);
+}
+
+.quadro-partenze__legend-item--cancelled {
+  color: var(--qp-danger);
+}
+
+.quadro-partenze__legend-item--arrived {
+  color: var(--qp-muted);
+}
+
+.quadro-partenze__legend-item--changed {
+  color: var(--qp-info);
+}
+
+/* --------------------------------------------------------------------------
+   14. FOOTER
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--qp-muted);
+  font-size: 0.82rem;
+}
+
+.quadro-partenze__footer-note {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------------------
+   15. UTILITY ACCESSIBILI
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__sr-only,
+.quadro-partenze .visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.quadro-partenze__aria-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   16. RESPONSIVE / CONTAINER QUERY
+   Sotto 42rem il componente diventa a card.
+   Le celle richiedono data-label per mostrare l’etichetta su mobile.
+   -------------------------------------------------------------------------- */
+
+@container quadro-partenze (max-width: 56rem) {
+  .quadro-partenze__table {
+    min-width: 720px;
+  }
+}
+
+@container quadro-partenze (max-width: 42rem) {
+  .quadro-partenze {
+    --qp-cell-padding: 0.75rem 0.85rem;
+  }
+
+  .quadro-partenze__viewport {
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    scrollbar-width: none;
+  }
+
+  .quadro-partenze__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .quadro-partenze__table,
+  .quadro-partenze__body,
+  .quadro-partenze__row,
+  .quadro-partenze__cell {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .quadro-partenze__head {
+    display: none;
+  }
+
+  .quadro-partenze__row {
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--qp-border);
+    border-radius: 14px;
+    background: var(--qp-card-bg);
+    overflow: hidden;
+    box-shadow: none !important;
+  }
+
+  .quadro-partenze__row:last-child {
+    margin-bottom: 0;
+  }
+
+  .quadro-partenze__row--on-time,
+  .quadro-partenze__row--delayed,
+  .quadro-partenze__row--boarding,
+  .quadro-partenze__row--cancelled,
+  .quadro-partenze__row--arrived,
+  .quadro-partenze__row--changed {
+    border-left: 4px solid currentColor;
+  }
+
+  .quadro-partenze__row--on-time {
+    color: var(--qp-success);
+  }
+
+  .quadro-partenze__row--delayed {
+    color: var(--qp-warning);
+  }
+
+  .quadro-partenze__row--boarding {
+    color: var(--qp-accent);
+  }
+
+  .quadro-partenze__row--cancelled {
+    color: var(--qp-danger);
+  }
+
+  .quadro-partenze__row--arrived {
+    color: var(--qp-muted);
+  }
+
+  .quadro-partenze__row--changed {
+    color: var(--qp-info);
+  }
+
+  .quadro-partenze__cell {
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 34%) 1fr;
+    align-items: center;
+    gap: 0.45rem 0.75rem;
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid var(--qp-border);
+    color: var(--qp-text);
+  }
+
+  .quadro-partenze__cell:last-child {
+    border-bottom: 0;
+  }
+
+  .quadro-partenze__cell::before {
+    content: attr(data-label);
+    color: var(--qp-muted);
+    font:
+      800
+      0.72rem
+      /
+      1.1
+      var(--qp-font-sans);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .quadro-partenze__cell--destination {
+    grid-template-columns: 1fr;
+  }
+
+  .quadro-partenze__cell--destination::before {
+    grid-column: 1 / -1;
+  }
+
+  .quadro-partenze__cell--note {
+    grid-template-columns: 1fr;
+  }
+
+  .quadro-partenze__cell--note::before {
+    grid-column: 1 / -1;
+  }
+
+  .quadro-partenze__value {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  .quadro-partenze__status {
+    justify-self: start;
+  }
+}
+
+@container quadro-partenze (max-width: 25rem) {
+  .quadro-partenze {
+    padding: 0.9rem;
+    border-radius: 14px;
+  }
+
+  .quadro-partenze__header {
+    align-items: flex-start;
+  }
+
+  .quadro-partenze__cell {
+    grid-template-columns: 1fr;
+  }
+
+  .quadro-partenze__cell::before {
+    margin-bottom: 0.1rem;
+  }
+
+  .quadro-partenze__platform {
+    min-width: 2.1rem;
+    height: 2.1rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   17. RIDUZIONE MOVIMENTO
+   -------------------------------------------------------------------------- */
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
+  .quadro-partenze *,
+  .quadro-partenze *::before,
+  .quadro-partenze *::after {
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
+    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .btn:active { transform: none; }
+
+  .quadro-partenze__flap.is-flipping {
+    transform: none;
+  }
+
+  .quadro-partenze__live-dot,
+  .quadro-partenze__status--boarding,
+  .quadro-partenze__status--last-call {
+    animation: none;
+  }
 }
 
-/* ---------------------------------------------------------------------------
-   15. Pie' di pagina: l'altra sponda della cornice
-   --------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+   18. ALTO CONTRASTO / FORCED COLORS
+   -------------------------------------------------------------------------- */
 
-.site-footer {
-  background: var(--ink);
-  color: oklch(var(--ink-fg) / .62);
-  border-top: 3px solid oklch(var(--a) / .55);
-  padding: 1rem 0;
-  font-family: var(--font-display);
-  font-size: .78rem;
-  letter-spacing: .05em;
+@media (forced-colors: active) {
+  .quadro-partenze {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+
+  .quadro-partenze__viewport,
+  .quadro-partenze__head-cell,
+  .quadro-partenze__cell,
+  .quadro-partenze__row,
+  .quadro-partenze__message {
+    background: Canvas !important;
+    color: CanvasText !important;
+    border-color: CanvasText !important;
+  }
+
+  .quadro-partenze__status,
+  .quadro-partenze__platform,
+  .quadro-partenze__button {
+    background: ButtonFace !important;
+    color: ButtonText !important;
+    border-color: ButtonBorder !important;
+  }
+
+  .quadro-partenze__status::before,
+  .quadro-partenze__live-dot,
+  .quadro-partenze__legend-swatch {
+    background: CanvasText !important;
+  }
+
+  .quadro-partenze__row[aria-selected="true"],
+  .quadro-partenze__row.is-selected {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .quadro-partenze__button[aria-pressed="true"] {
+    background: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  .quadro-partenze__link {
+    color: LinkText !important;
+  }
+
+  .quadro-partenze__button:focus-visible,
+  .quadro-partenze__row:focus-visible,
+  .quadro-partenze__viewport:focus-visible,
+  .quadro-partenze__link:focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
 }
-.site-footer .container { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 
-/* ---------------------------------------------------------------------------
-   16. Stampa
-   ---------------------------------------------------------------------------
-   La stampa e' un formato di consegna, non un ripiego. Sul foglio il tabellone
-   non serve: inchiostro pieno e fondi ambra sprecano toner e abbassano il
-   contrasto, quindi il flap torna a essere un numero e basta.
-   Mettere .no-print su tutto cio' che serve a comporre la richiesta — form,
-   filtri, pulsanti — e non a leggere il risultato. */
+/* --------------------------------------------------------------------------
+   19. STAMPA
+   -------------------------------------------------------------------------- */
 
 @media print {
-  @page { size: A4; margin: 14mm 12mm; }
-
-  html { font-size: 10.5pt; background: #fff; }
-  body::before { display: none; }
-
-  .site-header, .site-footer, .net-bar, .no-print,
-  .hero, details > summary, .picker { display: none !important; }
-
-  body { background: #fff; color: #000; }
-  .container { width: 100%; }
-  main { padding: 0; }
-
-  /* Su carta il rilievo lo fa il filetto. */
-  .card, .tile, .panel, .combo, .table-wrap, .checklist li, .ticket {
-    box-shadow: none !important;
-    background: #fff !important;
-    border-color: #999 !important;
+  .quadro-partenze {
+    max-width: none;
+    background: #fff;
+    color: #000;
+    border: 1px solid #999;
+    box-shadow: none;
     break-inside: avoid;
   }
-  .card, .tile { border-radius: 0; }
-  .card-accent, .ticket { border-top: 2pt solid #000; }
-  .ticket { border-left: 0; border-right: 0; }
-  .alert { border-left-width: 2pt; background: #fff !important; break-inside: avoid; }
-  h1, h2, h3 { break-after: avoid; }
-  .kv, .kv li { background: #fff !important; }
-  .note { background: #fff !important; border-left-color: #999; }
 
-  .flap { background: #fff !important; color: #000 !important; padding: 0; font-size: 1.05em; }
-  .badge { box-shadow: none !important; background: #fff !important; color: #000 !important; border: .5pt solid #999; }
+  .quadro-partenze__controls,
+  .quadro-partenze__live-dot,
+  .quadro-partenze__viewport::-webkit-scrollbar {
+    display: none !important;
+  }
 
-  th { background: #f2f2f2 !important; color: #000 !important; border-bottom: 1pt solid #999; position: static; }
+  .quadro-partenze__viewport {
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    background: #fff;
+  }
 
-  /* Il contenuto dei <details> deve comparire: in stampa non si puo' cliccare. */
-  details { border-top: 0; }
-  details > *:not(summary) { display: revert !important; }
+  .quadro-partenze__table {
+    min-width: 0;
+  }
 
-  /* Un link stampato senza il suo indirizzo non e' raggiungibile. */
-  a[href^="http"]::after,
-  a[href^="mailto"]::after { content: " (" attr(href) ")"; font-size: .82em; color: #444; }
+  .quadro-partenze__head-cell,
+  .quadro-partenze__cell {
+    color: #000 !important;
+    background: #fff !important;
+    border-color: #999 !important;
+  }
+
+  .quadro-partenze__status,
+  .quadro-partenze__platform {
+    color: #000 !important;
+    background: #fff !important;
+    border-color: #000 !important;
+  }
+
+  .quadro-partenze__status::before {
+    background: #000 !important;
+  }
+
+  .quadro-partenze *,
+  .quadro-partenze *::before,
+  .quadro-partenze *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   20. KEYFRAMES
+   -------------------------------------------------------------------------- */
+
+@keyframes qp-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.86);
+  }
+}
+
+@keyframes qp-badge-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 0.32rem currentColor;
+    opacity: 0.92;
+  }
+}
+
+@keyframes qp-flip {
+  0% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+  45% {
+    transform: rotateX(-90deg);
+    opacity: 0.45;
+  }
+  55% {
+    transform: rotateX(90deg);
+    opacity: 0.45;
+  }
+  100% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes qp-update-flash {
+  0%,
+  100% {
+    background: transparent;
+    box-shadow: none;
+  }
+  35% {
+    background: var(--qp-accent-soft);
+    box-shadow: 0 0 0 0.25rem var(--qp-accent-soft);
+  }
+}
+
+@keyframes qp-row-updated {
+  0% {
+    background: var(--qp-accent-soft);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+@keyframes qp-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes qp-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes qp-flash-info {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 0.32rem var(--qp-info-soft);
+  }
 }
