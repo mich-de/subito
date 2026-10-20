@@ -1336,8 +1336,8 @@
     "timestamp": "2026-10-12T15:15:27.410683"
   },
   "https://www.subito.it/telefonia/samsung-s24-256gb-bari-664240704.htm|Samsung S24 256GB": {
-    "price": 350,
-    "timestamp": "2026-10-15T04:29:55.385073"
+    "price": 320,
+    "timestamp": "2026-10-20T20:31:16.836436"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-garanzia-roma-664249523.htm|Honor Magic 8 Pro": {
     "price": 700,
@@ -1922,5 +1922,13 @@
   "https://www.subito.it/telefonia/google-pixel-3-wifii-promo-lampo-torino-665207944.htm|Google Pixel 1-5": {
     "price": 149,
     "timestamp": "2026-10-20T12:05:20.727466"
+  },
+  "https://www.subito.it/telefonia/samsung-s24-256-giga-l-aquila-665304395.htm|Samsung S24 256GB": {
+    "price": 350,
+    "timestamp": "2026-10-20T20:31:16.834197"
+  },
+  "https://www.subito.it/telefonia/oppo-find-x9-pro-16-512gb-modena-665304973.htm|OPPO Find X9 Pro": {
+    "price": 650,
+    "timestamp": "2026-10-20T20:31:16.838513"
   }
 }
