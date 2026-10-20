@@ -1,0 +1,6 @@
+enabled: true
+name: Amazon.it
+source_key: amazon
+filters:
+  condition: Nuovo / Ricondizionato / Usato Garantito
+max_pages: 2

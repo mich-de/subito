@@ -1,0 +1,454 @@
+/* ===========================================================================
+   OFFERTE MONITOR — livello applicativo sopra Quadro Partenze
+   ---------------------------------------------------------------------------
+   Qui dentro sta SOLO cio' che il design system non ha gia': il tabellone
+   degli annunci, la fascia dei totali, la consolle e i riquadri prodotto.
+   Tutto il resto (schede, pulsanti, campi, badge, tabelle, flap, stampa)
+   arriva da quadro-partenze.css e non va riscritto.
+
+   Regola di manutenzione: se una cosa si puo' ottenere con una classe del
+   sistema, si usa quella. Ogni regola qui sotto esiste perche' descrive un
+   pezzo di QUESTA applicazione, non un componente generico.
+
+   ATTENZIONE ai token: --bc, --a, --ink-fg e simili sono TERNE OKLCH, non
+   colori. Vanno sempre avvolti in oklch(), anche senza diluizione.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   A. Utilita' di pannello
+   --------------------------------------------------------------------------- */
+
+.hidden { display: none !important; }
+
+/* Intestazione che esiste solo su carta: a schermo il titolo lo da' .hero. */
+.print-head { display: none; }
+
+/* Le tre schede della barra di navigazione sono <a> per ereditare lo stato
+   attivo del sistema (.nav a[aria-current]), ma non devono navigare. */
+.nav a { cursor: pointer; }
+
+/* ---------------------------------------------------------------------------
+   B. Stato del servizio nella testata
+   ---------------------------------------------------------------------------
+   Sta nella fascia d'inchiostro, quindi i colori non possono venire dai token
+   di pagina: si diluisce l'ambra e il verde direttamente sul fondo scuro.
+   --------------------------------------------------------------------------- */
+
+.hdr-status {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .2rem .55rem;
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-size: .7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .1em;
+  white-space: nowrap;
+  color: oklch(var(--ink-fg) / .7);
+  box-shadow: inset 0 0 0 1px var(--ink-line);
+}
+.hdr-status .status-dot {
+  width: .42rem; height: .42rem;
+  background: oklch(var(--ink-fg) / .45);
+  flex-shrink: 0;
+}
+/* Acceso: l'unico punto ambra della testata oltre al filetto. Un pallino non
+   e' un fondo esteso, quindi la seconda regola regge. */
+.hdr-status.is-live { color: oklch(var(--a) / .95); }
+.hdr-status.is-live .status-dot {
+  background: oklch(var(--a));
+  animation: beacon 2.4s ease-in-out infinite;
+}
+@keyframes beacon { 50% { opacity: .25; } }
+
+.hdr-uptime {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  color: oklch(var(--ink-fg) / .45);
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .hdr-status, .hdr-uptime { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   C. Fascia dei totali
+   ---------------------------------------------------------------------------
+   Prima erano cinque riquadri con ombra: cinque scatole per cinque numeri
+   pesano piu' dei numeri. Qui e' una riga sola, divisa da filetti verticali —
+   la stessa logica dell'intestazione di un tabellone.
+   --------------------------------------------------------------------------- */
+
+.board-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--base-100);
+  overflow: hidden;
+}
+.board-strip > div {
+  padding: .7rem .9rem;
+  border-left: 1px solid var(--line);
+}
+.board-strip > div:first-child { border-left: 0; }
+
+.strip-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: .66rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .13em;
+  color: oklch(var(--bc) / .5);
+}
+.strip-value {
+  display: block;
+  margin-top: .15rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem; font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+}
+/* Un solo valore qualificato in ambra: quello che chiede attenzione. Gli
+   altri restano inchiostro, o l'ambra smette di significare qualcosa. */
+.strip-value.warn { color: oklch(var(--wa)); }
+
+/* ---------------------------------------------------------------------------
+   D. Filtri
+   --------------------------------------------------------------------------- */
+
+.filters {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: .4rem;
+}
+.filters .eyebrow { margin: 0 .4rem 0 0; }
+
+.filter-btn {
+  font-family: var(--font-display);
+  font-size: .74rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: .26rem .6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: oklch(var(--bc) / .68);
+  cursor: pointer;
+  transition: color .16s, border-color .16s, background-color .16s;
+}
+.filter-btn:hover { color: var(--base-content); background: oklch(var(--bc) / .05); }
+.filter-btn:focus-visible { outline: none; box-shadow: var(--ring); }
+/* Il filtro attivo e' struttura, non azione: percio' --p e non --s. */
+.filter-btn.active {
+  color: var(--primary);
+  border-color: oklch(var(--p) / .55);
+  background: oklch(var(--p) / .1);
+}
+
+/* ---------------------------------------------------------------------------
+   E. Il tabellone degli annunci
+   ---------------------------------------------------------------------------
+   E' il cuore della pagina, ed e' letteralmente un quadro partenze: riga
+   d'intestazione in inchiostro fisso, colonne incolonnate, e la colonna dei
+   prezzi tutta in flap — cifre ambra su nero, una sotto l'altra.
+
+   Le tre liste separate di prima (Subito, Amazon, «tutti gli annunci»)
+   mostravano gli stessi annunci tre volte. Qui la fonte e' una colonna.
+   --------------------------------------------------------------------------- */
+
+.board { table-layout: auto; }
+.board th:first-child, .board td:first-child { padding-left: .9rem; }
+.board th:last-child,  .board td:last-child  { padding-right: .9rem; }
+.board td { vertical-align: middle; }
+
+.board tbody tr { transition: background-color .14s; }
+
+.col-time  { width: 1%; white-space: nowrap; }
+.col-price { width: 1%; text-align: right; }
+.col-state { width: 1%; white-space: nowrap; }
+.col-del   { width: 1%; text-align: right; }
+
+/* Intestazione di colonna leggibile da uno screen reader e invisibile a
+   schermo: una colonna senza nome e' una colonna senza senso per chi non la
+   vede. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Le due azioni di riga: segnalare una truffa e togliere dal tabellone.
+   Erano invisibili finche' non ci passavi sopra, e una funzione che si vede
+   solo per caso e' una funzione che non c'e'. Ora stanno sempre in pagina,
+   ma smorzate: prendono colore quando le sfiori. Il rosso di sistema resta
+   riservato al passaggio del mouse, perche' una colonna di croci accese
+   urlerebbe piu' del prezzo, che e' la cosa da leggere. */
+.board .btn-hide,
+.board .btn-scam,
+.board .btn-skip {
+  opacity: .38;
+  padding: .1rem .34rem;
+  line-height: 1;
+  color: oklch(var(--bc) / .55);
+  transition: opacity .14s, color .14s;
+}
+.board tbody tr:hover .btn-hide,
+.board tbody tr:hover .btn-scam,
+.board tbody tr:hover .btn-skip,
+.board .btn-hide:focus-visible,
+.board .btn-scam:focus-visible,
+.board .btn-skip:focus-visible { opacity: 1; }
+.board .btn-hide:hover { color: oklch(var(--s)); }
+.board .btn-scam:hover { color: oklch(var(--a)); }
+
+/* Escludere e' l'azione piu' definitiva delle tre, ma non e' un allarme: si
+   scurisce e basta, senza prendere un colore. L'ambra e' gia' della
+   segnalazione e il rosso e' di chi agisce sul tabellone; un terzo colore qui
+   farebbe solo sembrare tutte e tre urgenti, che e' il modo piu' rapido per
+   non farne notare nessuna. */
+.board .btn-skip:hover { color: oklch(var(--bc)); }
+
+/* Segnalato: il triangolo resta acceso in ambra, perche' da quel momento e'
+   uno stato della riga e non un pulsante in attesa. */
+.board .btn-scam.is-on { opacity: 1; color: oklch(var(--a)); }
+
+/* La riga segnalata si smorza: c'e' ancora, si legge ancora, ma smette di
+   competere con gli annunci veri. Il titolo resta pienamente leggibile —
+   sbiadire quello sarebbe punire chi legge, non l'annuncio.
+   Il fondo usa --er, l'errore semantico, e non --s: quello e' il rosso delle
+   azioni, e tingere di --s una riga per qualificarla gli toglierebbe il
+   significato che ha sui pulsanti. */
+.board tbody tr.is-scam { background: oklch(var(--er) / .045); }
+.board tbody tr.is-scam .flap { opacity: .6; }
+.board tbody tr.is-scam:hover { background: oklch(var(--er) / .08); }
+
+/* Su touch il passaggio del dito non esiste: senza questo i tre comandi
+   resterebbero smorzati per sempre e mai del tutto leggibili. */
+@media (hover: none) {
+  .board .btn-hide,
+  .board .btn-scam,
+  .board .btn-skip { opacity: .62; }
+}
+
+.board-time {
+  font-family: var(--font-mono);
+  font-size: .82rem;
+  font-variant-numeric: tabular-nums;
+  color: oklch(var(--bc) / .55);
+}
+.board-time small { display: block; font-size: .66rem; opacity: .7; }
+
+.board-title {
+  display: block;
+  font-weight: 600;
+  color: var(--base-content);
+  text-decoration: none;
+  max-width: 46ch;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.board-title:hover { color: var(--primary); text-decoration: underline; }
+.board-title:focus-visible { outline: none; box-shadow: var(--ring); }
+
+.board-meta {
+  display: block;
+  margin-top: .1rem;
+  font-size: .72rem;
+  color: oklch(var(--bc) / .52);
+}
+
+.board-product {
+  font-family: var(--font-display);
+  font-size: .74rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: oklch(var(--bc) / .72);
+  white-space: nowrap;
+}
+
+/* Colonna dei prezzi: i flap incolonnati sono il tabellone. La larghezza
+   minima li tiene allineati anche quando le cifre cambiano. */
+.board .flap { min-width: 4.6ch; text-align: right; }
+
+/* La riga del prezzo piu' basso: filetto verde a sinistra, niente fondo
+   colorato. Il fondo colorato farebbe sembrare la riga selezionata. */
+.board tr.is-best td:first-child { box-shadow: inset 3px 0 0 var(--success); }
+
+/* L'entrata: le righe girano dall'alto come le palette del tabellone, una
+   dopo l'altra. Si ferma alla settima — oltre diventa attesa invece di ritmo.
+   flap-in e la clausola prefers-reduced-motion arrivano dal design system. */
+.board tbody.fade-in tr {
+  animation: flap-in .3s cubic-bezier(.2, .75, .3, 1) both;
+  transform-origin: top center;
+}
+.board tbody.fade-in tr:nth-child(1) { animation-delay: .02s }
+.board tbody.fade-in tr:nth-child(2) { animation-delay: .05s }
+.board tbody.fade-in tr:nth-child(3) { animation-delay: .08s }
+.board tbody.fade-in tr:nth-child(4) { animation-delay: .11s }
+.board tbody.fade-in tr:nth-child(5) { animation-delay: .14s }
+.board tbody.fade-in tr:nth-child(6) { animation-delay: .17s }
+.board tbody.fade-in tr:nth-child(n+7) { animation-delay: .2s }
+
+.board-empty {
+  padding: 2.4rem .9rem;
+  text-align: center;
+  color: oklch(var(--bc) / .55);
+  font-size: .88rem;
+}
+
+@media (max-width: 860px) {
+  .board .col-product, .board .col-source { display: none; }
+  .board-title { max-width: 28ch; }
+}
+
+/* ---------------------------------------------------------------------------
+   F. Consolle di sistema
+   ---------------------------------------------------------------------------
+   Richiusa per difetto: e' diagnostica, non contenuto. Prima occupava
+   240px fissi in fondo alla pagina anche quando non diceva niente.
+   --------------------------------------------------------------------------- */
+
+.console {
+  margin-top: .7rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  padding: .6rem .75rem;
+  border-radius: 2px;
+  background: var(--flap);
+  font-family: var(--font-mono);
+  font-size: .76rem;
+  line-height: 1.65;
+}
+.log-entry {
+  white-space: pre-wrap;
+  color: oklch(var(--ink-fg) / .62);
+  border-left: 2px solid transparent;
+  padding-left: .5rem;
+}
+.log-entry.found { color: oklch(78% .12 150); border-left-color: oklch(78% .12 150 / .5); }
+.log-entry.error { color: oklch(70% .17 27);  border-left-color: oklch(70% .17 27 / .5); }
+.log-entry.scan  { color: oklch(76% .09 235); border-left-color: oklch(76% .09 235 / .45); }
+.log-entry.info  { border-left-color: oklch(var(--ink-fg) / .18); }
+/* Il marcatempo e' un'etichetta dentro una riga, non una riga sua: la classe
+   .log-entry sullo <span> arriva dal codice storico e va neutralizzata. */
+.log-entry .log-entry.timestamp,
+.log-entry.timestamp {
+  display: inline;
+  border-left: 0; padding-left: 0;
+  margin-right: .5rem;
+  color: oklch(var(--a) / .7);
+}
+
+/* ---------------------------------------------------------------------------
+   G. Riquadri prodotto (scheda Configurazione)
+   ---------------------------------------------------------------------------
+   Era il punto piu' confuso: nove campi in fila per ogni prodotto, moltiplicati
+   per sei prodotti. Ora in vista si vedono nome, soglia e interruttori; i
+   termini di ricerca stanno in un <details>, che si apre solo se servono.
+   --------------------------------------------------------------------------- */
+
+.prod-grid { display: grid; gap: .85rem; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
+
+.prod-name {
+  flex: 1 1 10rem;
+  font-family: var(--font-display) !important;
+  font-size: 1.02rem !important;
+  font-weight: 700;
+  letter-spacing: .01em;
+  border-color: transparent !important;
+  background: oklch(var(--bc) / .04) !important;
+}
+.prod-name:focus { border-color: oklch(var(--a) / .8) !important; }
+
+.prod-nums { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: .7rem; }
+.prod-nums .field { margin: 0; }
+.prod-flags { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0 .8rem; margin-top: .4rem; }
+.prod-flags .checkline span { font-size: .82rem; }
+
+.prod-terms { display: grid; gap: .6rem; margin-top: .7rem; }
+.prod-terms .field { margin: 0; }
+
+/* ---------------------------------------------------------------------------
+   H. Editor YAML
+   --------------------------------------------------------------------------- */
+
+.yaml-tabs { display: flex; flex-wrap: wrap; gap: .35rem; }
+.yaml-tab-btn {
+  font-family: var(--font-mono);
+  font-size: .76rem;
+  padding: .26rem .6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: oklch(var(--bc) / .68);
+  cursor: pointer;
+}
+.yaml-tab-btn:hover { background: oklch(var(--bc) / .05); color: var(--base-content); }
+.yaml-tab-btn:focus-visible { outline: none; box-shadow: var(--ring); }
+.yaml-tab-btn.active {
+  color: var(--primary);
+  border-color: oklch(var(--p) / .55);
+  background: oklch(var(--p) / .1);
+}
+
+.code-area {
+  width: 100%;
+  min-height: 26rem;
+  padding: .8rem;
+  border-radius: 2px;
+  border: 1px solid var(--line-strong);
+  background: var(--flap);
+  color: oklch(var(--ink-fg) / .88);
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  line-height: 1.6;
+  resize: vertical;
+  tab-size: 2;
+}
+.code-area:focus { border-color: oklch(var(--a) / .8); box-shadow: var(--ring); }
+
+/* Riga d'intestazione con titolo a sinistra e comandi a destra: ricorre in tre
+   punti (prodotti, editor, salvataggio), quindi vive qui una volta sola. */
+.head-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.head-row .section-title { margin-bottom: 0; }
+
+.save-row {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: .9rem; flex-wrap: wrap;
+}
+.form-status { font-size: .78rem; line-height: 1.5; text-align: right; }
+.form-status code { font-size: .95em; }
+
+/* ---------------------------------------------------------------------------
+   I. Stampa
+   ---------------------------------------------------------------------------
+   Su carta resta il tabellone e basta: niente filtri, niente moduli, niente
+   consolle. La fascia dei totali diventa una riga di testo.
+   --------------------------------------------------------------------------- */
+
+@media print {
+  .filters, .console, .save-row, .yaml-tabs { display: none !important; }
+
+  /* Il sistema nasconde .hero in stampa (giustamente: filetto ambra e entrata
+     sfalsata sono roba da schermo), ma il foglio resterebbe senza intestazione.
+     Questa riga e' l'unica cosa che dice cos'e' il foglio che hai in mano. */
+  .print-head { display: block !important; }
+  .print-head::after {
+    content: 'OFFERTE MONITOR — TABELLONE ANNUNCI';
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.15rem; font-weight: 700;
+    letter-spacing: .06em;
+    padding-bottom: .4rem;
+    border-bottom: 1.5px solid #000;
+    margin-bottom: .9rem;
+  }
+
+  .board-strip { border: 0; }
+  .board-strip > div { border-left: 0; padding: 0 1.2rem 0 0; display: inline-block; }
+  .strip-value { font-size: 1rem; }
+  .board-title { max-width: none; white-space: normal; }
+  .board .flap { min-width: 0; }
+}

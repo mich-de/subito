@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Offerte Monitor — tabellone prezzi Subito &amp; Amazon</title>
+
+  <!-- Il tema si decide PRIMA che il CSS dipinga il primo pixel, altrimenti al
+       ricaricamento la pagina lampeggia in chiaro. Resta inline e senza defer. -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      var dark = saved ? saved === 'dark'
+                       : matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    })();
+  </script>
+
+  <link rel="stylesheet" href="/static/quadro-partenze.css">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="net-bar" aria-hidden="true"></div>
+
+  <header class="site-header no-print">
+    <div class="container">
+      <a class="brand" href="#">
+        <span class="brand-mark" aria-hidden="true">OM</span>
+        <span class="brand-text">
+          <strong>Offerte Monitor</strong>
+          <span>Subito · Amazon · NorthLadder</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Sezioni">
+        <a data-tab="dashboard" aria-current="page">Tabellone</a>
+        <a data-tab="config">Configurazione</a>
+        <a data-tab="yaml">YAML</a>
+      </nav>
+
+      <span id="status-badge" class="hdr-status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="status-text">Avvio</span>
+      </span>
+      <span id="uptime" class="hdr-uptime">00:00:00</span>
+
+      <button class="btn btn-ghost btn-sm" type="button" id="theme-toggle">
+        <span id="theme-label">Notte</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="stack">
+
+      <!-- ============================================================ TABELLONE -->
+      <div id="panel-dashboard" class="stack">
+
+        <!-- Compare solo in stampa: il sistema nasconde .hero sul foglio. -->
+        <div class="print-head" aria-hidden="true"></div>
+
+        <!-- La testatina appartiene al tabellone: sulle altre schede sarebbe
+             un titolo che parla di un contenuto non in vista. -->
+        <section class="hero no-print">
+          <div class="eyebrow" id="hero-eyebrow">Monitoraggio prezzi</div>
+          <h1>Offerte in <em>partenza</em></h1>
+          <p>
+            Un solo tabellone: ogni annuncio entro soglia, ordinato per prezzo,
+            con la fonte in colonna e il minimo in evidenza.
+          </p>
+        </section>
+
+        <div class="board-strip">
+          <div>
+            <span class="strip-label">Annunci</span>
+            <span class="strip-value" id="stat-total">0</span>
+          </div>
+          <div>
+            <span class="strip-label">Miglior prezzo</span>
+            <span class="strip-value" id="stat-best">—</span>
+          </div>
+          <div>
+            <span class="strip-label">Prezzo medio</span>
+            <span class="strip-value" id="stat-avg">—</span>
+          </div>
+          <div>
+            <span class="strip-label">Oltre soglia</span>
+            <span class="strip-value warn" id="stat-nearmiss">0</span>
+          </div>
+        </div>
+
+        <section class="card card-accent">
+          <div class="section-title">
+            <span class="section-icon" aria-hidden="true">▤</span>
+            <h2>Annunci entro soglia</h2>
+          </div>
+
+          <div class="filters no-print" id="filter-buttons">
+            <span class="eyebrow">Prodotto</span>
+            <button type="button" class="filter-btn active" id="btn-filter-all"
+                    onclick="setProductFilter('all')">Tutti</button>
+          </div>
+
+          <div class="table-wrap" style="margin-top:.85rem">
+            <table class="board">
+              <thead>
+                <tr>
+                  <th class="col-time">Ora</th>
+                  <th class="col-product">Prodotto</th>
+                  <th>Annuncio</th>
+                  <th class="col-source">Fonte</th>
+                  <th class="col-price">Prezzo</th>
+                  <th class="col-state">Stato</th>
+                  <!-- La colonna della croce esiste solo dove si puo' scrivere:
+                       altrove viene tolta all'avvio, non nascosta col CSS. -->
+                  <th class="col-del no-print" id="th-del"><span class="sr-only">Togli</span></th>
+                </tr>
+              </thead>
+              <tbody id="board-body">
+                <tr><td colspan="7" class="board-empty">In attesa della prima scansione…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <details>
+            <summary>Registro di sistema</summary>
+            <div id="log" class="console">
+              <div class="log-entry info"><span class="log-entry timestamp">[OK]</span>Inizializzazione console in corso…</div>
+            </div>
+          </details>
+        </section>
+      </div>
+
+      <!-- ======================================================== CONFIGURAZIONE -->
+      <div id="panel-config" class="hidden">
+        <form id="config-form" class="stack no-print" onsubmit="saveForm(event)">
+
+          <div class="split">
+            <section class="card">
+              <div class="section-title"><h2>Scansione</h2></div>
+
+              <label class="field">
+                <span>Intervallo in minuti</span>
+                <input type="number" id="cfg-interval" min="1" max="1440">
+              </label>
+
+              <label class="checkline">
+                <input type="checkbox" id="cfg-shipping">
+                <span>Accetta solo annunci con spedizione</span>
+              </label>
+
+              <hr class="divider">
+
+              <div class="grid cols-2">
+                <label class="field">
+                  <span>Subito · pagine</span>
+                  <input type="number" id="cfg-subito-pages" min="1" max="20">
+                </label>
+                <label class="field">
+                  <span>Amazon · pagine</span>
+                  <input type="number" id="cfg-amazon-pages" min="1" max="10">
+                </label>
+              </div>
+              <label class="checkline">
+                <input type="checkbox" id="cfg-subito-enabled">
+                <span>Scanner Subito.it attivo</span>
+              </label>
+              <label class="checkline">
+                <input type="checkbox" id="cfg-amazon-enabled">
+                <span>Scanner Amazon.it attivo</span>
+              </label>
+            </section>
+
+            <section class="card">
+              <div class="section-title"><h2>Notifiche</h2></div>
+
+              <div class="alert alert-info">
+                <strong>Telegram si configura fuori da qui.</strong>
+                Token e chat ID non vivono in questo modulo: stanno fra i segreti
+                del workflow di scansione, in <code>TELEGRAM_BOT_TOKEN</code> e
+                <code>TELEGRAM_CHAT_ID</code>, e da qui si possono solo leggere.
+              </div>
+
+              <label class="checkline">
+                <input type="checkbox" id="cfg-tg-enabled" checked disabled>
+                <span>Servizio notifiche attivo</span>
+              </label>
+
+              <label class="field">
+                <span>Bot token</span>
+                <input type="text" id="cfg-tg-token" readonly disabled
+                       value="Impostato nei segreti del workflow">
+              </label>
+              <label class="field">
+                <span>Chat ID</span>
+                <input type="text" id="cfg-tg-chat" readonly disabled
+                       value="Impostato nei segreti del workflow">
+              </label>
+            </section>
+          </div>
+
+          <section class="card">
+            <div class="head-row">
+              <div class="section-title"><h2>Prodotti monitorati</h2></div>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="addProduct()">+ Aggiungi</button>
+            </div>
+            <!-- Compare solo quando la bozza locale differisce dal repository:
+                 altrimenti la lista mostrata non e' quella che scansiona. -->
+            <div id="products-list" class="prod-grid" style="margin-top:.85rem"></div>
+          </section>
+
+          <div class="save-row">
+            <span id="config-save-status" class="form-status"></span>
+            <button type="submit" id="cfg-save-btn" class="btn btn-secondary">Salva e applica</button>
+          </div>
+
+        </form>
+
+        <!-- Fuori dal form apposta: e' un'azione a se', e un pulsante dentro
+             il form si porterebbe dietro il salvataggio della configurazione.
+             Compare solo quando c'e' qualcosa da rimettere. -->
+        <section id="hidden-box" class="card hidden">
+          <div class="section-title"><h2>Annunci tolti dal tabellone</h2></div>
+          <div class="alert alert-info">
+            <strong id="hidden-count">Nessuno.</strong>
+            Non sono cancellati da Subito: restano fuori dal tabellone anche
+            dopo le scansioni successive, che li ritroverebbero ogni volta.
+          </div>
+          <div class="save-row" style="justify-content:flex-start;margin-top:.7rem">
+            <button type="button" class="btn btn-secondary btn-sm"
+                    onclick="ripristinaNascosti(this)">Rimetti tutti</button>
+            <span id="hidden-status" class="form-status"></span>
+          </div>
+        </section>
+
+        <section id="scam-box" class="card hidden">
+          <div class="section-title"><h2>Annunci segnalati come truffa</h2></div>
+          <div class="alert alert-warning">
+            <span>⚠️</span>
+            <span>
+              <strong id="scam-count">Nessuno.</strong>
+              Restano sul tabellone, marcati in rosso, ma fuori dal conto del
+              minimo e della media — un prezzo finto e' quasi sempre il piu'
+              basso, e falserebbe la cifra che si guarda per prima. La
+              segnalazione la vedi solo tu: chi apre la pagina senza password
+              vede l'annuncio come tutti gli altri.
+            </span>
+          </div>
+          <div class="save-row" style="justify-content:flex-start;margin-top:.7rem">
+            <button type="button" class="btn btn-secondary btn-sm"
+                    onclick="ritiraSegnalazioni(this)">Ritira tutte</button>
+            <span id="scam-status" class="form-status"></span>
+          </div>
+        </section>
+
+        <section id="skip-box" class="card hidden">
+          <div class="section-title"><h2>Annunci esclusi dalla ricerca</h2></div>
+          <div class="alert alert-info">
+            <strong id="skip-count">Nessuno.</strong>
+            Questi non vengono piu' nemmeno raccolti: lo scanner li scarta
+            appena li rivede, quindi non tornano in tabellone, non contano per
+            il minimo e non fanno scattare Telegram. E' la differenza con
+            «tolti dal tabellone», che invece li nasconde soltanto.
+          </div>
+          <div class="save-row" style="justify-content:flex-start;margin-top:.7rem">
+            <button type="button" class="btn btn-secondary btn-sm"
+                    onclick="rimettiInRicerca(this)">Rimetti tutti in ricerca</button>
+            <span id="skip-status" class="form-status"></span>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= YAML -->
+      <div id="panel-yaml" class="hidden stack">
+        <div id="yaml-tabs" class="yaml-tabs no-print"></div>
+        <section class="card">
+          <form onsubmit="saveYaml(event)">
+            <div class="head-row">
+              <div class="section-title">
+                <h2 id="yaml-filename">config.yaml</h2>
+              </div>
+              <div class="save-row no-print">
+                <span id="yaml-status" class="form-status"></span>
+                <button type="submit" class="btn btn-secondary btn-sm">Salva YAML</button>
+              </div>
+            </div>
+            <textarea id="yaml-editor" class="code-area" spellcheck="false" style="margin-top:.85rem"></textarea>
+          </form>
+        </section>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer no-print">
+    <div class="container">
+      <span>Offerte Monitor</span>
+      <span>Quadro Partenze · nessuna dipendenza</span>
+    </div>
+  </footer>
+
+  <script>
+    const state = { items: [], currentConfig: '', formProducts: [], selectedProduct: 'all' };
+
+    /* ---- TEMA ---- */
+    (function () {
+      const btn = document.getElementById('theme-toggle');
+      const label = document.getElementById('theme-label');
+      const sync = () => {
+        label.textContent = document.documentElement.dataset.theme === 'dark' ? 'Giorno' : 'Notte';
+      };
+      sync();
+      btn.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem('theme', next);
+        sync();
+      });
+    })();
+
+    /* ---- UTILITÀ ---- */
+
+    /* I titoli arrivano dallo scraping: entrano nel DOM come stringhe, quindi
+       vanno sempre neutralizzati prima di essere interpolati. */
+    function esc(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      return `${dd}/${mm}`;
+    }
+    function fmtTime(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mi = String(d.getMinutes()).padStart(2, '0');
+      return `${hh}:${mi}`;
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.nav a[data-tab]').forEach(a => {
+        if (a.dataset.tab === name) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      });
+      ['dashboard', 'config', 'yaml'].forEach(p => {
+        const panel = document.getElementById('panel-' + p);
+        if (panel) panel.classList.toggle('hidden', p !== name);
+      });
+      if (name !== 'config' && name !== 'yaml') return;
+      // Le due schede riservate: si chiede la password, e se non arriva si
+      // torna al tabellone invece di mostrare una scheda vuota che sembra
+      // rotta.
+      sbloccaConfig().then(function (ok) {
+        if (!ok) { switchTab('dashboard'); return; }
+        if (name === 'config') {
+          loadConfig();
+          aggiornaBoxNascosti();
+          aggiornaBoxSegnalati();
+          aggiornaBoxIgnorati();
+        }
+        else loadYamlList();
+      });
+    }
+
+    document.querySelectorAll('.nav a[data-tab]').forEach(a => {
+      a.addEventListener('click', e => { e.preventDefault(); switchTab(a.dataset.tab); });
+    });
+
+    /* ---- REGISTRO ---- */
+    function appendLog(msg, type = 'info', ts = null) {
+      if (!ts) ts = new Date().toLocaleTimeString('it-IT');
+      const el = document.getElementById('log');
+      const d = document.createElement('div');
+      d.className = `log-entry ${['info', 'found', 'error', 'scan'].includes(type) ? type : 'info'}`;
+      const tsSpan = document.createElement('span');
+      tsSpan.className = 'log-entry timestamp';
+      tsSpan.textContent = `[${ts}]`;
+      d.appendChild(tsSpan);
+      d.appendChild(document.createTextNode(msg));
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+      if (el.children.length > 500) el.removeChild(el.firstChild);
+    }
+
+    /* Il registro arriva gia' fatto da /api/store: qui si disegna e basta.
+       appendLog() resta per le righe che nascono nel browser — l'esito di un
+       salvataggio, un errore di rete — ma quelle si aggiungono in coda, e
+       questa funzione non gira piu' dopo l'avvio, quindi non le cancella. */
+    function fetchServerLogs() {
+      const el = document.getElementById('log');
+      if (!el || !window.STATIC_LOGS || !window.STATIC_LOGS.length) return;
+      el.innerHTML = window.STATIC_LOGS.map(l =>
+        `<div class="log-entry ${esc(l.level || 'info')}"><span class="log-entry timestamp">[${esc(l.time || '')}]</span>${esc(l.message)}</div>`
+      ).join('');
+    }
+
+    /* ---- TABELLONE ---- */
+
+    function visibleItems(items) {
+      return state.selectedProduct === 'all'
+        ? items
+        : items.filter(i => i.product_name === state.selectedProduct);
+    }
+
+    function setProductFilter(name) {
+      state.selectedProduct = name;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', (btn.dataset.product || 'all') === name);
+      });
+      renderItems(state.items);
+    }
+
+    function renderItems(items) {
+      const rows = visibleItems(items)
+        .filter(i => i.price)
+        .sort((a, b) => a.price - b.price);
+
+      /* Un annuncio segnalato come truffa non e' un affare: se restasse nel
+         conto sarebbe quasi sempre lui il minimo — e' proprio il prezzo fuori
+         mercato a farlo sospettare — e la cifra grossa in cima alla pagina,
+         quella che si guarda per prima, direbbe una bugia. Resta sul
+         tabellone, marcato, ma fuori dalle statistiche. */
+      const onesti = rows.filter(i => !i.scam);
+      const best = onesti.length ? onesti[0].price : null;
+      const prices = onesti.map(i => i.price).filter(p => p > 1);
+      const avg = prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
+      // Le soglie viaggiano con gli annunci solo per chi ha la password: da
+      // anonimo il conteggio dei fuori soglia non e' zero, e' ignoto — e uno
+      // zero direbbe che sono tutti dentro, che e' un'altra cosa.
+      const soglieNote = window.PANEL_UNLOCKED !== false;
+      const near = rows.filter(i => i.near_miss).length;
+
+      document.getElementById('stat-total').textContent = rows.length;
+      document.getElementById('stat-best').textContent = best ? `€${best}` : '—';
+      document.getElementById('stat-avg').textContent = avg ? `€${avg}` : '—';
+      document.getElementById('stat-nearmiss').textContent = soglieNote ? near : '—';
+
+      const body = document.getElementById('board-body');
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="${CAN_WRITE ? 7 : 6}" class="board-empty">Nessun annuncio per questo filtro.</td></tr>`;
+        return;
+      }
+
+      // Le palette girano una volta sola, alla prima comparsa del tabellone:
+      // ripeterlo a ogni filtro trasformerebbe il ritmo in attesa.
+      if (!body.dataset.flapped) {
+        body.classList.add('fade-in');
+        body.dataset.flapped = '1';
+      } else {
+        body.classList.remove('fade-in');
+      }
+
+      body.innerHTML = rows.map(i => {
+        const isBest = !i.scam && i.price === best;
+        const isFresh = i.date && (Date.now() - new Date(i.date).getTime()) < 3600000;
+        // Un solo distintivo per riga, in ordine di importanza: due badge
+        // accanto si annullano a vicenda. «truffa» viene prima di tutto: e' la
+        // sola cosa che cambia cosa fare dell'annuncio.
+        const state_ = i.scam ? '<span class="badge badge-error">truffa</span>'
+          : isBest ? '<span class="badge badge-success">minimo</span>'
+          : i.near_miss ? '<span class="badge badge-warning">oltre soglia</span>'
+          : isFresh ? '<span class="badge badge-info">nuovo</span>'
+          : soglieNote ? '<span class="badge badge-ghost">in soglia</span>'
+          : '<span class="badge badge-ghost">trovato</span>';
+        const meta = [i.location, i.shipping ? 'spedizione' : null, i.condition]
+          .filter(Boolean).map(esc).join(' · ');
+        return `
+          <tr class="${isBest ? 'is-best' : ''}${i.scam ? ' is-scam' : ''}">
+            <td class="col-time"><span class="board-time">${esc(fmtTime(i.date))}<small>${esc(fmtDate(i.date))}</small></span></td>
+            <td class="col-product"><span class="board-product">${esc(i.product_name || '—')}</span></td>
+            <td>
+              <a class="board-title" href="${esc(i.url)}" target="_blank" rel="noopener"
+                 title="${esc(i.title)}">${esc(i.title)}</a>
+              ${meta ? `<span class="board-meta">${meta}</span>` : ''}
+            </td>
+            <td class="col-source mono">${esc((i.source || '').split('.')[0] || '—')}</td>
+            <td class="col-price"><span class="flap">€${esc(i.price)}</span></td>
+            <td class="col-state">${state_}</td>
+            ${CAN_WRITE ? `<td class="col-del no-print">
+              <button type="button" class="btn btn-ghost btn-sm btn-icon btn-scam${i.scam ? ' is-on' : ''}"
+                      data-scam="${esc(i.url)}" data-on="${i.scam ? '1' : ''}"
+                      aria-pressed="${i.scam ? 'true' : 'false'}"
+                      aria-label="${i.scam ? 'Ritira la segnalazione di truffa' : 'Segnala come truffa'}: ${esc(i.title)}"
+                      title="${i.scam ? 'Ritira la segnalazione' : 'Segnala come truffa'}">⚠</button>
+              <button type="button" class="btn btn-ghost btn-sm btn-icon btn-skip"
+                      data-skip="${esc(i.url)}"
+                      aria-label="Escludi dalla ricerca: ${esc(i.title)}"
+                      title="Non mi interessa: non cercarlo piu'">⊘</button>
+              <button type="button" class="btn btn-ghost btn-sm btn-icon btn-hide"
+                      data-hide="${esc(i.url)}"
+                      aria-label="Togli dal tabellone: ${esc(i.title)}"
+                      title="Togli dal tabellone">✕</button>
+            </td>` : ''}
+          </tr>`;
+      }).join('');
+    }
+
+    /* L'indirizzo dell'annuncio finisce in un attributo, non dentro un
+       onclick: i titoli arrivano dallo scraping e un apostrofo in un onclick
+       spezzerebbe il gestore. Un solo ascoltatore sul corpo della tabella
+       vale anche per le righe ridisegnate dopo un filtro. */
+    document.getElementById('board-body').addEventListener('click', function (e) {
+      const daTogliere = e.target.closest('[data-hide]');
+      if (daTogliere) { nascondiAnnuncio(daTogliere); return; }
+      const daEscludere = e.target.closest('[data-skip]');
+      if (daEscludere) { escludiDallaRicerca(daEscludere); return; }
+      const daSegnalare = e.target.closest('[data-scam]');
+      if (daSegnalare) segnalaTruffa(daSegnalare);
+    });
+
+    /* Escludere e' piu' forte che nascondere, ed e' l'unica delle tre azioni
+       che esce dal tabellone: l'elenco lo ritira sync_config.py a ogni giro e
+       lo scanner scarta quegli indirizzi alla fonte, prima di classificarli.
+       Quindi l'annuncio non torna nei risultati, non entra nel minimo e non
+       fa scattare Telegram — mentre la ✕ lo nasconde soltanto, e la scansione
+       continua a raccoglierlo.
+
+       Sparisce anche subito da qui, senza aspettare il giro seguente: il
+       filtro e' applicato pure in lettura da /api/store, altrimenti premere
+       il pulsante non farebbe niente di visibile per mezz'ora. */
+    async function escludiDallaRicerca(bottone) {
+      const url = bottone.dataset.skip;
+      if (!url) return;
+      const riga = bottone.closest('tr');
+      const titolo = riga && riga.querySelector('.board-title')
+        ? riga.querySelector('.board-title').textContent : url;
+      if (!window.confirm('Escluderlo dalla ricerca?\n\n' + titolo
+            + '\n\nLo scanner smette di raccoglierlo: non tornera\' in '
+            + 'tabellone e non fara\' piu\' scattare Telegram. Si rimette '
+            + 'dalla scheda Configurazione.')) return;
+
+      bottone.disabled = true;
+      const d = await postStore({ skip: [url] });
+      if (d && d.ok) {
+        state.items = (state.items || []).filter(i => i.url !== url);
+        window.STATIC_ITEMS = state.items;
+        window.IGNORED_COUNT = d.ignoredCount;
+        renderItems(state.items);
+        appendLog(d.message, 'info');
+        aggiornaBoxIgnorati();
+      } else {
+        bottone.disabled = false;
+        appendLog((d && d.error) || 'Non sono riuscito a escludere l\'annuncio.', 'error');
+      }
+    }
+
+    /* Segnalare non toglie: l'annuncio resta dov'e', marcato in rosso, fuori
+       dal conto del minimo e della media. Serve a ricordarsi perche' quel
+       prezzo era troppo bello, non a far finta di non averlo visto — per
+       quello c'e' la ✕ accanto. Il bottone e' un interruttore: ripremuto
+       ritira la segnalazione, senza chiedere conferma perche' non distrugge
+       niente. */
+    async function segnalaTruffa(bottone) {
+      const url = bottone.dataset.scam;
+      if (!url) return;
+      const attiva = !bottone.dataset.on;
+
+      bottone.disabled = true;
+      const d = await postStore(attiva ? { scam: [url] } : { unscam: [url] });
+      bottone.disabled = false;
+      if (!d || !d.ok) {
+        appendLog((d && d.error) || 'Non sono riuscito a cambiare la segnalazione.', 'error');
+        return;
+      }
+      (state.items || []).forEach(function (i) {
+        if (i.url === url) { if (attiva) i.scam = true; else delete i.scam; }
+      });
+      window.STATIC_ITEMS = state.items;
+      window.SCAM_COUNT = d.scamCount;
+      renderItems(state.items);
+      appendLog(d.message, attiva ? 'warning' : 'info');
+      aggiornaBoxSegnalati();
+    }
+
+    async function nascondiAnnuncio(bottone) {
+      const url = bottone.dataset.hide;
+      if (!url) return;
+      const riga = bottone.closest('tr');
+      const titolo = riga && riga.querySelector('.board-title')
+        ? riga.querySelector('.board-title').textContent : url;
+      if (!window.confirm('Togliere questo annuncio dal tabellone?\n\n' + titolo
+            + '\n\nResta su Subito: sparisce solo da qui. Si rimette dalla '
+            + 'scheda Configurazione.')) return;
+
+      bottone.disabled = true;
+      const d = await postStore({ hide: [url] });
+      if (d && d.ok) {
+        state.items = (state.items || []).filter(i => i.url !== url);
+        window.STATIC_ITEMS = state.items;
+        window.HIDDEN_COUNT = d.hiddenCount;
+        renderItems(state.items);
+        appendLog(d.message, 'info');
+        aggiornaBoxNascosti();
+      } else {
+        bottone.disabled = false;
+        appendLog((d && d.error) || 'Non sono riuscito a togliere l\'annuncio.', 'error');
+      }
+    }
+
+    function renderFilters(products) {
+      const el = document.getElementById('filter-buttons');
+      if (!el || !products || !products.length) return;
+      const btn = (label, value) =>
+        `<button type="button" class="filter-btn ${state.selectedProduct === value ? 'active' : ''}"
+                 data-product="${esc(value)}" onclick="setProductFilter('${esc(value).replace(/'/g, "\\'")}')">${esc(label)}</button>`;
+      el.innerHTML = '<span class="eyebrow">Prodotto</span>'
+        + `<button type="button" class="filter-btn ${state.selectedProduct === 'all' ? 'active' : ''}"
+                   data-product="all" id="btn-filter-all" onclick="setProductFilter('all')">Tutti</button>`
+        + products.filter(p => p.name).map(p => btn(p.name, p.name)).join('');
+    }
+
+    /* ---- MODULO CONFIGURAZIONE ---- */
+
+    const LS_TOKEN_KEY = 'subito.auth.token';
+
+    /* La pagina e' sempre statica — non contiene dati, li chiede a /api/store
+       all'apertura. Quello che cambia e' se dietro c'e' una funzione che sa
+       anche scrivere: su Vercel si', aprendo il file da disco no. */
+    const CAN_WRITE = !!window.API_WRITE;
+    const API_STORE = '/api/store';
+
+    /* La password non finisce mai nella pagina: si digita una volta e resta in
+       questo browser. Il confronto avviene sul server, che e' l'unico posto
+       dove vive il segreto. */
+    function authToken(force) {
+      let t = force ? '' : (localStorage.getItem(LS_TOKEN_KEY) || '');
+      if (!t) {
+        t = window.prompt('Password del pannello (variabile APP_PASSWORD su Vercel):') || '';
+        if (t) { try { localStorage.setItem(LS_TOKEN_KEY, t); } catch (e) {} }
+      }
+      return t;
+    }
+
+    function forgetAuthToken() {
+      try { localStorage.removeItem(LS_TOKEN_KEY); } catch (e) {}
+    }
+
+    /* Una sola porta verso il repository: POST /api/store. Se il server
+       risponde 401 la password memorizzata e' sbagliata, quindi si butta e si
+       richiede una volta sola invece di far ricaricare la pagina. */
+    async function postStore(payload, riprova) {
+      const token = authToken(riprova === true);
+      if (!token) return { error: 'Salvataggio annullato: serve la password.' };
+      const r = await fetch(API_STORE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+        body: JSON.stringify(payload)
+      });
+      const d = await r.json().catch(() => ({ error: 'Risposta non leggibile dal server.' }));
+      if (r.status === 401) {
+        forgetAuthToken();
+        if (!riprova) return postStore(payload, true);
+      }
+      return d;
+    }
+
+    /* Le schede Configurazione e YAML non si aprono senza password. Prima la
+       configurazione arrivava insieme al tabellone, quindi bastava aprire
+       l'indirizzo per leggere soglie, parole chiave ed esclusioni di tutti i
+       prodotti. Il tabellone degli annunci resta pubblico; questa parte no.
+
+       Si sblocca una volta per sessione: dopo, i dati restano in window.STATIC_*
+       e cambiare scheda non richiede piu' niente. */
+    let configSbloccata = false;
+
+    async function sbloccaConfig(riprova) {
+      if (configSbloccata) return true;
+      // La pagina aperta da disco non ha /api/store dietro: niente da sbloccare.
+      if (!CAN_WRITE) return true;
+      if (window.PANEL_HAS_PASSWORD === false) {
+        appendLog('APP_PASSWORD non configurata su Vercel: la configurazione '
+                + 'resta chiusa. Aggiungila fra le variabili d\'ambiente e '
+                + 'ripubblica.', 'error');
+        return false;
+      }
+      const token = authToken(riprova === true);
+      if (!token) return false;
+      let r;
+      try {
+        // Il payload intero, non solo i config: da anonimi gli annunci
+        // arrivano senza soglia ne' near_miss, quindi il tabellone mostra
+        // badge neutri. Sbloccando vanno ripresi con quei campi, o i badge
+        // resterebbero neutri fino al ricaricamento della pagina.
+        r = await fetch(API_STORE, {
+          cache: 'no-store', headers: { 'x-auth-token': token }
+        });
+      } catch (e) {
+        appendLog('Nessuna risposta da /api/store: ' + e.message, 'error');
+        return false;
+      }
+      if (r.status === 401) {
+        forgetAuthToken();
+        if (!riprova) return sbloccaConfig(true);
+        appendLog('Password errata: configurazione non sbloccata.', 'error');
+        return false;
+      }
+      if (!r.ok) {
+        appendLog('/api/store ha risposto ' + r.status + '.', 'error');
+        return false;
+      }
+      const d = await r.json().catch(() => null);
+      if (!d) { appendLog('Risposta non leggibile dal server.', 'error'); return false; }
+      window.STATIC_CONFIGS = d.configs || {};
+      window.STATIC_CONFIG_DATA = d.config || {};
+      configSbloccata = true;
+      window.PANEL_UNLOCKED = true;
+      window.HIDDEN_COUNT = d.hiddenCount || 0;
+      window.SCAM_COUNT = d.scamCount || 0;
+      window.IGNORED_COUNT = d.ignoredCount || 0;
+      if (Array.isArray(d.items) && d.items.length) {
+        window.STATIC_ITEMS = d.items;
+        state.items = d.items;
+        renderItems(d.items);
+      }
+      return true;
+    }
+
+
+    function renderProducts(products) {
+      state.formProducts = products.map(p => ({
+        ...p,
+        keywords: Array.isArray(p.keywords) ? p.keywords.join(', ') : (p.keywords || ''),
+        exclude_keywords: Array.isArray(p.exclude_keywords) ? p.exclude_keywords.join(', ') : (p.exclude_keywords || ''),
+        subito_urls: Array.isArray(p.subito_urls) ? p.subito_urls.join(', ') : (p.subito_urls || '')
+      }));
+      const el = document.getElementById('products-list');
+      if (!state.formProducts.length) {
+        el.innerHTML = '<p class="muted small">Nessun prodotto monitorato. Usa «+ Aggiungi» per configurarne uno.</p>';
+        return;
+      }
+      const check = (idx, field, on, label) => `
+        <label class="checkline">
+          <input type="checkbox" data-field="${field}" data-idx="${idx}" ${on ? 'checked' : ''}>
+          <span>${label}</span>
+        </label>`;
+      const text = (idx, field, value, label) => `
+        <label class="field">
+          <span>${label}</span>
+          <input type="text" data-field="${field}" data-idx="${idx}" value="${esc(value)}">
+        </label>`;
+
+      el.innerHTML = state.formProducts.map((p, i) => `
+        <article class="tile">
+          <div class="tile-head">
+            <input type="text" class="prod-name" data-field="name" data-idx="${i}"
+                   value="${esc(p.name || '')}" placeholder="Nome prodotto" aria-label="Nome prodotto">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="removeProduct(${i})">Rimuovi</button>
+          </div>
+
+          <div class="prod-nums">
+            <label class="field">
+              <span>Prezzo limite €</span>
+              <input type="number" min="1" data-field="max_price" data-idx="${i}" value="${esc(p.max_price || 500)}">
+            </label>
+            <label class="field">
+              <span>Tolleranza €</span>
+              <input type="number" min="0" data-field="price_margin" data-idx="${i}" value="${esc(p.price_margin || 50)}">
+            </label>
+          </div>
+
+          <div class="prod-flags">
+            ${check(i, 'subito', p.subito !== false, 'Subito.it')}
+            ${check(i, 'amazon', p.amazon !== false, 'Amazon.it')}
+            ${check(i, 'search_in_description', p.search_in_description === true, 'Cerca in descrizione')}
+          </div>
+
+          <details>
+            <summary>Termini di ricerca</summary>
+            <div class="prod-terms">
+              ${text(i, 'keywords', p.keywords, 'Parole chiave (separate da virgola)')}
+              ${text(i, 'exclude_keywords', p.exclude_keywords, 'Parole da escludere')}
+              ${text(i, 'subito_urls', p.subito_urls, 'URL Subito forzati')}
+            </div>
+          </details>
+        </article>`).join('');
+    }
+
+    function addProduct() {
+      syncFormFromInputs();
+      state.formProducts.push({
+        name: '', keywords: '', exclude_keywords: '', subito_urls: '',
+        max_price: 500, price_margin: 50, subito: true, amazon: true, search_in_description: false
+      });
+      renderProducts(state.formProducts);
+      const inputs = document.querySelectorAll('#products-list [data-field="name"]');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    }
+
+    function removeProduct(i) {
+      syncFormFromInputs();
+      state.formProducts.splice(i, 1);
+      renderProducts(state.formProducts);
+    }
+
+    function collectFormProducts() {
+      const split = v => typeof v === 'string' ? v.split(',').map(s => s.trim()).filter(Boolean) : (v || []);
+      return state.formProducts.map(p => ({
+        name: p.name,
+        keywords: split(p.keywords),
+        exclude_keywords: split(p.exclude_keywords),
+        subito_urls: split(p.subito_urls),
+        max_price: parseInt(p.max_price) || 500,
+        price_margin: parseInt(p.price_margin) || 50,
+        subito: p.subito !== false,
+        amazon: p.amazon !== false,
+        search_in_description: p.search_in_description === true,
+      }));
+    }
+
+    function syncFormFromInputs() {
+      document.querySelectorAll('#products-list [data-idx]').forEach(el => {
+        const i = parseInt(el.dataset.idx);
+        const f = el.dataset.field;
+        if (!state.formProducts[i]) return;
+        state.formProducts[i][f] = el.type === 'checkbox' ? el.checked : el.value;
+      });
+    }
+
+    /* ---- ANNUNCI TOLTI DAL TABELLONE ---- */
+
+    function aggiornaBoxNascosti() {
+      const box = document.getElementById('hidden-box');
+      if (!box) return;
+      const quanti = window.HIDDEN_COUNT || 0;
+      box.classList.toggle('hidden', !(CAN_WRITE && quanti));
+      const etichetta = document.getElementById('hidden-count');
+      if (etichetta) {
+        etichetta.textContent = quanti === 1
+          ? '1 annuncio e\' fuori dal tabellone.'
+          : quanti + ' annunci sono fuori dal tabellone.';
+      }
+    }
+
+    async function ripristinaNascosti(bottone) {
+      const stato = document.getElementById('hidden-status');
+      if (!window.confirm('Rimettere tutti gli annunci tolti?')) return;
+      bottone.disabled = true;
+      if (stato) stato.textContent = 'Ripristino in corso…';
+      const d = await postStore({ unhideAll: true });
+      bottone.disabled = false;
+      if (d && d.ok) {
+        window.HIDDEN_COUNT = d.hiddenCount || 0;
+        if (stato) stato.textContent = d.message;
+        aggiornaBoxNascosti();
+        appendLog(d.message + ' Ricarica il tabellone per rivederli.', 'info');
+      } else if (stato) {
+        stato.textContent = (d && d.error) || 'Ripristino non riuscito.';
+      }
+    }
+
+    function aggiornaBoxSegnalati() {
+      const box = document.getElementById('scam-box');
+      if (!box) return;
+      const quanti = window.SCAM_COUNT || 0;
+      box.classList.toggle('hidden', !(CAN_WRITE && quanti));
+      const etichetta = document.getElementById('scam-count');
+      if (etichetta) {
+        etichetta.textContent = quanti === 1
+          ? '1 annuncio e\' segnalato come truffa.'
+          : quanti + ' annunci sono segnalati come truffa.';
+      }
+    }
+
+    async function ritiraSegnalazioni(bottone) {
+      const stato = document.getElementById('scam-status');
+      if (!window.confirm('Ritirare tutte le segnalazioni di truffa?')) return;
+      bottone.disabled = true;
+      if (stato) stato.textContent = 'Ritiro in corso…';
+      const d = await postStore({ unscamAll: true });
+      bottone.disabled = false;
+      if (d && d.ok) {
+        window.SCAM_COUNT = d.scamCount || 0;
+        if (stato) stato.textContent = d.message;
+        /* Le righe portano ancora il marchio: si toglie qui invece di
+           richiedere tutto al server, che per un dato che gia' conosciamo
+           sarebbe una richiesta buttata. */
+        (state.items || []).forEach(function (i) { delete i.scam; });
+        renderItems(state.items);
+        aggiornaBoxSegnalati();
+        appendLog(d.message, 'info');
+      } else if (stato) {
+        stato.textContent = (d && d.error) || 'Ritiro non riuscito.';
+      }
+    }
+
+    function aggiornaBoxIgnorati() {
+      const box = document.getElementById('skip-box');
+      if (!box) return;
+      const quanti = window.IGNORED_COUNT || 0;
+      box.classList.toggle('hidden', !(CAN_WRITE && quanti));
+      const etichetta = document.getElementById('skip-count');
+      if (etichetta) {
+        etichetta.textContent = quanti === 1
+          ? '1 annuncio e\' escluso dalla ricerca.'
+          : quanti + ' annunci sono esclusi dalla ricerca.';
+      }
+    }
+
+    async function rimettiInRicerca(bottone) {
+      const stato = document.getElementById('skip-status');
+      if (!window.confirm('Rimettere in ricerca tutti gli annunci esclusi?')) return;
+      bottone.disabled = true;
+      if (stato) stato.textContent = 'Ripristino in corso…';
+      const d = await postStore({ unskipAll: true });
+      bottone.disabled = false;
+      if (d && d.ok) {
+        window.IGNORED_COUNT = d.ignoredCount || 0;
+        if (stato) stato.textContent = d.message;
+        aggiornaBoxIgnorati();
+        /* Qui non basta ridisegnare: gli annunci non sono in memoria, li ha
+           tolti il server. Tornano alla scansione seguente, che e' quella che
+           li raccoglie di nuovo. */
+        appendLog(d.message + ' Torneranno alla prossima scansione.', 'info');
+      } else if (stato) {
+        stato.textContent = (d && d.error) || 'Ripristino non riuscito.';
+      }
+    }
+
+    async function loadConfig() {
+      if (window.STATIC_CONFIG_DATA) {
+        const d = window.STATIC_CONFIG_DATA;
+        if (d.general) {
+          document.getElementById('cfg-interval').value = d.general.interval_minutes;
+          document.getElementById('cfg-shipping').checked = d.general.shipping_required;
+        }
+        if (d.telegram) {
+          document.getElementById('cfg-tg-enabled').checked = d.telegram.enabled;
+        }
+        if (d.subito) {
+          document.getElementById('cfg-subito-enabled').checked = d.subito.enabled;
+          document.getElementById('cfg-subito-pages').value = d.subito.max_pages;
+        }
+        if (d.amazon) {
+          document.getElementById('cfg-amazon-enabled').checked = d.amazon.enabled;
+          document.getElementById('cfg-amazon-pages').value = d.amazon.max_pages;
+        }
+        renderFilters(d.products || []);
+        renderProducts(d.products || []);
+      }
+    }
+
+    async function saveForm(e) {
+      e.preventDefault();
+      syncFormFromInputs();
+      const btn = document.getElementById('cfg-save-btn');
+      const status = document.getElementById('config-save-status');
+      if (!CAN_WRITE) {
+        status.textContent = 'Questa copia della pagina non può salvare.';
+        return;
+      }
+      btn.textContent = 'Salvataggio…';
+      btn.disabled = true;
+      status.textContent = 'Salvataggio in corso…';
+      try {
+        const d = await postStore({
+          general: {
+            interval_minutes: parseInt(document.getElementById('cfg-interval').value),
+            shipping_required: document.getElementById('cfg-shipping').checked
+          },
+          telegram: { enabled: document.getElementById('cfg-tg-enabled').checked },
+          products: collectFormProducts(),
+          subito: {
+            enabled: document.getElementById('cfg-subito-enabled').checked,
+            max_pages: parseInt(document.getElementById('cfg-subito-pages').value)
+          },
+          amazon: {
+            enabled: document.getElementById('cfg-amazon-enabled').checked,
+            max_pages: parseInt(document.getElementById('cfg-amazon-pages').value)
+          }
+        });
+        status.textContent = d.ok
+          ? (d.changed ? `${d.message} (${d.files.join(', ')})` : d.message)
+          : (d.error || 'Errore di salvataggio.');
+      } catch (e) {
+        status.textContent = 'Errore di connessione con /api/store.';
+      }
+      btn.textContent = 'Salva e applica';
+      btn.disabled = false;
+    }
+
+    /* ---- EDITOR YAML ---- */
+    function renderYamlTabs(files) {
+      document.getElementById('yaml-tabs').innerHTML = files.map(f =>
+        `<button type="button" class="yaml-tab-btn" data-file="${esc(f)}" onclick="loadYaml('${esc(f)}')">${esc(f)}</button>`
+      ).join('');
+    }
+
+    function loadYamlList() {
+      if (!window.STATIC_CONFIGS) return;
+      const files = Object.keys(window.STATIC_CONFIGS);
+      renderYamlTabs(files);
+      if (files.length) loadYaml(files[0]);
+    }
+
+    function markYamlTab(name) {
+      document.getElementById('yaml-filename').textContent = name;
+      state.currentConfig = name;
+      document.querySelectorAll('.yaml-tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.file === name);
+      });
+    }
+
+    function loadYaml(name) {
+      if (!window.STATIC_CONFIGS || !window.STATIC_CONFIGS[name]) return;
+      document.getElementById('yaml-editor').value = window.STATIC_CONFIGS[name];
+      markYamlTab(name);
+    }
+
+    async function saveYaml(e) {
+      e.preventDefault();
+      const status = document.getElementById('yaml-status');
+      if (!CAN_WRITE) {
+        status.textContent = 'Questa copia della pagina non può salvare.';
+        return;
+      }
+      status.textContent = 'Salvataggio in corso…';
+      try {
+        const d = await postStore({
+          yaml: { name: state.currentConfig, content: document.getElementById('yaml-editor').value }
+        });
+        status.textContent = d.ok
+          ? (d.changed ? `${d.message} (${d.files.join(', ')})` : d.message)
+          : (d.error || 'Errore di salvataggio.');
+      } catch (e) {
+        status.textContent = 'Errore di connessione con /api/store.';
+      }
+    }
+
+    /* ---- STATO DEL SERVIZIO ---- */
+    function setLive(text, uptime) {
+      const badge = document.getElementById('status-badge');
+      badge.classList.add('is-live');
+      document.getElementById('status-text').textContent = text;
+      document.getElementById('uptime').textContent = uptime;
+    }
+
+    function fetchStatus() {
+      // La cadenza arriva dal workflow, non da una costante: quando il cron
+      // e' passato da 15 a 30 minuti questa riga mentiva.
+      setLive(CAN_WRITE ? 'Scansione in cloud · scrivibile' : 'Scansione in cloud',
+              `cron ${window.SCAN_CADENCE || 30}m`);
+      const eyebrow = document.getElementById('hero-eyebrow');
+      if (eyebrow) eyebrow.textContent = 'Scansione automatica in cloud';
+    }
+
+    /* Dove non si puo' scrivere, la colonna della croce non ha ragione di
+       esistere: si toglie dall'intestazione invece di lasciarla vuota. */
+    if (!CAN_WRITE) {
+      const thDel = document.getElementById('th-del');
+      if (thDel) thDel.remove();
+    }
+
+    /* Su Vercel qui non c'e' ancora niente da disegnare: la configurazione
+       arriva solo dopo lo sblocco, quando si apre la scheda. Altrove (build
+       statico) i dati sono gia' nella pagina e si disegnano subito. */
+    if (!CAN_WRITE && (window.STATIC_CONFIGS || window.STATIC_CONFIG_DATA)) {
+      loadConfig();
+      loadYamlList();
+    }
+    fetchStatus();
+    fetchServerLogs();
+  </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+name: Price Tracker Scanner
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    # Ogni 30 minuti, non 15: il run completo dura ~13 min (Subito ne prende
+    # 3, il resto sono Amazon e NorthLadder via Playwright) e a 15 minuti il
+    # margine era di novanta secondi. A 30 il turno successivo parte sempre a
+    # tavolo libero.
+    #
+    # Ai minuti 7 e 37, non ':00' e ':30'. GitHub non garantisce i cron: quando
+    # i runner sono carichi scarta le esecuzioni programmate, e ':00' e ':30'
+    # sono i due minuti piu' affollati dell'ora, perche' ci finisce il cron di
+    # chiunque scriva '*/30'. Con quella scrittura, il 31/08/2026, ne partivano
+    # sette al giorno su quarantotto, e sempre in ritardo di dieci-venti
+    # minuti. Spostarsi di sette minuti non cambia niente per noi e toglie di
+    # mezzo la coda.
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+
+# Rete di sicurezza contro l'accavallamento: un run per volta, in coda e non
+# annullato, cosi' una scansione lunga non si ritrova a spingere su main
+# insieme a quella partita dal cron successivo.
+#
+# ATTENZIONE, guasto visto il 28/08/2026: GitHub tiene UN SOLO run in attesa
+# per gruppo. Un run rimasto appeso in "queued" (nel nostro caso un
+# workflow_dispatch del 26/08 che non aveva creato nemmeno un job) occupa quel
+# posto per sempre, e da quel momento le esecuzioni da cron non partono piu'.
+# I push continuano a funzionare, quindi il guasto e' silenzioso: sembra tutto
+# a posto finche' non si guarda che l'ultima scansione automatica risale a ore
+# prima. Se il cron smette di girare, la prima cosa da controllare e':
+#   gh api "repos/mich-de/subito/actions/runs?status=queued"
+# e annullare a mano quello che ci trova appeso.
+concurrency:
+  group: scanner
+  cancel-in-progress: false
+
+# Solo i due permessi che servono davvero: committare i dati e ripulire i run
+# vecchi. Questo workflow non pubblica niente — il tabellone sta su
+# https://subito-it.vercel.app/ e si aggiorna da solo leggendo data/*.json.
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@v7.0.0
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m playwright install chromium
+
+      - name: Fetch Config Saved from the Dashboard
+        run: |
+          # Il pannello su Vercel non scrive qui: scrive su Vercel Blob. Questo
+          # passo ritira quello che ci ha lasciato e lo mette in config/, prima
+          # che lo scanner legga. Non fallisce mai: se Blob non risponde si
+          # scansiona con la configurazione che c'e' gia'.
+          python sync_config.py
+
+      - name: Run Price Scanner
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python run_once.py
+
+      - name: Build Dashboard for Vercel
+        run: |
+          # Il tabellone su Vercel non contiene dati: li chiede a /api/store
+          # all'apertura. Va rigenerato solo quando cambiano il template o i
+          # fogli di stile, quindi di norma questo passo non produce nessun
+          # diff — e' qui perche' una modifica al template arrivi su Vercel
+          # senza doversi ricordare di lanciare lo script a mano.
+          python export_vercel.py
+
+      - name: Save Scan Data to Main Branch
+        run: |
+          git config --global user.name "mich-de"
+          git config --global user.email "mic.deangelis@gmail.com"
+          # Dati, config/ quando il pannello l'ha cambiata, e vercel/index.html
+          # quando cambia il template. La dashboard non ha piu' bisogno di
+          # essere ricommittata a ogni giro: su Vercel la pagina non contiene
+          # dati, li chiede a /api/store quando la si apre.
+          #
+          # config/ sta qui per una ragione precisa: cosi' il repository resta
+          # lo specchio di cio' che sta girando davvero. Senza, le soglie
+          # vivrebbero solo dentro Blob e guardare il repository per sapere
+          # cosa si sta cercando direbbe una bugia.
+          git add -f data/sent_items.json data/*_results.json data/northladder_history.json config/*.yaml vercel/index.html || true
+          git diff --quiet && git diff --staged --quiet || git commit -m "Chore: Save scan results and sent items history [skip ci]"
+          git push origin main || true
+
+      - name: Purge Old Workflow Runs Automatically
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          CURRENT_RUN: ${{ github.run_id }}
+        run: |
+          # Prima chiedeva workflow_runs[1:] senza filtri: teneva UN SOLO run e
+          # cancellava tutti gli altri, compresi quelli in coda o in esecuzione.
+          # Un run appena lanciato spariva prima di partire e il sito non veniva
+          # mai pubblicato. Qui si toccano solo i run gia' conclusi, si salta
+          # sempre quello corrente e se ne conservano dieci per poter indagare.
+          curl -s -H "Authorization: token $GH_TOKEN" \
+            "https://api.github.com/repos/$REPO/actions/runs?per_page=100&status=completed" \
+            | jq -r --arg current "$CURRENT_RUN" \
+                '.workflow_runs
+                 | map(select(.id != ($current | tonumber)))
+                 | .[10:][].id' \
+            | while read -r run_id; do
+                [ -n "$run_id" ] || continue
+                curl -s -X DELETE -H "Authorization: token $GH_TOKEN" \
+                  "https://api.github.com/repos/$REPO/actions/runs/$run_id"
+              done
+
+# Nessun job di pubblicazione, ed e' voluto: qui girano il repository e lo
+# scanner, il tabellone sta su https://subito-it.vercel.app/. Uno solo, quindi
+# nessun dubbio su quale dica il vero.

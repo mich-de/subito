@@ -1,0 +1,4 @@
+# Solo ruamel: serve a riscrivere i YAML conservando i commenti. Il dialogo con
+# GitHub usa urllib della libreria standard, cosi' il bundle della funzione
+# resta piccolo e l'avvio a freddo breve.
+ruamel.yaml==0.18.6

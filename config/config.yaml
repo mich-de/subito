@@ -1,0 +1,273 @@
+telegram:
+  enabled: true
+  bot_token: "YOUR_TELEGRAM_BOT_TOKEN"
+  chat_id: "YOUR_TELEGRAM_CHAT_ID"
+scanner:
+  interval_minutes: 10
+  shipping_required: true
+  products:
+  - name: Samsung S24 256GB
+    keywords:
+    - Samsung S24 256
+    - Samsung Galaxy S24 256
+    - S24 256
+    # La ricerca di Subito non lega "256" a un titolo che scrive "256Gb"
+    # attaccato: sono due parole diverse per il suo indice. Senza questa
+    # variante quegli annunci non tornano proprio dalla ricerca.
+    - S24 256gb
+    exclude_keywords:
+    - fe
+    - ultra
+    - plus
+    - watch
+    - notebook
+    - netbook
+    - laptop
+    - pc
+    - tablet
+    - ipad
+    - galaxy a
+    - scambio
+    - cerco
+    subito_urls: []
+    max_price: 360
+    price_margin: 40
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: Samsung S24 512GB
+    keywords:
+    - Samsung S24 512
+    - Samsung Galaxy S24 512
+    - S24 512
+    - S24 512gb
+    exclude_keywords:
+    - fe
+    - ultra
+    - plus
+    - watch
+    - notebook
+    - netbook
+    - laptop
+    - pc
+    - tablet
+    - ipad
+    - galaxy a
+    - scambio
+    - cerco
+    subito_urls: []
+    max_price: 400
+    price_margin: 40
+    subito: false
+    amazon: false
+    search_in_description: false
+  - name: Samsung S25 256GB
+    keywords:
+    - Samsung S25 256
+    - Samsung Galaxy S25 256
+    - S25 256
+    - S25 256gb
+    exclude_keywords:
+    - fe
+    - ultra
+    - plus
+    - watch
+    - notebook
+    - netbook
+    - laptop
+    - pc
+    - tablet
+    - ipad
+    - galaxy a
+    - scambio
+    - cerco
+    subito_urls: []
+    max_price: 380
+    # Margine a 50 (era 30): il tetto passa da 410 a 430. Il margine finisce
+    # in pe= dell'URL di ricerca, quindi con 30 gli annunci sopra 410 non
+    # venivano nemmeno restituiti da Subito. Obiettivo reale sempre 380.
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: Samsung S25 512GB
+    keywords:
+    - Samsung S25 512
+    - Samsung Galaxy S25 512
+    - S25 512
+    - S25 512gb
+    exclude_keywords:
+    - fe
+    - ultra
+    - plus
+    - watch
+    - scambio
+    - cerco
+    subito_urls: []
+    max_price: 400
+    price_margin: 30
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: OPPO Find X9 Pro
+    keywords:
+    - OPPO Find X9 Pro
+    - Find X9 Pro
+    exclude_keywords:
+    - custodia
+    - cover
+    - pellicola
+    - vetro
+    - caricatore
+    - cavo
+    - adattatore
+    - case
+    - silicone
+    - schermo
+    - riparazione
+    - ricambio
+    - batteria
+    - scambio
+    - cerco
+    - find x8
+    - find x7
+    - find x6
+    - find x5
+    - neo
+    - lite
+    subito_urls: []
+    max_price: 650
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: Honor Magic 8 Pro
+    keywords:
+    - Honor Magic 8 Pro
+    - Magic 8 Pro
+    exclude_keywords:
+    - custodia
+    - cover
+    - pellicola
+    - vetro
+    - caricatore
+    - cavo
+    - adattatore
+    - case
+    - silicone
+    - schermo
+    - riparazione
+    - ricambio
+    - batteria
+    - scambio
+    - cerco
+    - magic 7
+    - magic7
+    - magic 6
+    - magic6
+    - magic 5
+    - magic5
+    - magic v
+    - magicbook
+    - magicpad
+    - magic watch
+    - lite
+    # La ricerca di Subito e' a testo libero: "Magic 8 Pro" le ha restituito
+    # un MacBook col Magic Mouse e un Red Magic 8S, ed entrambi sono finiti
+    # su Telegram. Sono marchi diversi, non varianti dell'Honor.
+    - macbook
+    - mouse
+    - red magic
+    - redmagic
+    - nubia
+    subito_urls: []
+    max_price: 650
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: Google Pixel 1-5
+    keywords:
+    - Google Pixel 1
+    - Google Pixel 2
+    - Google Pixel 3
+    - Google Pixel 4
+    - Google Pixel 5
+    exclude_keywords:
+    - custodi
+    - cover
+    - pellicola
+    - vetro
+    - caricator
+    - cavo
+    - adattatore
+    - case
+    - silicone
+    - schermo
+    - riparazione
+    - ricambio
+    - batteria
+    - cinturin
+    - watch
+    - orologio
+    - buds
+    - auricolari
+    - cuffie
+    - stand
+    - dock
+    - alimentatore
+    - tablet
+    - display
+    - danneggiato
+    - difetto
+    - rotto
+    - guasto
+    - scambio
+    - cerco
+    subito_urls: []
+    max_price: 100
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: Vivo X300
+    keywords:
+    - Vivo X300
+    exclude_keywords:
+    - x200
+    - cover
+    subito_urls: []
+    max_price: 400
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: Lenovo IdeaPad slim 5
+    keywords:
+    - Snapdragon x
+    exclude_keywords:
+    - Intel
+    - 8gb
+    - 256gb
+    subito_urls: []
+    max_price: 500
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+  - name: Galaxy Book 4
+    keywords:
+    - Galaxy book 4
+    - snapdragon
+    exclude_keywords:
+    - Intel
+    subito_urls: []
+    max_price: 500
+    price_margin: 50
+    subito: true
+    amazon: true
+    search_in_description: false
+web:
+  host: 0.0.0.0
+  port: 5000
+  debug: false

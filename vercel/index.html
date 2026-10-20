@@ -1,0 +1,3051 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Offerte Monitor — tabellone prezzi Subito &amp; Amazon</title>
+
+  <!-- Il tema si decide PRIMA che il CSS dipinga il primo pixel, altrimenti al
+       ricaricamento la pagina lampeggia in chiaro. Resta inline e senza defer. -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      var dark = saved ? saved === 'dark'
+                       : matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    })();
+  </script>
+
+  <style>
+/* ==========================================================================
+   quadro-partenze.css
+   Componente: Quadro Partenze / Departure Board
+   Obiettivo: production-ready, responsive, accessibile, themable, animabile
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKEN / TEMI
+   Default: dark
+   Light: data-theme="light" oppure classe .quadro-partenze--light
+   Auto light: se prefers-color-scheme: light e nessun tema forzato
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze {
+  /* Layout e spacing */
+  --qp-density: 1;
+  --qp-space-1: 0.25rem;
+  --qp-space-2: 0.5rem;
+  --qp-space-3: 0.75rem;
+  --qp-space-4: 1rem;
+  --qp-space-5: 1.25rem;
+  --qp-space-6: 1.5rem;
+  --qp-gap: 0.9rem;
+  --qp-cell-padding: 0.72rem 0.85rem;
+
+  /* Dimensioni */
+  --qp-radius: 18px;
+  --qp-radius-sm: 10px;
+  --qp-max-width: 1200px;
+  --qp-max-height: 72vh;
+  --qp-table-min-width: 860px;
+
+  /* Animazioni */
+  --qp-animation-duration: 0.45s;
+  --qp-transition-fast: 140ms ease;
+  --qp-transition-base: 220ms ease;
+
+  /* Font */
+  --qp-font-sans:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    "Noto Sans",
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
+  --qp-font-mono:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "Courier New",
+    monospace;
+
+  /* Colori default: DARK */
+  --qp-bg: #070b14;
+  --qp-panel: #0f172a;
+  --qp-surface: #111827;
+  --qp-border: rgba(148, 163, 184, 0.18);
+  --qp-text: #e2e8f0;
+  --qp-muted: #94a3b8;
+
+  --qp-accent: #38bdf8;
+  --qp-on-accent: #04121f;
+
+  --qp-success: #22c55e;
+  --qp-warning: #f59e0b;
+  --qp-danger: #f87171;
+  --qp-info: #60a5fa;
+  --qp-focus: #fde047;
+
+  --qp-accent-soft: rgba(56, 189, 248, 0.16);
+  --qp-success-soft: rgba(34, 197, 94, 0.16);
+  --qp-warning-soft: rgba(245, 158, 11, 0.16);
+  --qp-danger-soft: rgba(248, 113, 113, 0.16);
+  --qp-info-soft: rgba(96, 165, 250, 0.16);
+
+  --qp-shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+
+  --qp-row-alt: rgba(148, 163, 184, 0.05);
+  --qp-row-hover: rgba(56, 189, 248, 0.09);
+  --qp-row-selected: rgba(56, 189, 248, 0.16);
+  --qp-card-bg: rgba(15, 23, 42, 0.72);
+  --qp-header-bg: rgba(15, 23, 42, 0.94);
+
+  --qp-platform-bg: rgba(148, 163, 184, 0.14);
+  --qp-platform-color: #e2e8f0;
+
+  --qp-skeleton-base: rgba(148, 163, 184, 0.18);
+  --qp-skeleton-highlight: rgba(226, 232, 240, 0.28);
+
+  --qp-scrollbar-thumb: rgba(148, 163, 184, 0.42);
+  --qp-scrollbar-track: rgba(2, 6, 23, 0.35);
+
+  --qp-message-bg: rgba(148, 163, 184, 0.07);
+  --qp-danger-border: rgba(248, 113, 113, 0.42);
+}
+
+/* Tema chiaro forzato */
+.quadro-partenze[data-theme="light"],
+.quadro-partenze--light {
+  --qp-bg: #f8fafc;
+  --qp-panel: #ffffff;
+  --qp-surface: #f1f5f9;
+  --qp-border: rgba(15, 23, 42, 0.14);
+  --qp-text: #0f172a;
+  --qp-muted: #475569;
+
+  --qp-accent: #0284c7;
+  --qp-on-accent: #ffffff;
+
+  --qp-success: #15803d;
+  --qp-warning: #b45309;
+  --qp-danger: #b91c1c;
+  --qp-info: #1d4ed8;
+  --qp-focus: #b45309;
+
+  --qp-accent-soft: rgba(2, 132, 199, 0.12);
+  --qp-success-soft: rgba(21, 128, 61, 0.12);
+  --qp-warning-soft: rgba(180, 83, 9, 0.14);
+  --qp-danger-soft: rgba(185, 28, 28, 0.12);
+  --qp-info-soft: rgba(29, 78, 216, 0.12);
+
+  --qp-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+
+  --qp-row-alt: rgba(15, 23, 42, 0.035);
+  --qp-row-hover: rgba(2, 132, 199, 0.08);
+  --qp-row-selected: rgba(2, 132, 199, 0.13);
+  --qp-card-bg: #ffffff;
+  --qp-header-bg: rgba(255, 255, 255, 0.95);
+
+  --qp-platform-bg: rgba(15, 23, 42, 0.07);
+  --qp-platform-color: #0f172a;
+
+  --qp-skeleton-base: rgba(15, 23, 42, 0.08);
+  --qp-skeleton-highlight: rgba(15, 23, 42, 0.16);
+
+  --qp-scrollbar-thumb: rgba(15, 23, 42, 0.24);
+  --qp-scrollbar-track: rgba(15, 23, 42, 0.06);
+
+  --qp-message-bg: rgba(15, 23, 42, 0.04);
+  --qp-danger-border: rgba(185, 28, 28, 0.35);
+}
+
+/* Tema chiaro automatico se non forzato */
+@media (prefers-color-scheme: light) {
+  .quadro-partenze:not([data-theme]):not(.quadro-partenze--dark):not(.quadro-partenze--light) {
+    --qp-bg: #f8fafc;
+    --qp-panel: #ffffff;
+    --qp-surface: #f1f5f9;
+    --qp-border: rgba(15, 23, 42, 0.14);
+    --qp-text: #0f172a;
+    --qp-muted: #475569;
+
+    --qp-accent: #0284c7;
+    --qp-on-accent: #ffffff;
+
+    --qp-success: #15803d;
+    --qp-warning: #b45309;
+    --qp-danger: #b91c1c;
+    --qp-info: #1d4ed8;
+    --qp-focus: #b45309;
+
+    --qp-accent-soft: rgba(2, 132, 199, 0.12);
+    --qp-success-soft: rgba(21, 128, 61, 0.12);
+    --qp-warning-soft: rgba(180, 83, 9, 0.14);
+    --qp-danger-soft: rgba(185, 28, 28, 0.12);
+    --qp-info-soft: rgba(29, 78, 216, 0.12);
+
+    --qp-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+
+    --qp-row-alt: rgba(15, 23, 42, 0.035);
+    --qp-row-hover: rgba(2, 132, 199, 0.08);
+    --qp-row-selected: rgba(2, 132, 199, 0.13);
+    --qp-card-bg: #ffffff;
+    --qp-header-bg: rgba(255, 255, 255, 0.95);
+
+    --qp-platform-bg: rgba(15, 23, 42, 0.07);
+    --qp-platform-color: #0f172a;
+
+    --qp-skeleton-base: rgba(15, 23, 42, 0.08);
+    --qp-skeleton-highlight: rgba(15, 23, 42, 0.16);
+
+    --qp-scrollbar-thumb: rgba(15, 23, 42, 0.24);
+    --qp-scrollbar-track: rgba(15, 23, 42, 0.06);
+
+    --qp-message-bg: rgba(15, 23, 42, 0.04);
+    --qp-danger-border: rgba(185, 28, 28, 0.35);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. BASE COMPONENT
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze,
+.quadro-partenze * {
+  box-sizing: border-box;
+}
+
+.quadro-partenze {
+  position: relative;
+  display: grid;
+  gap: calc(var(--qp-gap) * var(--qp-density));
+  width: 100%;
+  max-width: var(--qp-max-width);
+  padding: calc(var(--qp-space-4) * var(--qp-density));
+  color: var(--qp-text);
+  background:
+    linear-gradient(135deg, var(--qp-accent-soft) 0%, transparent 42%),
+    var(--qp-panel);
+  border: 1px solid var(--qp-border);
+  border-radius: var(--qp-radius);
+  box-shadow: var(--qp-shadow);
+  font-family: var(--qp-font-sans);
+  line-height: 1.45;
+  container-type: inline-size;
+  container-name: quadro-partenze;
+  isolation: isolate;
+}
+
+/* Varianti contenitore */
+.quadro-partenze--flat {
+  box-shadow: none;
+}
+
+.quadro-partenze--borderless {
+  border-color: transparent;
+}
+
+.quadro-partenze--transparent {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.quadro-partenze--compact {
+  --qp-density: 0.84;
+  --qp-cell-padding: 0.48rem 0.62rem;
+}
+
+.quadro-partenze--comfortable {
+  --qp-density: 1.14;
+  --qp-cell-padding: 0.88rem 0.95rem;
+}
+
+.quadro-partenze--full {
+  max-width: none;
+}
+
+/* --------------------------------------------------------------------------
+   3. HEADER / TITOLO / META / CONTROLLI
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--qp-space-3);
+  min-width: 0;
+}
+
+.quadro-partenze__heading {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.quadro-partenze__title {
+  margin: 0;
+  font:
+    800
+    clamp(1.1rem, 1.6vw + 0.75rem, 1.65rem)
+    /
+    1.1
+    var(--qp-font-sans);
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.quadro-partenze--sentence-case .quadro-partenze__title {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.quadro-partenze__subtitle,
+.quadro-partenze__description {
+  margin: 0;
+  color: var(--qp-muted);
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.quadro-partenze__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--qp-space-2) var(--qp-space-3);
+  color: var(--qp-muted);
+  font-size: 0.85rem;
+}
+
+.quadro-partenze__updated {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.quadro-partenze__live-dot {
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 999px;
+  background: var(--qp-success);
+  box-shadow: 0 0 0 0.28rem var(--qp-success-soft);
+  animation: qp-pulse 2s ease-in-out infinite;
+}
+
+.quadro-partenze--offline .quadro-partenze__live-dot {
+  background: var(--qp-muted);
+  box-shadow: 0 0 0 0.28rem rgba(148, 163, 184, 0.16);
+  animation: none;
+}
+
+.quadro-partenze__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quadro-partenze__button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.25rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--qp-border);
+  border-radius: 999px;
+  background: var(--qp-surface);
+  color: var(--qp-text);
+  font: 700 0.88rem / 1 var(--qp-font-sans);
+  cursor: pointer;
+  transition:
+    background-color var(--qp-transition-fast),
+    border-color var(--qp-transition-fast),
+    color var(--qp-transition-fast),
+    transform var(--qp-transition-fast),
+    box-shadow var(--qp-transition-fast);
+}
+
+.quadro-partenze__button:hover {
+  border-color: var(--qp-accent);
+  color: var(--qp-accent);
+  background: var(--qp-row-hover);
+}
+
+.quadro-partenze__button:active {
+  transform: translateY(1px);
+}
+
+.quadro-partenze__button:focus-visible {
+  outline: 3px solid var(--qp-focus);
+  outline-offset: 2px;
+}
+
+.quadro-partenze__button[aria-pressed="true"] {
+  background: var(--qp-accent);
+  border-color: var(--qp-accent);
+  color: var(--qp-on-accent);
+}
+
+.quadro-partenze__button--ghost {
+  background: transparent;
+}
+
+.quadro-partenze__button--danger {
+  color: var(--qp-danger);
+  border-color: var(--qp-danger-border);
+}
+
+.quadro-partenze__button--danger:hover {
+  background: var(--qp-danger-soft);
+  border-color: var(--qp-danger);
+  color: var(--qp-danger);
+}
+
+.quadro-partenze__link {
+  color: var(--qp-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.quadro-partenze__link:hover {
+  color: var(--qp-text);
+}
+
+.quadro-partenze__link:focus-visible {
+  outline: 3px solid var(--qp-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   4. VIEWPORT / SCROLL CONTENITORE
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__viewport {
+  position: relative;
+  overflow: auto;
+  overscroll-behavior-x: contain;
+  max-height: var(--qp-max-height);
+  border: 1px solid var(--qp-border);
+  border-radius: calc(var(--qp-radius) - 4px);
+  background: var(--qp-surface);
+  scrollbar-color: var(--qp-scrollbar-thumb) var(--qp-scrollbar-track);
+  scrollbar-width: thin;
+  contain: paint;
+}
+
+.quadro-partenze__viewport:focus-visible {
+  outline: 3px solid var(--qp-focus);
+  outline-offset: 2px;
+}
+
+.quadro-partenze__viewport::-webkit-scrollbar {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+.quadro-partenze__viewport::-webkit-scrollbar-track {
+  background: var(--qp-scrollbar-track);
+}
+
+.quadro-partenze__viewport::-webkit-scrollbar-thumb {
+  background: var(--qp-scrollbar-thumb);
+  border-radius: 999px;
+}
+
+.quadro-partenze__viewport::-webkit-scrollbar-thumb:hover {
+  background: var(--qp-muted);
+}
+
+/* --------------------------------------------------------------------------
+   5. TABELLA / HEAD / BODY
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__table {
+  width: 100%;
+  min-width: var(--qp-table-min-width);
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  font-variant-numeric: tabular-nums;
+}
+
+.quadro-partenze__head {
+  /* thead */
+}
+
+.quadro-partenze__head-cell {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: var(--qp-space-2) var(--qp-space-3);
+  background: var(--qp-header-bg);
+  color: var(--qp-muted);
+  border-bottom: 1px solid var(--qp-border);
+  font:
+    800
+    0.74rem
+    /
+    1.1
+    var(--qp-font-sans);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.quadro-partenze__head-cell--right {
+  text-align: right;
+}
+
+.quadro-partenze__head-cell--center {
+  text-align: center;
+}
+
+/* Larghezza colonne desktop */
+.quadro-partenze__head-cell:nth-child(1),
+.quadro-partenze__cell--time {
+  width: 11%;
+}
+
+.quadro-partenze__head-cell:nth-child(2),
+.quadro-partenze__cell--destination {
+  width: 35%;
+}
+
+.quadro-partenze__head-cell:nth-child(3),
+.quadro-partenze__cell--platform {
+  width: 11%;
+}
+
+.quadro-partenze__head-cell:nth-child(4),
+.quadro-partenze__cell--status {
+  width: 20%;
+}
+
+.quadro-partenze__head-cell:nth-child(5),
+.quadro-partenze__cell--note {
+  width: 23%;
+}
+
+.quadro-partenze__body {
+  /* tbody */
+}
+
+/* --------------------------------------------------------------------------
+   6. RIGHE
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__row {
+  background: transparent;
+  transition:
+    background-color var(--qp-transition-base),
+    box-shadow var(--qp-transition-base),
+    opacity var(--qp-transition-base);
+}
+
+.quadro-partenze__row:nth-child(even) {
+  background: var(--qp-row-alt);
+}
+
+.quadro-partenze__row:hover {
+  background: var(--qp-row-hover);
+}
+
+.quadro-partenze__row:focus-visible {
+  outline: 3px solid var(--qp-focus);
+  outline-offset: -3px;
+}
+
+.quadro-partenze__row:focus-within {
+  position: relative;
+  z-index: 1;
+}
+
+.quadro-partenze__row[aria-selected="true"],
+.quadro-partenze__row.is-selected {
+  background: var(--qp-row-selected);
+  box-shadow: inset 3px 0 0 var(--qp-accent);
+}
+
+.quadro-partenze__row--new {
+  animation: qp-fade-in 0.35s ease both;
+}
+
+.quadro-partenze__row--updated {
+  animation: qp-row-updated 0.9s ease both;
+}
+
+/* Stati riga */
+.quadro-partenze__row--on-time {
+  box-shadow: inset 3px 0 0 var(--qp-success);
+}
+
+.quadro-partenze__row--delayed {
+  box-shadow: inset 3px 0 0 var(--qp-warning);
+}
+
+.quadro-partenze__row--boarding {
+  box-shadow: inset 3px 0 0 var(--qp-accent);
+  background: var(--qp-accent-soft);
+}
+
+.quadro-partenze__row--cancelled {
+  box-shadow: inset 3px 0 0 var(--qp-danger);
+  opacity: 0.82;
+}
+
+.quadro-partenze__row--arrived {
+  box-shadow: inset 3px 0 0 var(--qp-muted);
+  opacity: 0.72;
+}
+
+.quadro-partenze__row--changed {
+  box-shadow: inset 3px 0 0 var(--qp-info);
+}
+
+.quadro-partenze__row--disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   7. CELLE / VALORI
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__cell {
+  padding: var(--qp-cell-padding);
+  border-bottom: 1px solid var(--qp-border);
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quadro-partenze__row:last-child .quadro-partenze__cell {
+  border-bottom: 0;
+}
+
+.quadro-partenze__value {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quadro-partenze__secondary {
+  display: block;
+  margin-top: 0.16rem;
+  color: var(--qp-muted);
+  font-size: 0.82rem;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.quadro-partenze__cell--time .quadro-partenze__value,
+.quadro-partenze__cell--platform .quadro-partenze__value {
+  font-family: var(--qp-font-mono);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.quadro-partenze__cell--time .quadro-partenze__value {
+  font-size: 1.02rem;
+}
+
+.quadro-partenze__cell--destination .quadro-partenze__value {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.quadro-partenze__cell--note .quadro-partenze__value {
+  color: var(--qp-muted);
+  font-size: 0.9rem;
+}
+
+.quadro-partenze__cell--right {
+  text-align: right;
+}
+
+.quadro-partenze__cell--center {
+  text-align: center;
+}
+
+/* Testo lungo: permette wrapping controllato se serve */
+.quadro-partenze--wrap-destinations
+  .quadro-partenze__cell--destination
+  .quadro-partenze__value {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------------------
+   8. BINARIO / PLATFORM
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__platform {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.35rem;
+  height: 2.35rem;
+  padding: 0 0.6rem;
+  border-radius: var(--qp-radius-sm);
+  background: var(--qp-platform-bg);
+  color: var(--qp-platform-color);
+  font:
+    800
+    1rem
+    /
+    1
+    var(--qp-font-mono);
+  letter-spacing: 0.04em;
+}
+
+.quadro-partenze__platform--empty {
+  color: var(--qp-muted);
+  background: transparent;
+  border: 1px dashed var(--qp-border);
+}
+
+.quadro-partenze__platform--changed {
+  color: var(--qp-info);
+  box-shadow: 0 0 0 2px var(--qp-info-soft);
+  animation: qp-flash-info 1.2s ease-in-out 2;
+}
+
+.quadro-partenze__platform--closed {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+/* --------------------------------------------------------------------------
+   9. STATO / BADGE
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: 100%;
+  padding: 0.36rem 0.68rem;
+  border: 1px solid var(--qp-status-border, var(--qp-border));
+  border-radius: 999px;
+  background: var(--qp-status-bg, var(--qp-surface));
+  color: var(--qp-status-color, var(--qp-text));
+  font:
+    800
+    0.76rem
+    /
+    1
+    var(--qp-font-sans);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quadro-partenze__status::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.quadro-partenze__status--on-time {
+  --qp-status-color: var(--qp-success);
+  --qp-status-bg: var(--qp-success-soft);
+  --qp-status-border: transparent;
+}
+
+.quadro-partenze__status--delayed {
+  --qp-status-color: var(--qp-warning);
+  --qp-status-bg: var(--qp-warning-soft);
+  --qp-status-border: transparent;
+}
+
+.quadro-partenze__status--boarding {
+  --qp-status-color: var(--qp-accent);
+  --qp-status-bg: var(--qp-accent-soft);
+  --qp-status-border: transparent;
+  animation: qp-badge-pulse 1.6s ease-in-out infinite;
+}
+
+.quadro-partenze__status--last-call {
+  --qp-status-color: var(--qp-danger);
+  --qp-status-bg: var(--qp-danger-soft);
+  --qp-status-border: transparent;
+  animation: qp-badge-pulse 1s ease-in-out infinite;
+}
+
+.quadro-partenze__status--cancelled {
+  --qp-status-color: var(--qp-danger);
+  --qp-status-bg: var(--qp-danger-soft);
+  --qp-status-border: transparent;
+}
+
+.quadro-partenze__status--arrived {
+  --qp-status-color: var(--qp-muted);
+  --qp-status-bg: rgba(148, 163, 184, 0.12);
+  --qp-status-border: transparent;
+}
+
+.quadro-partenze__status--changed {
+  --qp-status-color: var(--qp-info);
+  --qp-status-bg: var(--qp-info-soft);
+  --qp-status-border: transparent;
+}
+
+.quadro-partenze__status--generic {
+  --qp-status-color: var(--qp-text);
+  --qp-status-bg: var(--qp-surface);
+  --qp-status-border: var(--qp-border);
+}
+
+.quadro-partenze__row--cancelled .quadro-partenze__status--cancelled,
+.quadro-partenze__row--cancelled .quadro-partenze__value {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   10. EFFETTO FLIP / SPLIT-FLAP OPZIONALE
+   HTML consigliato:
+   <span class="quadro-partenze__flip">
+     <span class="quadro-partenze__flap">14:30</span>
+   </span>
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__flip {
+  display: inline-block;
+  perspective: 750px;
+}
+
+.quadro-partenze__flap {
+  display: inline-block;
+  transform-origin: 50% 100%;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.quadro-partenze__flap.is-flipping {
+  animation: qp-flip var(--qp-animation-duration) cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.quadro-partenze__cell--updating .quadro-partenze__value {
+  animation: qp-update-flash 0.75s ease;
+  border-radius: 6px;
+}
+
+.quadro-partenze--no-animation
+  .quadro-partenze__flap.is-flipping,
+.quadro-partenze--no-animation
+  .quadro-partenze__cell--updating
+  .quadro-partenze__value,
+.quadro-partenze--no-animation
+  .quadro-partenze__status--boarding,
+.quadro-partenze--no-animation
+  .quadro-partenze__status--last-call,
+.quadro-partenze--no-animation
+  .quadro-partenze__live-dot {
+  animation: none;
+}
+
+/* --------------------------------------------------------------------------
+   11. LOADING / SKELETON
+   Aggiungere .quadro-partenze--loading al root
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze--loading {
+  pointer-events: none;
+}
+
+.quadro-partenze--loading .quadro-partenze__value,
+.quadro-partenze--loading .quadro-partenze__platform,
+.quadro-partenze--loading .quadro-partenze__status {
+  color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  text-shadow: none;
+  user-select: none;
+  background:
+    linear-gradient(
+      90deg,
+      var(--qp-skeleton-base) 25%,
+      var(--qp-skeleton-highlight) 37%,
+      var(--qp-skeleton-base) 63%
+    );
+  background-size: 400% 100%;
+  animation: qp-shimmer 1.35s ease infinite;
+}
+
+.quadro-partenze--loading .quadro-partenze__value {
+  min-height: 1.1em;
+  border-radius: 6px;
+}
+
+.quadro-partenze--loading .quadro-partenze__platform {
+  min-width: 2.35rem;
+  border-radius: var(--qp-radius-sm);
+}
+
+.quadro-partenze--loading .quadro-partenze__status {
+  min-width: 6.5rem;
+  border-radius: 999px;
+}
+
+.quadro-partenze--loading .quadro-partenze__status::before {
+  opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   12. MESSAGGI: VUOTO / ERRORE / INFO
+   Aggiungere al root:
+   .quadro-partenze--empty
+   .quadro-partenze--error
+   .quadro-partenze--info
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__message {
+  display: none;
+  place-items: center;
+  gap: 0.5rem;
+  padding: var(--qp-space-6);
+  border: 1px dashed var(--qp-border);
+  border-radius: 14px;
+  background: var(--qp-message-bg);
+  color: var(--qp-muted);
+  text-align: center;
+}
+
+.quadro-partenze__message strong {
+  color: var(--qp-text);
+}
+
+.quadro-partenze__message--empty {
+  border-color: var(--qp-border);
+}
+
+.quadro-partenze__message--error {
+  color: var(--qp-danger);
+  border-color: var(--qp-danger-border);
+  background: var(--qp-danger-soft);
+}
+
+.quadro-partenze__message--error strong {
+  color: var(--qp-danger);
+}
+
+.quadro-partenze__message--info {
+  color: var(--qp-info);
+  border-color: rgba(96, 165, 250, 0.35);
+  background: var(--qp-info-soft);
+}
+
+.quadro-partenze--empty .quadro-partenze__viewport,
+.quadro-partenze--error .quadro-partenze__viewport {
+  display: none;
+}
+
+.quadro-partenze--empty .quadro-partenze__message--empty,
+.quadro-partenze--error .quadro-partenze__message--error,
+.quadro-partenze--info .quadro-partenze__message--info {
+  display: grid;
+}
+
+/* --------------------------------------------------------------------------
+   13. LEGENDA
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--qp-muted);
+  font-size: 0.85rem;
+}
+
+.quadro-partenze__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.quadro-partenze__legend-swatch {
+  width: 0.78rem;
+  height: 0.78rem;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: inset 0 0 0 1px var(--qp-border);
+}
+
+.quadro-partenze__legend-item--on-time {
+  color: var(--qp-success);
+}
+
+.quadro-partenze__legend-item--delayed {
+  color: var(--qp-warning);
+}
+
+.quadro-partenze__legend-item--boarding {
+  color: var(--qp-accent);
+}
+
+.quadro-partenze__legend-item--cancelled {
+  color: var(--qp-danger);
+}
+
+.quadro-partenze__legend-item--arrived {
+  color: var(--qp-muted);
+}
+
+.quadro-partenze__legend-item--changed {
+  color: var(--qp-info);
+}
+
+/* --------------------------------------------------------------------------
+   14. FOOTER
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--qp-muted);
+  font-size: 0.82rem;
+}
+
+.quadro-partenze__footer-note {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------------------
+   15. UTILITY ACCESSIBILI
+   -------------------------------------------------------------------------- */
+
+.quadro-partenze__sr-only,
+.quadro-partenze .visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.quadro-partenze__aria-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   16. RESPONSIVE / CONTAINER QUERY
+   Sotto 42rem il componente diventa a card.
+   Le celle richiedono data-label per mostrare l’etichetta su mobile.
+   -------------------------------------------------------------------------- */
+
+@container quadro-partenze (max-width: 56rem) {
+  .quadro-partenze__table {
+    min-width: 720px;
+  }
+}
+
+@container quadro-partenze (max-width: 42rem) {
+  .quadro-partenze {
+    --qp-cell-padding: 0.75rem 0.85rem;
+  }
+
+  .quadro-partenze__viewport {
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    scrollbar-width: none;
+  }
+
+  .quadro-partenze__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .quadro-partenze__table,
+  .quadro-partenze__body,
+  .quadro-partenze__row,
+  .quadro-partenze__cell {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .quadro-partenze__head {
+    display: none;
+  }
+
+  .quadro-partenze__row {
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--qp-border);
+    border-radius: 14px;
+    background: var(--qp-card-bg);
+    overflow: hidden;
+    box-shadow: none !important;
+  }
+
+  .quadro-partenze__row:last-child {
+    margin-bottom: 0;
+  }
+
+  .quadro-partenze__row--on-time,
+  .quadro-partenze__row--delayed,
+  .quadro-partenze__row--boarding,
+  .quadro-partenze__row--cancelled,
+  .quadro-partenze__row--arrived,
+  .quadro-partenze__row--changed {
+    border-left: 4px solid currentColor;
+  }
+
+  .quadro-partenze__row--on-time {
+    color: var(--qp-success);
+  }
+
+  .quadro-partenze__row--delayed {
+    color: var(--qp-warning);
+  }
+
+  .quadro-partenze__row--boarding {
+    color: var(--qp-accent);
+  }
+
+  .quadro-partenze__row--cancelled {
+    color: var(--qp-danger);
+  }
+
+  .quadro-partenze__row--arrived {
+    color: var(--qp-muted);
+  }
+
+  .quadro-partenze__row--changed {
+    color: var(--qp-info);
+  }
+
+  .quadro-partenze__cell {
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 34%) 1fr;
+    align-items: center;
+    gap: 0.45rem 0.75rem;
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid var(--qp-border);
+    color: var(--qp-text);
+  }
+
+  .quadro-partenze__cell:last-child {
+    border-bottom: 0;
+  }
+
+  .quadro-partenze__cell::before {
+    content: attr(data-label);
+    color: var(--qp-muted);
+    font:
+      800
+      0.72rem
+      /
+      1.1
+      var(--qp-font-sans);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .quadro-partenze__cell--destination {
+    grid-template-columns: 1fr;
+  }
+
+  .quadro-partenze__cell--destination::before {
+    grid-column: 1 / -1;
+  }
+
+  .quadro-partenze__cell--note {
+    grid-template-columns: 1fr;
+  }
+
+  .quadro-partenze__cell--note::before {
+    grid-column: 1 / -1;
+  }
+
+  .quadro-partenze__value {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  .quadro-partenze__status {
+    justify-self: start;
+  }
+}
+
+@container quadro-partenze (max-width: 25rem) {
+  .quadro-partenze {
+    padding: 0.9rem;
+    border-radius: 14px;
+  }
+
+  .quadro-partenze__header {
+    align-items: flex-start;
+  }
+
+  .quadro-partenze__cell {
+    grid-template-columns: 1fr;
+  }
+
+  .quadro-partenze__cell::before {
+    margin-bottom: 0.1rem;
+  }
+
+  .quadro-partenze__platform {
+    min-width: 2.1rem;
+    height: 2.1rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   17. RIDUZIONE MOVIMENTO
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .quadro-partenze *,
+  .quadro-partenze *::before,
+  .quadro-partenze *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .quadro-partenze__flap.is-flipping {
+    transform: none;
+  }
+
+  .quadro-partenze__live-dot,
+  .quadro-partenze__status--boarding,
+  .quadro-partenze__status--last-call {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   18. ALTO CONTRASTO / FORCED COLORS
+   -------------------------------------------------------------------------- */
+
+@media (forced-colors: active) {
+  .quadro-partenze {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+
+  .quadro-partenze__viewport,
+  .quadro-partenze__head-cell,
+  .quadro-partenze__cell,
+  .quadro-partenze__row,
+  .quadro-partenze__message {
+    background: Canvas !important;
+    color: CanvasText !important;
+    border-color: CanvasText !important;
+  }
+
+  .quadro-partenze__status,
+  .quadro-partenze__platform,
+  .quadro-partenze__button {
+    background: ButtonFace !important;
+    color: ButtonText !important;
+    border-color: ButtonBorder !important;
+  }
+
+  .quadro-partenze__status::before,
+  .quadro-partenze__live-dot,
+  .quadro-partenze__legend-swatch {
+    background: CanvasText !important;
+  }
+
+  .quadro-partenze__row[aria-selected="true"],
+  .quadro-partenze__row.is-selected {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .quadro-partenze__button[aria-pressed="true"] {
+    background: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  .quadro-partenze__link {
+    color: LinkText !important;
+  }
+
+  .quadro-partenze__button:focus-visible,
+  .quadro-partenze__row:focus-visible,
+  .quadro-partenze__viewport:focus-visible,
+  .quadro-partenze__link:focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   19. STAMPA
+   -------------------------------------------------------------------------- */
+
+@media print {
+  .quadro-partenze {
+    max-width: none;
+    background: #fff;
+    color: #000;
+    border: 1px solid #999;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .quadro-partenze__controls,
+  .quadro-partenze__live-dot,
+  .quadro-partenze__viewport::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .quadro-partenze__viewport {
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    background: #fff;
+  }
+
+  .quadro-partenze__table {
+    min-width: 0;
+  }
+
+  .quadro-partenze__head-cell,
+  .quadro-partenze__cell {
+    color: #000 !important;
+    background: #fff !important;
+    border-color: #999 !important;
+  }
+
+  .quadro-partenze__status,
+  .quadro-partenze__platform {
+    color: #000 !important;
+    background: #fff !important;
+    border-color: #000 !important;
+  }
+
+  .quadro-partenze__status::before {
+    background: #000 !important;
+  }
+
+  .quadro-partenze *,
+  .quadro-partenze *::before,
+  .quadro-partenze *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   20. KEYFRAMES
+   -------------------------------------------------------------------------- */
+
+@keyframes qp-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.86);
+  }
+}
+
+@keyframes qp-badge-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 0.32rem currentColor;
+    opacity: 0.92;
+  }
+}
+
+@keyframes qp-flip {
+  0% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+  45% {
+    transform: rotateX(-90deg);
+    opacity: 0.45;
+  }
+  55% {
+    transform: rotateX(90deg);
+    opacity: 0.45;
+  }
+  100% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes qp-update-flash {
+  0%,
+  100% {
+    background: transparent;
+    box-shadow: none;
+  }
+  35% {
+    background: var(--qp-accent-soft);
+    box-shadow: 0 0 0 0.25rem var(--qp-accent-soft);
+  }
+}
+
+@keyframes qp-row-updated {
+  0% {
+    background: var(--qp-accent-soft);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+@keyframes qp-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes qp-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes qp-flash-info {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 0.32rem var(--qp-info-soft);
+  }
+}
+
+</style>
+  <style>
+/* ===========================================================================
+   OFFERTE MONITOR — livello applicativo sopra Quadro Partenze
+   ---------------------------------------------------------------------------
+   Qui dentro sta SOLO cio' che il design system non ha gia': il tabellone
+   degli annunci, la fascia dei totali, la consolle e i riquadri prodotto.
+   Tutto il resto (schede, pulsanti, campi, badge, tabelle, flap, stampa)
+   arriva da quadro-partenze.css e non va riscritto.
+
+   Regola di manutenzione: se una cosa si puo' ottenere con una classe del
+   sistema, si usa quella. Ogni regola qui sotto esiste perche' descrive un
+   pezzo di QUESTA applicazione, non un componente generico.
+
+   ATTENZIONE ai token: --bc, --a, --ink-fg e simili sono TERNE OKLCH, non
+   colori. Vanno sempre avvolti in oklch(), anche senza diluizione.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   A. Utilita' di pannello
+   --------------------------------------------------------------------------- */
+
+.hidden { display: none !important; }
+
+/* Intestazione che esiste solo su carta: a schermo il titolo lo da' .hero. */
+.print-head { display: none; }
+
+/* Le tre schede della barra di navigazione sono <a> per ereditare lo stato
+   attivo del sistema (.nav a[aria-current]), ma non devono navigare. */
+.nav a { cursor: pointer; }
+
+/* ---------------------------------------------------------------------------
+   B. Stato del servizio nella testata
+   ---------------------------------------------------------------------------
+   Sta nella fascia d'inchiostro, quindi i colori non possono venire dai token
+   di pagina: si diluisce l'ambra e il verde direttamente sul fondo scuro.
+   --------------------------------------------------------------------------- */
+
+.hdr-status {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .2rem .55rem;
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-size: .7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .1em;
+  white-space: nowrap;
+  color: oklch(var(--ink-fg) / .7);
+  box-shadow: inset 0 0 0 1px var(--ink-line);
+}
+.hdr-status .status-dot {
+  width: .42rem; height: .42rem;
+  background: oklch(var(--ink-fg) / .45);
+  flex-shrink: 0;
+}
+/* Acceso: l'unico punto ambra della testata oltre al filetto. Un pallino non
+   e' un fondo esteso, quindi la seconda regola regge. */
+.hdr-status.is-live { color: oklch(var(--a) / .95); }
+.hdr-status.is-live .status-dot {
+  background: oklch(var(--a));
+  animation: beacon 2.4s ease-in-out infinite;
+}
+@keyframes beacon { 50% { opacity: .25; } }
+
+.hdr-uptime {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  color: oklch(var(--ink-fg) / .45);
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .hdr-status, .hdr-uptime { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   C. Fascia dei totali
+   ---------------------------------------------------------------------------
+   Prima erano cinque riquadri con ombra: cinque scatole per cinque numeri
+   pesano piu' dei numeri. Qui e' una riga sola, divisa da filetti verticali —
+   la stessa logica dell'intestazione di un tabellone.
+   --------------------------------------------------------------------------- */
+
+.board-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--base-100);
+  overflow: hidden;
+}
+.board-strip > div {
+  padding: .7rem .9rem;
+  border-left: 1px solid var(--line);
+}
+.board-strip > div:first-child { border-left: 0; }
+
+.strip-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: .66rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .13em;
+  color: oklch(var(--bc) / .5);
+}
+.strip-value {
+  display: block;
+  margin-top: .15rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem; font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+}
+/* Un solo valore qualificato in ambra: quello che chiede attenzione. Gli
+   altri restano inchiostro, o l'ambra smette di significare qualcosa. */
+.strip-value.warn { color: oklch(var(--wa)); }
+
+/* ---------------------------------------------------------------------------
+   D. Filtri
+   --------------------------------------------------------------------------- */
+
+.filters {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: .4rem;
+}
+.filters .eyebrow { margin: 0 .4rem 0 0; }
+
+.filter-btn {
+  font-family: var(--font-display);
+  font-size: .74rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: .26rem .6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: oklch(var(--bc) / .68);
+  cursor: pointer;
+  transition: color .16s, border-color .16s, background-color .16s;
+}
+.filter-btn:hover { color: var(--base-content); background: oklch(var(--bc) / .05); }
+.filter-btn:focus-visible { outline: none; box-shadow: var(--ring); }
+/* Il filtro attivo e' struttura, non azione: percio' --p e non --s. */
+.filter-btn.active {
+  color: var(--primary);
+  border-color: oklch(var(--p) / .55);
+  background: oklch(var(--p) / .1);
+}
+
+/* ---------------------------------------------------------------------------
+   E. Il tabellone degli annunci
+   ---------------------------------------------------------------------------
+   E' il cuore della pagina, ed e' letteralmente un quadro partenze: riga
+   d'intestazione in inchiostro fisso, colonne incolonnate, e la colonna dei
+   prezzi tutta in flap — cifre ambra su nero, una sotto l'altra.
+
+   Le tre liste separate di prima (Subito, Amazon, «tutti gli annunci»)
+   mostravano gli stessi annunci tre volte. Qui la fonte e' una colonna.
+   --------------------------------------------------------------------------- */
+
+.board { table-layout: auto; }
+.board th:first-child, .board td:first-child { padding-left: .9rem; }
+.board th:last-child,  .board td:last-child  { padding-right: .9rem; }
+.board td { vertical-align: middle; }
+
+.board tbody tr { transition: background-color .14s; }
+
+.col-time  { width: 1%; white-space: nowrap; }
+.col-price { width: 1%; text-align: right; }
+.col-state { width: 1%; white-space: nowrap; }
+.col-del   { width: 1%; text-align: right; }
+
+/* Intestazione di colonna leggibile da uno screen reader e invisibile a
+   schermo: una colonna senza nome e' una colonna senza senso per chi non la
+   vede. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Le due azioni di riga: segnalare una truffa e togliere dal tabellone.
+   Erano invisibili finche' non ci passavi sopra, e una funzione che si vede
+   solo per caso e' una funzione che non c'e'. Ora stanno sempre in pagina,
+   ma smorzate: prendono colore quando le sfiori. Il rosso di sistema resta
+   riservato al passaggio del mouse, perche' una colonna di croci accese
+   urlerebbe piu' del prezzo, che e' la cosa da leggere. */
+.board .btn-hide,
+.board .btn-scam,
+.board .btn-skip {
+  opacity: .38;
+  padding: .1rem .34rem;
+  line-height: 1;
+  color: oklch(var(--bc) / .55);
+  transition: opacity .14s, color .14s;
+}
+.board tbody tr:hover .btn-hide,
+.board tbody tr:hover .btn-scam,
+.board tbody tr:hover .btn-skip,
+.board .btn-hide:focus-visible,
+.board .btn-scam:focus-visible,
+.board .btn-skip:focus-visible { opacity: 1; }
+.board .btn-hide:hover { color: oklch(var(--s)); }
+.board .btn-scam:hover { color: oklch(var(--a)); }
+
+/* Escludere e' l'azione piu' definitiva delle tre, ma non e' un allarme: si
+   scurisce e basta, senza prendere un colore. L'ambra e' gia' della
+   segnalazione e il rosso e' di chi agisce sul tabellone; un terzo colore qui
+   farebbe solo sembrare tutte e tre urgenti, che e' il modo piu' rapido per
+   non farne notare nessuna. */
+.board .btn-skip:hover { color: oklch(var(--bc)); }
+
+/* Segnalato: il triangolo resta acceso in ambra, perche' da quel momento e'
+   uno stato della riga e non un pulsante in attesa. */
+.board .btn-scam.is-on { opacity: 1; color: oklch(var(--a)); }
+
+/* La riga segnalata si smorza: c'e' ancora, si legge ancora, ma smette di
+   competere con gli annunci veri. Il titolo resta pienamente leggibile —
+   sbiadire quello sarebbe punire chi legge, non l'annuncio.
+   Il fondo usa --er, l'errore semantico, e non --s: quello e' il rosso delle
+   azioni, e tingere di --s una riga per qualificarla gli toglierebbe il
+   significato che ha sui pulsanti. */
+.board tbody tr.is-scam { background: oklch(var(--er) / .045); }
+.board tbody tr.is-scam .flap { opacity: .6; }
+.board tbody tr.is-scam:hover { background: oklch(var(--er) / .08); }
+
+/* Su touch il passaggio del dito non esiste: senza questo i tre comandi
+   resterebbero smorzati per sempre e mai del tutto leggibili. */
+@media (hover: none) {
+  .board .btn-hide,
+  .board .btn-scam,
+  .board .btn-skip { opacity: .62; }
+}
+
+.board-time {
+  font-family: var(--font-mono);
+  font-size: .82rem;
+  font-variant-numeric: tabular-nums;
+  color: oklch(var(--bc) / .55);
+}
+.board-time small { display: block; font-size: .66rem; opacity: .7; }
+
+.board-title {
+  display: block;
+  font-weight: 600;
+  color: var(--base-content);
+  text-decoration: none;
+  max-width: 46ch;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.board-title:hover { color: var(--primary); text-decoration: underline; }
+.board-title:focus-visible { outline: none; box-shadow: var(--ring); }
+
+.board-meta {
+  display: block;
+  margin-top: .1rem;
+  font-size: .72rem;
+  color: oklch(var(--bc) / .52);
+}
+
+.board-product {
+  font-family: var(--font-display);
+  font-size: .74rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: oklch(var(--bc) / .72);
+  white-space: nowrap;
+}
+
+/* Colonna dei prezzi: i flap incolonnati sono il tabellone. La larghezza
+   minima li tiene allineati anche quando le cifre cambiano. */
+.board .flap { min-width: 4.6ch; text-align: right; }
+
+/* La riga del prezzo piu' basso: filetto verde a sinistra, niente fondo
+   colorato. Il fondo colorato farebbe sembrare la riga selezionata. */
+.board tr.is-best td:first-child { box-shadow: inset 3px 0 0 var(--success); }
+
+/* L'entrata: le righe girano dall'alto come le palette del tabellone, una
+   dopo l'altra. Si ferma alla settima — oltre diventa attesa invece di ritmo.
+   flap-in e la clausola prefers-reduced-motion arrivano dal design system. */
+.board tbody.fade-in tr {
+  animation: flap-in .3s cubic-bezier(.2, .75, .3, 1) both;
+  transform-origin: top center;
+}
+.board tbody.fade-in tr:nth-child(1) { animation-delay: .02s }
+.board tbody.fade-in tr:nth-child(2) { animation-delay: .05s }
+.board tbody.fade-in tr:nth-child(3) { animation-delay: .08s }
+.board tbody.fade-in tr:nth-child(4) { animation-delay: .11s }
+.board tbody.fade-in tr:nth-child(5) { animation-delay: .14s }
+.board tbody.fade-in tr:nth-child(6) { animation-delay: .17s }
+.board tbody.fade-in tr:nth-child(n+7) { animation-delay: .2s }
+
+.board-empty {
+  padding: 2.4rem .9rem;
+  text-align: center;
+  color: oklch(var(--bc) / .55);
+  font-size: .88rem;
+}
+
+@media (max-width: 860px) {
+  .board .col-product, .board .col-source { display: none; }
+  .board-title { max-width: 28ch; }
+}
+
+/* ---------------------------------------------------------------------------
+   F. Consolle di sistema
+   ---------------------------------------------------------------------------
+   Richiusa per difetto: e' diagnostica, non contenuto. Prima occupava
+   240px fissi in fondo alla pagina anche quando non diceva niente.
+   --------------------------------------------------------------------------- */
+
+.console {
+  margin-top: .7rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  padding: .6rem .75rem;
+  border-radius: 2px;
+  background: var(--flap);
+  font-family: var(--font-mono);
+  font-size: .76rem;
+  line-height: 1.65;
+}
+.log-entry {
+  white-space: pre-wrap;
+  color: oklch(var(--ink-fg) / .62);
+  border-left: 2px solid transparent;
+  padding-left: .5rem;
+}
+.log-entry.found { color: oklch(78% .12 150); border-left-color: oklch(78% .12 150 / .5); }
+.log-entry.error { color: oklch(70% .17 27);  border-left-color: oklch(70% .17 27 / .5); }
+.log-entry.scan  { color: oklch(76% .09 235); border-left-color: oklch(76% .09 235 / .45); }
+.log-entry.info  { border-left-color: oklch(var(--ink-fg) / .18); }
+/* Il marcatempo e' un'etichetta dentro una riga, non una riga sua: la classe
+   .log-entry sullo <span> arriva dal codice storico e va neutralizzata. */
+.log-entry .log-entry.timestamp,
+.log-entry.timestamp {
+  display: inline;
+  border-left: 0; padding-left: 0;
+  margin-right: .5rem;
+  color: oklch(var(--a) / .7);
+}
+
+/* ---------------------------------------------------------------------------
+   G. Riquadri prodotto (scheda Configurazione)
+   ---------------------------------------------------------------------------
+   Era il punto piu' confuso: nove campi in fila per ogni prodotto, moltiplicati
+   per sei prodotti. Ora in vista si vedono nome, soglia e interruttori; i
+   termini di ricerca stanno in un <details>, che si apre solo se servono.
+   --------------------------------------------------------------------------- */
+
+.prod-grid { display: grid; gap: .85rem; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
+
+.prod-name {
+  flex: 1 1 10rem;
+  font-family: var(--font-display) !important;
+  font-size: 1.02rem !important;
+  font-weight: 700;
+  letter-spacing: .01em;
+  border-color: transparent !important;
+  background: oklch(var(--bc) / .04) !important;
+}
+.prod-name:focus { border-color: oklch(var(--a) / .8) !important; }
+
+.prod-nums { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: .7rem; }
+.prod-nums .field { margin: 0; }
+.prod-flags { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0 .8rem; margin-top: .4rem; }
+.prod-flags .checkline span { font-size: .82rem; }
+
+.prod-terms { display: grid; gap: .6rem; margin-top: .7rem; }
+.prod-terms .field { margin: 0; }
+
+/* ---------------------------------------------------------------------------
+   H. Editor YAML
+   --------------------------------------------------------------------------- */
+
+.yaml-tabs { display: flex; flex-wrap: wrap; gap: .35rem; }
+.yaml-tab-btn {
+  font-family: var(--font-mono);
+  font-size: .76rem;
+  padding: .26rem .6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: oklch(var(--bc) / .68);
+  cursor: pointer;
+}
+.yaml-tab-btn:hover { background: oklch(var(--bc) / .05); color: var(--base-content); }
+.yaml-tab-btn:focus-visible { outline: none; box-shadow: var(--ring); }
+.yaml-tab-btn.active {
+  color: var(--primary);
+  border-color: oklch(var(--p) / .55);
+  background: oklch(var(--p) / .1);
+}
+
+.code-area {
+  width: 100%;
+  min-height: 26rem;
+  padding: .8rem;
+  border-radius: 2px;
+  border: 1px solid var(--line-strong);
+  background: var(--flap);
+  color: oklch(var(--ink-fg) / .88);
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  line-height: 1.6;
+  resize: vertical;
+  tab-size: 2;
+}
+.code-area:focus { border-color: oklch(var(--a) / .8); box-shadow: var(--ring); }
+
+/* Riga d'intestazione con titolo a sinistra e comandi a destra: ricorre in tre
+   punti (prodotti, editor, salvataggio), quindi vive qui una volta sola. */
+.head-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.head-row .section-title { margin-bottom: 0; }
+
+.save-row {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: .9rem; flex-wrap: wrap;
+}
+.form-status { font-size: .78rem; line-height: 1.5; text-align: right; }
+.form-status code { font-size: .95em; }
+
+/* ---------------------------------------------------------------------------
+   I. Stampa
+   ---------------------------------------------------------------------------
+   Su carta resta il tabellone e basta: niente filtri, niente moduli, niente
+   consolle. La fascia dei totali diventa una riga di testo.
+   --------------------------------------------------------------------------- */
+
+@media print {
+  .filters, .console, .save-row, .yaml-tabs { display: none !important; }
+
+  /* Il sistema nasconde .hero in stampa (giustamente: filetto ambra e entrata
+     sfalsata sono roba da schermo), ma il foglio resterebbe senza intestazione.
+     Questa riga e' l'unica cosa che dice cos'e' il foglio che hai in mano. */
+  .print-head { display: block !important; }
+  .print-head::after {
+    content: 'OFFERTE MONITOR — TABELLONE ANNUNCI';
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.15rem; font-weight: 700;
+    letter-spacing: .06em;
+    padding-bottom: .4rem;
+    border-bottom: 1.5px solid #000;
+    margin-bottom: .9rem;
+  }
+
+  .board-strip { border: 0; }
+  .board-strip > div { border-left: 0; padding: 0 1.2rem 0 0; display: inline-block; }
+  .strip-value { font-size: 1rem; }
+  .board-title { max-width: none; white-space: normal; }
+  .board .flap { min-width: 0; }
+}
+
+</style>
+<script>
+    window.API_WRITE = true;
+    window.STATIC_ITEMS = [];
+    window.STATIC_CONFIGS = {};
+    window.STATIC_CONFIG_DATA = {};
+    window.STATIC_LOGS = [];
+    window.SCAN_CADENCE = 30;
+    window.PANEL_HAS_PASSWORD = null;
+    window.PANEL_UNLOCKED = false;
+  </script>
+</head>
+<body>
+  <div class="net-bar" aria-hidden="true"></div>
+
+  <header class="site-header no-print">
+    <div class="container">
+      <a class="brand" href="#">
+        <span class="brand-mark" aria-hidden="true">OM</span>
+        <span class="brand-text">
+          <strong>Offerte Monitor</strong>
+          <span>Subito · Amazon · NorthLadder</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Sezioni">
+        <a data-tab="dashboard" aria-current="page">Tabellone</a>
+        <a data-tab="config">Configurazione</a>
+        <a data-tab="yaml">YAML</a>
+      </nav>
+
+      <span id="status-badge" class="hdr-status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="status-text">Avvio</span>
+      </span>
+      <span id="uptime" class="hdr-uptime">00:00:00</span>
+
+      <button class="btn btn-ghost btn-sm" type="button" id="theme-toggle">
+        <span id="theme-label">Notte</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="stack">
+
+      <!-- ============================================================ TABELLONE -->
+      <div id="panel-dashboard" class="stack">
+
+        <!-- Compare solo in stampa: il sistema nasconde .hero sul foglio. -->
+        <div class="print-head" aria-hidden="true"></div>
+
+        <!-- La testatina appartiene al tabellone: sulle altre schede sarebbe
+             un titolo che parla di un contenuto non in vista. -->
+        <section class="hero no-print">
+          <div class="eyebrow" id="hero-eyebrow">Monitoraggio prezzi</div>
+          <h1>Offerte in <em>partenza</em></h1>
+          <p>
+            Un solo tabellone: ogni annuncio entro soglia, ordinato per prezzo,
+            con la fonte in colonna e il minimo in evidenza.
+          </p>
+        </section>
+
+        <div class="board-strip">
+          <div>
+            <span class="strip-label">Annunci</span>
+            <span class="strip-value" id="stat-total">0</span>
+          </div>
+          <div>
+            <span class="strip-label">Miglior prezzo</span>
+            <span class="strip-value" id="stat-best">—</span>
+          </div>
+          <div>
+            <span class="strip-label">Prezzo medio</span>
+            <span class="strip-value" id="stat-avg">—</span>
+          </div>
+          <div>
+            <span class="strip-label">Oltre soglia</span>
+            <span class="strip-value warn" id="stat-nearmiss">0</span>
+          </div>
+        </div>
+
+        <section class="card card-accent">
+          <div class="section-title">
+            <span class="section-icon" aria-hidden="true">▤</span>
+            <h2>Annunci entro soglia</h2>
+          </div>
+
+          <div class="filters no-print" id="filter-buttons">
+            <span class="eyebrow">Prodotto</span>
+            <button type="button" class="filter-btn active" id="btn-filter-all"
+                    onclick="setProductFilter('all')">Tutti</button>
+          </div>
+
+          <div class="table-wrap" style="margin-top:.85rem">
+            <table class="board">
+              <thead>
+                <tr>
+                  <th class="col-time">Ora</th>
+                  <th class="col-product">Prodotto</th>
+                  <th>Annuncio</th>
+                  <th class="col-source">Fonte</th>
+                  <th class="col-price">Prezzo</th>
+                  <th class="col-state">Stato</th>
+                  <!-- La colonna della croce esiste solo dove si puo' scrivere:
+                       altrove viene tolta all'avvio, non nascosta col CSS. -->
+                  <th class="col-del no-print" id="th-del"><span class="sr-only">Togli</span></th>
+                </tr>
+              </thead>
+              <tbody id="board-body">
+                <tr><td colspan="7" class="board-empty">In attesa della prima scansione…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <details>
+            <summary>Registro di sistema</summary>
+            <div id="log" class="console">
+              <div class="log-entry info"><span class="log-entry timestamp">[OK]</span>Inizializzazione console in corso…</div>
+            </div>
+          </details>
+        </section>
+      </div>
+
+      <!-- ======================================================== CONFIGURAZIONE -->
+      <div id="panel-config" class="hidden">
+        <form id="config-form" class="stack no-print" onsubmit="saveForm(event)">
+
+          <div class="split">
+            <section class="card">
+              <div class="section-title"><h2>Scansione</h2></div>
+
+              <label class="field">
+                <span>Intervallo in minuti</span>
+                <input type="number" id="cfg-interval" min="1" max="1440">
+              </label>
+
+              <label class="checkline">
+                <input type="checkbox" id="cfg-shipping">
+                <span>Accetta solo annunci con spedizione</span>
+              </label>
+
+              <hr class="divider">
+
+              <div class="grid cols-2">
+                <label class="field">
+                  <span>Subito · pagine</span>
+                  <input type="number" id="cfg-subito-pages" min="1" max="20">
+                </label>
+                <label class="field">
+                  <span>Amazon · pagine</span>
+                  <input type="number" id="cfg-amazon-pages" min="1" max="10">
+                </label>
+              </div>
+              <label class="checkline">
+                <input type="checkbox" id="cfg-subito-enabled">
+                <span>Scanner Subito.it attivo</span>
+              </label>
+              <label class="checkline">
+                <input type="checkbox" id="cfg-amazon-enabled">
+                <span>Scanner Amazon.it attivo</span>
+              </label>
+            </section>
+
+            <section class="card">
+              <div class="section-title"><h2>Notifiche</h2></div>
+
+              <div class="alert alert-info">
+                <strong>Telegram si configura fuori da qui.</strong>
+                Token e chat ID non vivono in questo modulo: stanno fra i segreti
+                del workflow di scansione, in <code>TELEGRAM_BOT_TOKEN</code> e
+                <code>TELEGRAM_CHAT_ID</code>, e da qui si possono solo leggere.
+              </div>
+
+              <label class="checkline">
+                <input type="checkbox" id="cfg-tg-enabled" checked disabled>
+                <span>Servizio notifiche attivo</span>
+              </label>
+
+              <label class="field">
+                <span>Bot token</span>
+                <input type="text" id="cfg-tg-token" readonly disabled
+                       value="Impostato nei segreti del workflow">
+              </label>
+              <label class="field">
+                <span>Chat ID</span>
+                <input type="text" id="cfg-tg-chat" readonly disabled
+                       value="Impostato nei segreti del workflow">
+              </label>
+            </section>
+          </div>
+
+          <section class="card">
+            <div class="head-row">
+              <div class="section-title"><h2>Prodotti monitorati</h2></div>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="addProduct()">+ Aggiungi</button>
+            </div>
+            <!-- Compare solo quando la bozza locale differisce dal repository:
+                 altrimenti la lista mostrata non e' quella che scansiona. -->
+            <div id="products-list" class="prod-grid" style="margin-top:.85rem"></div>
+          </section>
+
+          <div class="save-row">
+            <span id="config-save-status" class="form-status"></span>
+            <button type="submit" id="cfg-save-btn" class="btn btn-secondary">Salva e applica</button>
+          </div>
+
+        </form>
+
+        <!-- Fuori dal form apposta: e' un'azione a se', e un pulsante dentro
+             il form si porterebbe dietro il salvataggio della configurazione.
+             Compare solo quando c'e' qualcosa da rimettere. -->
+        <section id="hidden-box" class="card hidden">
+          <div class="section-title"><h2>Annunci tolti dal tabellone</h2></div>
+          <div class="alert alert-info">
+            <strong id="hidden-count">Nessuno.</strong>
+            Non sono cancellati da Subito: restano fuori dal tabellone anche
+            dopo le scansioni successive, che li ritroverebbero ogni volta.
+          </div>
+          <div class="save-row" style="justify-content:flex-start;margin-top:.7rem">
+            <button type="button" class="btn btn-secondary btn-sm"
+                    onclick="ripristinaNascosti(this)">Rimetti tutti</button>
+            <span id="hidden-status" class="form-status"></span>
+          </div>
+        </section>
+
+        <section id="scam-box" class="card hidden">
+          <div class="section-title"><h2>Annunci segnalati come truffa</h2></div>
+          <div class="alert alert-warning">
+            <span>⚠️</span>
+            <span>
+              <strong id="scam-count">Nessuno.</strong>
+              Restano sul tabellone, marcati in rosso, ma fuori dal conto del
+              minimo e della media — un prezzo finto e' quasi sempre il piu'
+              basso, e falserebbe la cifra che si guarda per prima. La
+              segnalazione la vedi solo tu: chi apre la pagina senza password
+              vede l'annuncio come tutti gli altri.
+            </span>
+          </div>
+          <div class="save-row" style="justify-content:flex-start;margin-top:.7rem">
+            <button type="button" class="btn btn-secondary btn-sm"
+                    onclick="ritiraSegnalazioni(this)">Ritira tutte</button>
+            <span id="scam-status" class="form-status"></span>
+          </div>
+        </section>
+
+        <section id="skip-box" class="card hidden">
+          <div class="section-title"><h2>Annunci esclusi dalla ricerca</h2></div>
+          <div class="alert alert-info">
+            <strong id="skip-count">Nessuno.</strong>
+            Questi non vengono piu' nemmeno raccolti: lo scanner li scarta
+            appena li rivede, quindi non tornano in tabellone, non contano per
+            il minimo e non fanno scattare Telegram. E' la differenza con
+            «tolti dal tabellone», che invece li nasconde soltanto.
+          </div>
+          <div class="save-row" style="justify-content:flex-start;margin-top:.7rem">
+            <button type="button" class="btn btn-secondary btn-sm"
+                    onclick="rimettiInRicerca(this)">Rimetti tutti in ricerca</button>
+            <span id="skip-status" class="form-status"></span>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= YAML -->
+      <div id="panel-yaml" class="hidden stack">
+        <div id="yaml-tabs" class="yaml-tabs no-print"></div>
+        <section class="card">
+          <form onsubmit="saveYaml(event)">
+            <div class="head-row">
+              <div class="section-title">
+                <h2 id="yaml-filename">config.yaml</h2>
+              </div>
+              <div class="save-row no-print">
+                <span id="yaml-status" class="form-status"></span>
+                <button type="submit" class="btn btn-secondary btn-sm">Salva YAML</button>
+              </div>
+            </div>
+            <textarea id="yaml-editor" class="code-area" spellcheck="false" style="margin-top:.85rem"></textarea>
+          </form>
+        </section>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer no-print">
+    <div class="container">
+      <span>Offerte Monitor</span>
+      <span>Quadro Partenze · nessuna dipendenza</span>
+    </div>
+  </footer>
+
+  <script>
+    const state = { items: [], currentConfig: '', formProducts: [], selectedProduct: 'all' };
+
+    /* ---- TEMA ---- */
+    (function () {
+      const btn = document.getElementById('theme-toggle');
+      const label = document.getElementById('theme-label');
+      const sync = () => {
+        label.textContent = document.documentElement.dataset.theme === 'dark' ? 'Giorno' : 'Notte';
+      };
+      sync();
+      btn.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem('theme', next);
+        sync();
+      });
+    })();
+
+    /* ---- UTILITÀ ---- */
+
+    /* I titoli arrivano dallo scraping: entrano nel DOM come stringhe, quindi
+       vanno sempre neutralizzati prima di essere interpolati. */
+    function esc(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      return `${dd}/${mm}`;
+    }
+    function fmtTime(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mi = String(d.getMinutes()).padStart(2, '0');
+      return `${hh}:${mi}`;
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.nav a[data-tab]').forEach(a => {
+        if (a.dataset.tab === name) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      });
+      ['dashboard', 'config', 'yaml'].forEach(p => {
+        const panel = document.getElementById('panel-' + p);
+        if (panel) panel.classList.toggle('hidden', p !== name);
+      });
+      if (name !== 'config' && name !== 'yaml') return;
+      // Le due schede riservate: si chiede la password, e se non arriva si
+      // torna al tabellone invece di mostrare una scheda vuota che sembra
+      // rotta.
+      sbloccaConfig().then(function (ok) {
+        if (!ok) { switchTab('dashboard'); return; }
+        if (name === 'config') {
+          loadConfig();
+          aggiornaBoxNascosti();
+          aggiornaBoxSegnalati();
+          aggiornaBoxIgnorati();
+        }
+        else loadYamlList();
+      });
+    }
+
+    document.querySelectorAll('.nav a[data-tab]').forEach(a => {
+      a.addEventListener('click', e => { e.preventDefault(); switchTab(a.dataset.tab); });
+    });
+
+    /* ---- REGISTRO ---- */
+    function appendLog(msg, type = 'info', ts = null) {
+      if (!ts) ts = new Date().toLocaleTimeString('it-IT');
+      const el = document.getElementById('log');
+      const d = document.createElement('div');
+      d.className = `log-entry ${['info', 'found', 'error', 'scan'].includes(type) ? type : 'info'}`;
+      const tsSpan = document.createElement('span');
+      tsSpan.className = 'log-entry timestamp';
+      tsSpan.textContent = `[${ts}]`;
+      d.appendChild(tsSpan);
+      d.appendChild(document.createTextNode(msg));
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+      if (el.children.length > 500) el.removeChild(el.firstChild);
+    }
+
+    /* Il registro arriva gia' fatto da /api/store: qui si disegna e basta.
+       appendLog() resta per le righe che nascono nel browser — l'esito di un
+       salvataggio, un errore di rete — ma quelle si aggiungono in coda, e
+       questa funzione non gira piu' dopo l'avvio, quindi non le cancella. */
+    function fetchServerLogs() {
+      const el = document.getElementById('log');
+      if (!el || !window.STATIC_LOGS || !window.STATIC_LOGS.length) return;
+      el.innerHTML = window.STATIC_LOGS.map(l =>
+        `<div class="log-entry ${esc(l.level || 'info')}"><span class="log-entry timestamp">[${esc(l.time || '')}]</span>${esc(l.message)}</div>`
+      ).join('');
+    }
+
+    /* ---- TABELLONE ---- */
+
+    function visibleItems(items) {
+      return state.selectedProduct === 'all'
+        ? items
+        : items.filter(i => i.product_name === state.selectedProduct);
+    }
+
+    function setProductFilter(name) {
+      state.selectedProduct = name;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', (btn.dataset.product || 'all') === name);
+      });
+      renderItems(state.items);
+    }
+
+    function renderItems(items) {
+      const rows = visibleItems(items)
+        .filter(i => i.price)
+        .sort((a, b) => a.price - b.price);
+
+      /* Un annuncio segnalato come truffa non e' un affare: se restasse nel
+         conto sarebbe quasi sempre lui il minimo — e' proprio il prezzo fuori
+         mercato a farlo sospettare — e la cifra grossa in cima alla pagina,
+         quella che si guarda per prima, direbbe una bugia. Resta sul
+         tabellone, marcato, ma fuori dalle statistiche. */
+      const onesti = rows.filter(i => !i.scam);
+      const best = onesti.length ? onesti[0].price : null;
+      const prices = onesti.map(i => i.price).filter(p => p > 1);
+      const avg = prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
+      // Le soglie viaggiano con gli annunci solo per chi ha la password: da
+      // anonimo il conteggio dei fuori soglia non e' zero, e' ignoto — e uno
+      // zero direbbe che sono tutti dentro, che e' un'altra cosa.
+      const soglieNote = window.PANEL_UNLOCKED !== false;
+      const near = rows.filter(i => i.near_miss).length;
+
+      document.getElementById('stat-total').textContent = rows.length;
+      document.getElementById('stat-best').textContent = best ? `€${best}` : '—';
+      document.getElementById('stat-avg').textContent = avg ? `€${avg}` : '—';
+      document.getElementById('stat-nearmiss').textContent = soglieNote ? near : '—';
+
+      const body = document.getElementById('board-body');
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="${CAN_WRITE ? 7 : 6}" class="board-empty">Nessun annuncio per questo filtro.</td></tr>`;
+        return;
+      }
+
+      // Le palette girano una volta sola, alla prima comparsa del tabellone:
+      // ripeterlo a ogni filtro trasformerebbe il ritmo in attesa.
+      if (!body.dataset.flapped) {
+        body.classList.add('fade-in');
+        body.dataset.flapped = '1';
+      } else {
+        body.classList.remove('fade-in');
+      }
+
+      body.innerHTML = rows.map(i => {
+        const isBest = !i.scam && i.price === best;
+        const isFresh = i.date && (Date.now() - new Date(i.date).getTime()) < 3600000;
+        // Un solo distintivo per riga, in ordine di importanza: due badge
+        // accanto si annullano a vicenda. «truffa» viene prima di tutto: e' la
+        // sola cosa che cambia cosa fare dell'annuncio.
+        const state_ = i.scam ? '<span class="badge badge-error">truffa</span>'
+          : isBest ? '<span class="badge badge-success">minimo</span>'
+          : i.near_miss ? '<span class="badge badge-warning">oltre soglia</span>'
+          : isFresh ? '<span class="badge badge-info">nuovo</span>'
+          : soglieNote ? '<span class="badge badge-ghost">in soglia</span>'
+          : '<span class="badge badge-ghost">trovato</span>';
+        const meta = [i.location, i.shipping ? 'spedizione' : null, i.condition]
+          .filter(Boolean).map(esc).join(' · ');
+        return `
+          <tr class="${isBest ? 'is-best' : ''}${i.scam ? ' is-scam' : ''}">
+            <td class="col-time"><span class="board-time">${esc(fmtTime(i.date))}<small>${esc(fmtDate(i.date))}</small></span></td>
+            <td class="col-product"><span class="board-product">${esc(i.product_name || '—')}</span></td>
+            <td>
+              <a class="board-title" href="${esc(i.url)}" target="_blank" rel="noopener"
+                 title="${esc(i.title)}">${esc(i.title)}</a>
+              ${meta ? `<span class="board-meta">${meta}</span>` : ''}
+            </td>
+            <td class="col-source mono">${esc((i.source || '').split('.')[0] || '—')}</td>
+            <td class="col-price"><span class="flap">€${esc(i.price)}</span></td>
+            <td class="col-state">${state_}</td>
+            ${CAN_WRITE ? `<td class="col-del no-print">
+              <button type="button" class="btn btn-ghost btn-sm btn-icon btn-scam${i.scam ? ' is-on' : ''}"
+                      data-scam="${esc(i.url)}" data-on="${i.scam ? '1' : ''}"
+                      aria-pressed="${i.scam ? 'true' : 'false'}"
+                      aria-label="${i.scam ? 'Ritira la segnalazione di truffa' : 'Segnala come truffa'}: ${esc(i.title)}"
+                      title="${i.scam ? 'Ritira la segnalazione' : 'Segnala come truffa'}">⚠</button>
+              <button type="button" class="btn btn-ghost btn-sm btn-icon btn-skip"
+                      data-skip="${esc(i.url)}"
+                      aria-label="Escludi dalla ricerca: ${esc(i.title)}"
+                      title="Non mi interessa: non cercarlo piu'">⊘</button>
+              <button type="button" class="btn btn-ghost btn-sm btn-icon btn-hide"
+                      data-hide="${esc(i.url)}"
+                      aria-label="Togli dal tabellone: ${esc(i.title)}"
+                      title="Togli dal tabellone">✕</button>
+            </td>` : ''}
+          </tr>`;
+      }).join('');
+    }
+
+    /* L'indirizzo dell'annuncio finisce in un attributo, non dentro un
+       onclick: i titoli arrivano dallo scraping e un apostrofo in un onclick
+       spezzerebbe il gestore. Un solo ascoltatore sul corpo della tabella
+       vale anche per le righe ridisegnate dopo un filtro. */
+    document.getElementById('board-body').addEventListener('click', function (e) {
+      const daTogliere = e.target.closest('[data-hide]');
+      if (daTogliere) { nascondiAnnuncio(daTogliere); return; }
+      const daEscludere = e.target.closest('[data-skip]');
+      if (daEscludere) { escludiDallaRicerca(daEscludere); return; }
+      const daSegnalare = e.target.closest('[data-scam]');
+      if (daSegnalare) segnalaTruffa(daSegnalare);
+    });
+
+    /* Escludere e' piu' forte che nascondere, ed e' l'unica delle tre azioni
+       che esce dal tabellone: l'elenco lo ritira sync_config.py a ogni giro e
+       lo scanner scarta quegli indirizzi alla fonte, prima di classificarli.
+       Quindi l'annuncio non torna nei risultati, non entra nel minimo e non
+       fa scattare Telegram — mentre la ✕ lo nasconde soltanto, e la scansione
+       continua a raccoglierlo.
+
+       Sparisce anche subito da qui, senza aspettare il giro seguente: il
+       filtro e' applicato pure in lettura da /api/store, altrimenti premere
+       il pulsante non farebbe niente di visibile per mezz'ora. */
+    async function escludiDallaRicerca(bottone) {
+      const url = bottone.dataset.skip;
+      if (!url) return;
+      const riga = bottone.closest('tr');
+      const titolo = riga && riga.querySelector('.board-title')
+        ? riga.querySelector('.board-title').textContent : url;
+      if (!window.confirm('Escluderlo dalla ricerca?\n\n' + titolo
+            + '\n\nLo scanner smette di raccoglierlo: non tornera\' in '
+            + 'tabellone e non fara\' piu\' scattare Telegram. Si rimette '
+            + 'dalla scheda Configurazione.')) return;
+
+      bottone.disabled = true;
+      const d = await postStore({ skip: [url] });
+      if (d && d.ok) {
+        state.items = (state.items || []).filter(i => i.url !== url);
+        window.STATIC_ITEMS = state.items;
+        window.IGNORED_COUNT = d.ignoredCount;
+        renderItems(state.items);
+        appendLog(d.message, 'info');
+        aggiornaBoxIgnorati();
+      } else {
+        bottone.disabled = false;
+        appendLog((d && d.error) || 'Non sono riuscito a escludere l\'annuncio.', 'error');
+      }
+    }
+
+    /* Segnalare non toglie: l'annuncio resta dov'e', marcato in rosso, fuori
+       dal conto del minimo e della media. Serve a ricordarsi perche' quel
+       prezzo era troppo bello, non a far finta di non averlo visto — per
+       quello c'e' la ✕ accanto. Il bottone e' un interruttore: ripremuto
+       ritira la segnalazione, senza chiedere conferma perche' non distrugge
+       niente. */
+    async function segnalaTruffa(bottone) {
+      const url = bottone.dataset.scam;
+      if (!url) return;
+      const attiva = !bottone.dataset.on;
+
+      bottone.disabled = true;
+      const d = await postStore(attiva ? { scam: [url] } : { unscam: [url] });
+      bottone.disabled = false;
+      if (!d || !d.ok) {
+        appendLog((d && d.error) || 'Non sono riuscito a cambiare la segnalazione.', 'error');
+        return;
+      }
+      (state.items || []).forEach(function (i) {
+        if (i.url === url) { if (attiva) i.scam = true; else delete i.scam; }
+      });
+      window.STATIC_ITEMS = state.items;
+      window.SCAM_COUNT = d.scamCount;
+      renderItems(state.items);
+      appendLog(d.message, attiva ? 'warning' : 'info');
+      aggiornaBoxSegnalati();
+    }
+
+    async function nascondiAnnuncio(bottone) {
+      const url = bottone.dataset.hide;
+      if (!url) return;
+      const riga = bottone.closest('tr');
+      const titolo = riga && riga.querySelector('.board-title')
+        ? riga.querySelector('.board-title').textContent : url;
+      if (!window.confirm('Togliere questo annuncio dal tabellone?\n\n' + titolo
+            + '\n\nResta su Subito: sparisce solo da qui. Si rimette dalla '
+            + 'scheda Configurazione.')) return;
+
+      bottone.disabled = true;
+      const d = await postStore({ hide: [url] });
+      if (d && d.ok) {
+        state.items = (state.items || []).filter(i => i.url !== url);
+        window.STATIC_ITEMS = state.items;
+        window.HIDDEN_COUNT = d.hiddenCount;
+        renderItems(state.items);
+        appendLog(d.message, 'info');
+        aggiornaBoxNascosti();
+      } else {
+        bottone.disabled = false;
+        appendLog((d && d.error) || 'Non sono riuscito a togliere l\'annuncio.', 'error');
+      }
+    }
+
+    function renderFilters(products) {
+      const el = document.getElementById('filter-buttons');
+      if (!el || !products || !products.length) return;
+      const btn = (label, value) =>
+        `<button type="button" class="filter-btn ${state.selectedProduct === value ? 'active' : ''}"
+                 data-product="${esc(value)}" onclick="setProductFilter('${esc(value).replace(/'/g, "\\'")}')">${esc(label)}</button>`;
+      el.innerHTML = '<span class="eyebrow">Prodotto</span>'
+        + `<button type="button" class="filter-btn ${state.selectedProduct === 'all' ? 'active' : ''}"
+                   data-product="all" id="btn-filter-all" onclick="setProductFilter('all')">Tutti</button>`
+        + products.filter(p => p.name).map(p => btn(p.name, p.name)).join('');
+    }
+
+    /* ---- MODULO CONFIGURAZIONE ---- */
+
+    const LS_TOKEN_KEY = 'subito.auth.token';
+
+    /* La pagina e' sempre statica — non contiene dati, li chiede a /api/store
+       all'apertura. Quello che cambia e' se dietro c'e' una funzione che sa
+       anche scrivere: su Vercel si', aprendo il file da disco no. */
+    const CAN_WRITE = !!window.API_WRITE;
+    const API_STORE = '/api/store';
+
+    /* La password non finisce mai nella pagina: si digita una volta e resta in
+       questo browser. Il confronto avviene sul server, che e' l'unico posto
+       dove vive il segreto. */
+    function authToken(force) {
+      let t = force ? '' : (localStorage.getItem(LS_TOKEN_KEY) || '');
+      if (!t) {
+        t = window.prompt('Password del pannello (variabile APP_PASSWORD su Vercel):') || '';
+        if (t) { try { localStorage.setItem(LS_TOKEN_KEY, t); } catch (e) {} }
+      }
+      return t;
+    }
+
+    function forgetAuthToken() {
+      try { localStorage.removeItem(LS_TOKEN_KEY); } catch (e) {}
+    }
+
+    /* Una sola porta verso il repository: POST /api/store. Se il server
+       risponde 401 la password memorizzata e' sbagliata, quindi si butta e si
+       richiede una volta sola invece di far ricaricare la pagina. */
+    async function postStore(payload, riprova) {
+      const token = authToken(riprova === true);
+      if (!token) return { error: 'Salvataggio annullato: serve la password.' };
+      const r = await fetch(API_STORE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+        body: JSON.stringify(payload)
+      });
+      const d = await r.json().catch(() => ({ error: 'Risposta non leggibile dal server.' }));
+      if (r.status === 401) {
+        forgetAuthToken();
+        if (!riprova) return postStore(payload, true);
+      }
+      return d;
+    }
+
+    /* Le schede Configurazione e YAML non si aprono senza password. Prima la
+       configurazione arrivava insieme al tabellone, quindi bastava aprire
+       l'indirizzo per leggere soglie, parole chiave ed esclusioni di tutti i
+       prodotti. Il tabellone degli annunci resta pubblico; questa parte no.
+
+       Si sblocca una volta per sessione: dopo, i dati restano in window.STATIC_*
+       e cambiare scheda non richiede piu' niente. */
+    let configSbloccata = false;
+
+    async function sbloccaConfig(riprova) {
+      if (configSbloccata) return true;
+      // La pagina aperta da disco non ha /api/store dietro: niente da sbloccare.
+      if (!CAN_WRITE) return true;
+      if (window.PANEL_HAS_PASSWORD === false) {
+        appendLog('APP_PASSWORD non configurata su Vercel: la configurazione '
+                + 'resta chiusa. Aggiungila fra le variabili d\'ambiente e '
+                + 'ripubblica.', 'error');
+        return false;
+      }
+      const token = authToken(riprova === true);
+      if (!token) return false;
+      let r;
+      try {
+        // Il payload intero, non solo i config: da anonimi gli annunci
+        // arrivano senza soglia ne' near_miss, quindi il tabellone mostra
+        // badge neutri. Sbloccando vanno ripresi con quei campi, o i badge
+        // resterebbero neutri fino al ricaricamento della pagina.
+        r = await fetch(API_STORE, {
+          cache: 'no-store', headers: { 'x-auth-token': token }
+        });
+      } catch (e) {
+        appendLog('Nessuna risposta da /api/store: ' + e.message, 'error');
+        return false;
+      }
+      if (r.status === 401) {
+        forgetAuthToken();
+        if (!riprova) return sbloccaConfig(true);
+        appendLog('Password errata: configurazione non sbloccata.', 'error');
+        return false;
+      }
+      if (!r.ok) {
+        appendLog('/api/store ha risposto ' + r.status + '.', 'error');
+        return false;
+      }
+      const d = await r.json().catch(() => null);
+      if (!d) { appendLog('Risposta non leggibile dal server.', 'error'); return false; }
+      window.STATIC_CONFIGS = d.configs || {};
+      window.STATIC_CONFIG_DATA = d.config || {};
+      configSbloccata = true;
+      window.PANEL_UNLOCKED = true;
+      window.HIDDEN_COUNT = d.hiddenCount || 0;
+      window.SCAM_COUNT = d.scamCount || 0;
+      window.IGNORED_COUNT = d.ignoredCount || 0;
+      if (Array.isArray(d.items) && d.items.length) {
+        window.STATIC_ITEMS = d.items;
+        state.items = d.items;
+        renderItems(d.items);
+      }
+      return true;
+    }
+
+
+    function renderProducts(products) {
+      state.formProducts = products.map(p => ({
+        ...p,
+        keywords: Array.isArray(p.keywords) ? p.keywords.join(', ') : (p.keywords || ''),
+        exclude_keywords: Array.isArray(p.exclude_keywords) ? p.exclude_keywords.join(', ') : (p.exclude_keywords || ''),
+        subito_urls: Array.isArray(p.subito_urls) ? p.subito_urls.join(', ') : (p.subito_urls || '')
+      }));
+      const el = document.getElementById('products-list');
+      if (!state.formProducts.length) {
+        el.innerHTML = '<p class="muted small">Nessun prodotto monitorato. Usa «+ Aggiungi» per configurarne uno.</p>';
+        return;
+      }
+      const check = (idx, field, on, label) => `
+        <label class="checkline">
+          <input type="checkbox" data-field="${field}" data-idx="${idx}" ${on ? 'checked' : ''}>
+          <span>${label}</span>
+        </label>`;
+      const text = (idx, field, value, label) => `
+        <label class="field">
+          <span>${label}</span>
+          <input type="text" data-field="${field}" data-idx="${idx}" value="${esc(value)}">
+        </label>`;
+
+      el.innerHTML = state.formProducts.map((p, i) => `
+        <article class="tile">
+          <div class="tile-head">
+            <input type="text" class="prod-name" data-field="name" data-idx="${i}"
+                   value="${esc(p.name || '')}" placeholder="Nome prodotto" aria-label="Nome prodotto">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="removeProduct(${i})">Rimuovi</button>
+          </div>
+
+          <div class="prod-nums">
+            <label class="field">
+              <span>Prezzo limite €</span>
+              <input type="number" min="1" data-field="max_price" data-idx="${i}" value="${esc(p.max_price || 500)}">
+            </label>
+            <label class="field">
+              <span>Tolleranza €</span>
+              <input type="number" min="0" data-field="price_margin" data-idx="${i}" value="${esc(p.price_margin || 50)}">
+            </label>
+          </div>
+
+          <div class="prod-flags">
+            ${check(i, 'subito', p.subito !== false, 'Subito.it')}
+            ${check(i, 'amazon', p.amazon !== false, 'Amazon.it')}
+            ${check(i, 'search_in_description', p.search_in_description === true, 'Cerca in descrizione')}
+          </div>
+
+          <details>
+            <summary>Termini di ricerca</summary>
+            <div class="prod-terms">
+              ${text(i, 'keywords', p.keywords, 'Parole chiave (separate da virgola)')}
+              ${text(i, 'exclude_keywords', p.exclude_keywords, 'Parole da escludere')}
+              ${text(i, 'subito_urls', p.subito_urls, 'URL Subito forzati')}
+            </div>
+          </details>
+        </article>`).join('');
+    }
+
+    function addProduct() {
+      syncFormFromInputs();
+      state.formProducts.push({
+        name: '', keywords: '', exclude_keywords: '', subito_urls: '',
+        max_price: 500, price_margin: 50, subito: true, amazon: true, search_in_description: false
+      });
+      renderProducts(state.formProducts);
+      const inputs = document.querySelectorAll('#products-list [data-field="name"]');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    }
+
+    function removeProduct(i) {
+      syncFormFromInputs();
+      state.formProducts.splice(i, 1);
+      renderProducts(state.formProducts);
+    }
+
+    function collectFormProducts() {
+      const split = v => typeof v === 'string' ? v.split(',').map(s => s.trim()).filter(Boolean) : (v || []);
+      return state.formProducts.map(p => ({
+        name: p.name,
+        keywords: split(p.keywords),
+        exclude_keywords: split(p.exclude_keywords),
+        subito_urls: split(p.subito_urls),
+        max_price: parseInt(p.max_price) || 500,
+        price_margin: parseInt(p.price_margin) || 50,
+        subito: p.subito !== false,
+        amazon: p.amazon !== false,
+        search_in_description: p.search_in_description === true,
+      }));
+    }
+
+    function syncFormFromInputs() {
+      document.querySelectorAll('#products-list [data-idx]').forEach(el => {
+        const i = parseInt(el.dataset.idx);
+        const f = el.dataset.field;
+        if (!state.formProducts[i]) return;
+        state.formProducts[i][f] = el.type === 'checkbox' ? el.checked : el.value;
+      });
+    }
+
+    /* ---- ANNUNCI TOLTI DAL TABELLONE ---- */
+
+    function aggiornaBoxNascosti() {
+      const box = document.getElementById('hidden-box');
+      if (!box) return;
+      const quanti = window.HIDDEN_COUNT || 0;
+      box.classList.toggle('hidden', !(CAN_WRITE && quanti));
+      const etichetta = document.getElementById('hidden-count');
+      if (etichetta) {
+        etichetta.textContent = quanti === 1
+          ? '1 annuncio e\' fuori dal tabellone.'
+          : quanti + ' annunci sono fuori dal tabellone.';
+      }
+    }
+
+    async function ripristinaNascosti(bottone) {
+      const stato = document.getElementById('hidden-status');
+      if (!window.confirm('Rimettere tutti gli annunci tolti?')) return;
+      bottone.disabled = true;
+      if (stato) stato.textContent = 'Ripristino in corso…';
+      const d = await postStore({ unhideAll: true });
+      bottone.disabled = false;
+      if (d && d.ok) {
+        window.HIDDEN_COUNT = d.hiddenCount || 0;
+        if (stato) stato.textContent = d.message;
+        aggiornaBoxNascosti();
+        appendLog(d.message + ' Ricarica il tabellone per rivederli.', 'info');
+      } else if (stato) {
+        stato.textContent = (d && d.error) || 'Ripristino non riuscito.';
+      }
+    }
+
+    function aggiornaBoxSegnalati() {
+      const box = document.getElementById('scam-box');
+      if (!box) return;
+      const quanti = window.SCAM_COUNT || 0;
+      box.classList.toggle('hidden', !(CAN_WRITE && quanti));
+      const etichetta = document.getElementById('scam-count');
+      if (etichetta) {
+        etichetta.textContent = quanti === 1
+          ? '1 annuncio e\' segnalato come truffa.'
+          : quanti + ' annunci sono segnalati come truffa.';
+      }
+    }
+
+    async function ritiraSegnalazioni(bottone) {
+      const stato = document.getElementById('scam-status');
+      if (!window.confirm('Ritirare tutte le segnalazioni di truffa?')) return;
+      bottone.disabled = true;
+      if (stato) stato.textContent = 'Ritiro in corso…';
+      const d = await postStore({ unscamAll: true });
+      bottone.disabled = false;
+      if (d && d.ok) {
+        window.SCAM_COUNT = d.scamCount || 0;
+        if (stato) stato.textContent = d.message;
+        /* Le righe portano ancora il marchio: si toglie qui invece di
+           richiedere tutto al server, che per un dato che gia' conosciamo
+           sarebbe una richiesta buttata. */
+        (state.items || []).forEach(function (i) { delete i.scam; });
+        renderItems(state.items);
+        aggiornaBoxSegnalati();
+        appendLog(d.message, 'info');
+      } else if (stato) {
+        stato.textContent = (d && d.error) || 'Ritiro non riuscito.';
+      }
+    }
+
+    function aggiornaBoxIgnorati() {
+      const box = document.getElementById('skip-box');
+      if (!box) return;
+      const quanti = window.IGNORED_COUNT || 0;
+      box.classList.toggle('hidden', !(CAN_WRITE && quanti));
+      const etichetta = document.getElementById('skip-count');
+      if (etichetta) {
+        etichetta.textContent = quanti === 1
+          ? '1 annuncio e\' escluso dalla ricerca.'
+          : quanti + ' annunci sono esclusi dalla ricerca.';
+      }
+    }
+
+    async function rimettiInRicerca(bottone) {
+      const stato = document.getElementById('skip-status');
+      if (!window.confirm('Rimettere in ricerca tutti gli annunci esclusi?')) return;
+      bottone.disabled = true;
+      if (stato) stato.textContent = 'Ripristino in corso…';
+      const d = await postStore({ unskipAll: true });
+      bottone.disabled = false;
+      if (d && d.ok) {
+        window.IGNORED_COUNT = d.ignoredCount || 0;
+        if (stato) stato.textContent = d.message;
+        aggiornaBoxIgnorati();
+        /* Qui non basta ridisegnare: gli annunci non sono in memoria, li ha
+           tolti il server. Tornano alla scansione seguente, che e' quella che
+           li raccoglie di nuovo. */
+        appendLog(d.message + ' Torneranno alla prossima scansione.', 'info');
+      } else if (stato) {
+        stato.textContent = (d && d.error) || 'Ripristino non riuscito.';
+      }
+    }
+
+    async function loadConfig() {
+      if (window.STATIC_CONFIG_DATA) {
+        const d = window.STATIC_CONFIG_DATA;
+        if (d.general) {
+          document.getElementById('cfg-interval').value = d.general.interval_minutes;
+          document.getElementById('cfg-shipping').checked = d.general.shipping_required;
+        }
+        if (d.telegram) {
+          document.getElementById('cfg-tg-enabled').checked = d.telegram.enabled;
+        }
+        if (d.subito) {
+          document.getElementById('cfg-subito-enabled').checked = d.subito.enabled;
+          document.getElementById('cfg-subito-pages').value = d.subito.max_pages;
+        }
+        if (d.amazon) {
+          document.getElementById('cfg-amazon-enabled').checked = d.amazon.enabled;
+          document.getElementById('cfg-amazon-pages').value = d.amazon.max_pages;
+        }
+        renderFilters(d.products || []);
+        renderProducts(d.products || []);
+      }
+    }
+
+    async function saveForm(e) {
+      e.preventDefault();
+      syncFormFromInputs();
+      const btn = document.getElementById('cfg-save-btn');
+      const status = document.getElementById('config-save-status');
+      if (!CAN_WRITE) {
+        status.textContent = 'Questa copia della pagina non può salvare.';
+        return;
+      }
+      btn.textContent = 'Salvataggio…';
+      btn.disabled = true;
+      status.textContent = 'Salvataggio in corso…';
+      try {
+        const d = await postStore({
+          general: {
+            interval_minutes: parseInt(document.getElementById('cfg-interval').value),
+            shipping_required: document.getElementById('cfg-shipping').checked
+          },
+          telegram: { enabled: document.getElementById('cfg-tg-enabled').checked },
+          products: collectFormProducts(),
+          subito: {
+            enabled: document.getElementById('cfg-subito-enabled').checked,
+            max_pages: parseInt(document.getElementById('cfg-subito-pages').value)
+          },
+          amazon: {
+            enabled: document.getElementById('cfg-amazon-enabled').checked,
+            max_pages: parseInt(document.getElementById('cfg-amazon-pages').value)
+          }
+        });
+        status.textContent = d.ok
+          ? (d.changed ? `${d.message} (${d.files.join(', ')})` : d.message)
+          : (d.error || 'Errore di salvataggio.');
+      } catch (e) {
+        status.textContent = 'Errore di connessione con /api/store.';
+      }
+      btn.textContent = 'Salva e applica';
+      btn.disabled = false;
+    }
+
+    /* ---- EDITOR YAML ---- */
+    function renderYamlTabs(files) {
+      document.getElementById('yaml-tabs').innerHTML = files.map(f =>
+        `<button type="button" class="yaml-tab-btn" data-file="${esc(f)}" onclick="loadYaml('${esc(f)}')">${esc(f)}</button>`
+      ).join('');
+    }
+
+    function loadYamlList() {
+      if (!window.STATIC_CONFIGS) return;
+      const files = Object.keys(window.STATIC_CONFIGS);
+      renderYamlTabs(files);
+      if (files.length) loadYaml(files[0]);
+    }
+
+    function markYamlTab(name) {
+      document.getElementById('yaml-filename').textContent = name;
+      state.currentConfig = name;
+      document.querySelectorAll('.yaml-tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.file === name);
+      });
+    }
+
+    function loadYaml(name) {
+      if (!window.STATIC_CONFIGS || !window.STATIC_CONFIGS[name]) return;
+      document.getElementById('yaml-editor').value = window.STATIC_CONFIGS[name];
+      markYamlTab(name);
+    }
+
+    async function saveYaml(e) {
+      e.preventDefault();
+      const status = document.getElementById('yaml-status');
+      if (!CAN_WRITE) {
+        status.textContent = 'Questa copia della pagina non può salvare.';
+        return;
+      }
+      status.textContent = 'Salvataggio in corso…';
+      try {
+        const d = await postStore({
+          yaml: { name: state.currentConfig, content: document.getElementById('yaml-editor').value }
+        });
+        status.textContent = d.ok
+          ? (d.changed ? `${d.message} (${d.files.join(', ')})` : d.message)
+          : (d.error || 'Errore di salvataggio.');
+      } catch (e) {
+        status.textContent = 'Errore di connessione con /api/store.';
+      }
+    }
+
+    /* ---- STATO DEL SERVIZIO ---- */
+    function setLive(text, uptime) {
+      const badge = document.getElementById('status-badge');
+      badge.classList.add('is-live');
+      document.getElementById('status-text').textContent = text;
+      document.getElementById('uptime').textContent = uptime;
+    }
+
+    function fetchStatus() {
+      // La cadenza arriva dal workflow, non da una costante: quando il cron
+      // e' passato da 15 a 30 minuti questa riga mentiva.
+      setLive(CAN_WRITE ? 'Scansione in cloud · scrivibile' : 'Scansione in cloud',
+              `cron ${window.SCAN_CADENCE || 30}m`);
+      const eyebrow = document.getElementById('hero-eyebrow');
+      if (eyebrow) eyebrow.textContent = 'Scansione automatica in cloud';
+    }
+
+    /* Dove non si puo' scrivere, la colonna della croce non ha ragione di
+       esistere: si toglie dall'intestazione invece di lasciarla vuota. */
+    if (!CAN_WRITE) {
+      const thDel = document.getElementById('th-del');
+      if (thDel) thDel.remove();
+    }
+
+    /* Su Vercel qui non c'e' ancora niente da disegnare: la configurazione
+       arriva solo dopo lo sblocco, quando si apre la scheda. Altrove (build
+       statico) i dati sono gia' nella pagina e si disegnano subito. */
+    if (!CAN_WRITE && (window.STATIC_CONFIGS || window.STATIC_CONFIG_DATA)) {
+      loadConfig();
+      loadYamlList();
+    }
+    fetchStatus();
+    fetchServerLogs();
+  </script>
+
+    <script>
+      /* Il ponte verso il repository. Una sola richiesta per aprire il
+         tabellone: annunci e registro. La configurazione non viene di qui —
+         la chiede la scheda Configurazione, con la password. */
+      (function () {
+        function avvia() {
+          fetch('/api/store', { cache: 'no-store' })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.error) throw new Error(d.error);
+              window.STATIC_ITEMS = d.items || [];
+              window.STATIC_CONFIGS = d.configs || {};
+              window.STATIC_CONFIG_DATA = d.config || {};
+              window.STATIC_LOGS = d.logs || [];
+              window.SCAN_CADENCE = d.cadence || 30;
+              window.PANEL_HAS_PASSWORD = d.hasPassword !== false;
+              window.PANEL_UNLOCKED = d.unlocked === true;
+              window.HIDDEN_COUNT = d.hiddenCount || 0;
+              window.IGNORED_COUNT = d.ignoredCount || 0;
+              if (!d.writable) {
+                window.STATIC_LOGS.push({
+                  message: 'Scrittura non disponibile: manca lo store Blob o '
+                         + 'APP_PASSWORD fra le variabili d\'ambiente su Vercel.',
+                  level: 'error',
+                  time: new Date().toTimeString().slice(0, 8)
+                });
+              }
+              if (typeof state === 'object') state.items = window.STATIC_ITEMS;
+              if (typeof renderItems === 'function') renderItems(window.STATIC_ITEMS);
+              /* La configurazione non si carica qui: la chiede la scheda
+                 Configurazione quando la si apre, con la password. */
+              if (typeof fetchServerLogs === 'function') fetchServerLogs();
+              if (typeof fetchStatus === 'function') fetchStatus();
+            })
+            .catch(function (e) {
+              /* Un tabellone vuoto e muto e' peggio di un tabellone che
+                 dichiara cosa non ha funzionato. */
+              window.STATIC_LOGS = [{
+                message: 'Nessuna risposta da /api/store: ' + e.message,
+                level: 'error',
+                time: new Date().toTimeString().slice(0, 8)
+              }];
+              if (typeof fetchServerLogs === 'function') fetchServerLogs();
+            });
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', avvia);
+        } else {
+          avvia();
+        }
+      })();
+    </script>
+    </body>
+
+</html>
