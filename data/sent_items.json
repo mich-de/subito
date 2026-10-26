@@ -2032,7 +2032,19 @@
     "timestamp": "2026-10-25T19:59:00.602872"
   },
   "https://www.subito.it/informatica/computer-galaxy-book-4-chieti-665916593.htm|Galaxy Book 4": {
-    "price": 370,
-    "timestamp": "2026-10-25T22:32:01.873109"
+    "price": 350,
+    "timestamp": "2026-10-26T12:52:01.548702"
+  },
+  "https://www.subito.it/telefonia/xiaomi-mi-a3-4-64-snapdragon-665-48-mp-padova-665958129.htm|Lenovo IdeaPad slim 5": {
+    "price": 35,
+    "timestamp": "2026-10-26T12:52:01.541646"
+  },
+  "https://www.subito.it/informatica/samsung-galaxy-book-4-nuovo-sigillato-varese-665939616.htm|Galaxy Book 4": {
+    "price": 340,
+    "timestamp": "2026-10-26T12:52:01.545526"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-12-512-nuovo-palermo-665931796.htm|Honor Magic 8 Pro": {
+    "price": 680,
+    "timestamp": "2026-10-26T12:52:01.940038"
   }
 }
