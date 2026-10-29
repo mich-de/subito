@@ -2064,8 +2064,8 @@
     "timestamp": "2026-10-28T05:29:08.196546"
   },
   "https://www.subito.it/informatica/pc-windows-11-samsung-galaxy-book-4-15-6-venezia-665690462.htm|Galaxy Book 4": {
-    "price": 549,
-    "timestamp": "2026-10-28T05:29:08.534043"
+    "price": 499,
+    "timestamp": "2026-10-29T01:46:48.019064"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-nuovo-palermo-666194307.htm|Honor Magic 8 Pro": {
     "price": 650,
@@ -2090,5 +2090,9 @@
   "https://www.subito.it/telefonia/galaxy-s24-256gb-bologna-666279974.htm|Samsung S24 256GB": {
     "price": 399,
     "timestamp": "2026-10-28T21:56:36.661365"
+  },
+  "https://www.subito.it/telefonia/samsung-s24-256gb-catanzaro-666289386.htm|Samsung S24 256GB": {
+    "price": 360,
+    "timestamp": "2026-10-29T01:46:48.016233"
   }
 }
