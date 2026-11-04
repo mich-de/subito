@@ -2048,8 +2048,8 @@
     "timestamp": "2026-10-26T12:52:01.940038"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-256gb-accessori-padova-666028294.htm|Samsung S24 256GB": {
-    "price": 380,
-    "timestamp": "2026-10-26T23:21:24.558434"
+    "price": 340,
+    "timestamp": "2026-11-04T15:46:38.244752"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-16-512-brindisi-666056583.htm|Honor Magic 8 Pro": {
     "price": 650,
@@ -2208,8 +2208,8 @@
     "timestamp": "2026-11-03T06:35:49.705897"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-256gb-viola-accessori-alessandria-666955506.htm|Samsung S24 256GB": {
-    "price": 339,
-    "timestamp": "2026-11-03T14:39:53.936614"
+    "price": 300,
+    "timestamp": "2026-11-04T15:46:38.242272"
   },
   "https://www.subito.it/telefonia/samsung-s24-256gb-napoli-666978980.htm|Samsung S24 256GB": {
     "price": 240,
@@ -2234,5 +2234,21 @@
   "https://www.subito.it/telefonia/oppo-find-x9-pro-512-gb-bolzano-666998173.htm|OPPO Find X9 Pro": {
     "price": 700,
     "timestamp": "2026-11-03T20:40:17.016037"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-air-palermo-667107830.htm|Honor Magic 8 Pro": {
+    "price": 550,
+    "timestamp": "2026-11-04T15:46:38.247062"
+  },
+  "https://www.subito.it/informatica/pc-portatile-samsung-galaxy-book-4-nuovo-latina-667096528.htm|Galaxy Book 4": {
+    "price": 380,
+    "timestamp": "2026-11-04T15:46:38.249380"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-512-gb-black-pari-al-nuovo-roma-667087281.htm|Honor Magic 8 Pro": {
+    "price": 675,
+    "timestamp": "2026-11-04T15:46:38.935441"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-12-512-verona-667058884.htm|Honor Magic 8 Pro": {
+    "price": 680,
+    "timestamp": "2026-11-04T15:46:38.937972"
   }
 }
