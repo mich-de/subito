@@ -1964,8 +1964,8 @@
     "timestamp": "2026-10-23T12:03:58.592026"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-256-gb-roma-664690004.htm|Samsung S24 256GB": {
-    "price": 400,
-    "timestamp": "2026-10-23T12:03:58.942080"
+    "price": 380,
+    "timestamp": "2026-11-04T21:53:10.825403"
   },
   "https://www.subito.it/telefonia/samsung-s25-256gb-batteria-100-parma-665597672.htm|Samsung S25 256GB": {
     "price": 395,
@@ -2188,8 +2188,8 @@
     "timestamp": "2026-11-02T00:37:33.342090"
   },
   "https://www.subito.it/telefonia/samsung-galaxy-s24-256-gb-come-nuovo-palermo-666904013.htm|Samsung S24 256GB": {
-    "price": 330,
-    "timestamp": "2026-11-03T14:39:53.933663"
+    "price": 325,
+    "timestamp": "2026-11-04T21:53:09.867023"
   },
   "https://www.subito.it/telefonia/magic-8-pro-512gb-roma-666874054.htm|Honor Magic 8 Pro": {
     "price": 600,
@@ -2250,5 +2250,13 @@
   "https://www.subito.it/telefonia/honor-magic-8-pro-12-512-verona-667058884.htm|Honor Magic 8 Pro": {
     "price": 680,
     "timestamp": "2026-11-04T15:46:38.937972"
+  },
+  "https://www.subito.it/telefonia/teleconvertitore-g2-200mm-vivo-x300-ultra-milano-667138253.htm|Vivo X300": {
+    "price": 250,
+    "timestamp": "2026-11-04T21:53:09.869627"
+  },
+  "https://www.subito.it/telefonia/samsung-s25-256gb-napoli-667158209.htm|Samsung S25 256GB": {
+    "price": 430,
+    "timestamp": "2026-11-04T21:53:10.827955"
   }
 }
