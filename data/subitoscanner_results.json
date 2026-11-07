@@ -7,7 +7,7 @@
     "location": "Campolongo Maggiore (VE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:12.046388+02:00",
+    "date": "2026-11-07T18:48:18.265518+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -20,7 +20,7 @@
     "location": "Riccione (RN)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:12.046415+02:00",
+    "date": "2026-11-07T18:48:18.265546+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -33,7 +33,7 @@
     "location": "Noto (SR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:12.046434+02:00",
+    "date": "2026-11-07T18:48:18.265566+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -46,7 +46,7 @@
     "location": "Salerno (SA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:12.046448+02:00",
+    "date": "2026-11-07T18:48:18.265576+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -59,7 +59,7 @@
     "location": "Lecce (LE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:25.915053+02:00",
+    "date": "2026-11-07T18:48:32.224617+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -72,7 +72,7 @@
     "location": "Sciacca (AG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:35.122800+02:00",
+    "date": "2026-11-07T18:48:40.768319+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -85,7 +85,7 @@
     "location": "Casoria (NA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:35.122824+02:00",
+    "date": "2026-11-07T18:48:40.768344+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -98,7 +98,7 @@
     "location": "Salerno (SA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:35.122831+02:00",
+    "date": "2026-11-07T18:48:40.768351+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -111,7 +111,7 @@
     "location": "Due Carrare (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:35.122845+02:00",
+    "date": "2026-11-07T18:48:40.768365+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -124,7 +124,7 @@
     "location": "Chatillon (AO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:35.122851+02:00",
+    "date": "2026-11-07T18:48:40.768370+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
@@ -137,10 +137,23 @@
     "location": "Alpignano (TO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:35.122862+02:00",
+    "date": "2026-11-07T18:48:40.768381+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": false,
     "max_price": 360
+  },
+  {
+    "title": "Samsung S25 256 Gb LEGGERE DECRIZIONE",
+    "price": 350,
+    "url": "https://www.subito.it/telefonia/samsung-s25-256-gb-leggere-decrizione-pistoia-667456228.htm",
+    "source": "Subito.it",
+    "location": "Montecatini-Terme (PT)",
+    "shipping": true,
+    "condition": "usato",
+    "date": "2026-11-07T18:48:51.101329+02:00",
+    "product_name": "Samsung S25 256GB",
+    "near_miss": false,
+    "max_price": 380
   },
   {
     "title": "Borsa rigida Oppo find x9/9 pro",
@@ -150,7 +163,7 @@
     "location": "Aosta (AO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:39:59.357474+02:00",
+    "date": "2026-11-07T18:49:59.708876+02:00",
     "product_name": "OPPO Find X9 Pro",
     "near_miss": false,
     "max_price": 650
@@ -163,7 +176,7 @@
     "location": "Sassari (SS)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:39:59.357518+02:00",
+    "date": "2026-11-07T18:49:59.708949+02:00",
     "product_name": "OPPO Find X9 Pro",
     "near_miss": false,
     "max_price": 650
@@ -176,7 +189,7 @@
     "location": "Torino (TO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:39:59.357527+02:00",
+    "date": "2026-11-07T18:49:59.708959+02:00",
     "product_name": "OPPO Find X9 Pro",
     "near_miss": false,
     "max_price": 650
@@ -189,7 +202,7 @@
     "location": "Savona (SV)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:39:59.357538+02:00",
+    "date": "2026-11-07T18:49:59.708972+02:00",
     "product_name": "OPPO Find X9 Pro",
     "near_miss": false,
     "max_price": 650
@@ -202,7 +215,7 @@
     "location": "Nola (NA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:08.976229+02:00",
+    "date": "2026-11-07T18:50:09.035361+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": false,
     "max_price": 650
@@ -215,7 +228,7 @@
     "location": "Catania (CT)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:08.976236+02:00",
+    "date": "2026-11-07T18:50:09.035367+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": false,
     "max_price": 650
@@ -228,7 +241,7 @@
     "location": "Canale Monterano (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:08.976243+02:00",
+    "date": "2026-11-07T18:50:09.035375+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": false,
     "max_price": 650
@@ -241,7 +254,7 @@
     "location": "Oria (BR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:08.976249+02:00",
+    "date": "2026-11-07T18:50:09.035380+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": false,
     "max_price": 650
@@ -254,7 +267,7 @@
     "location": "Correggio (RE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:08.976253+02:00",
+    "date": "2026-11-07T18:50:09.035385+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": false,
     "max_price": 650
@@ -267,7 +280,7 @@
     "location": "Quartu Sant'Elena (CA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:41.827051+02:00",
+    "date": "2026-11-07T18:50:40.274517+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -280,7 +293,7 @@
     "location": "Castelnuovo di Garfagnana (LU)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:41.827115+02:00",
+    "date": "2026-11-07T18:50:40.274583+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -293,7 +306,7 @@
     "location": "Trieste (TS)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:48.159111+02:00",
+    "date": "2026-11-07T18:50:46.167942+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -306,7 +319,7 @@
     "location": "Milano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:56.616536+02:00",
+    "date": "2026-11-07T18:50:54.093760+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -319,7 +332,7 @@
     "location": "Siracusa (SR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:58.706524+02:00",
+    "date": "2026-11-07T18:50:56.091486+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": false,
     "max_price": 100
@@ -332,7 +345,7 @@
     "location": "Fidenza (PR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:12.638321+02:00",
+    "date": "2026-11-07T18:51:09.065672+02:00",
     "product_name": "Vivo X300",
     "near_miss": false,
     "max_price": 400
@@ -345,7 +358,7 @@
     "location": "Piobesi Torinese (TO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:12.638393+02:00",
+    "date": "2026-11-07T18:51:09.065742+02:00",
     "product_name": "Vivo X300",
     "near_miss": false,
     "max_price": 400
@@ -358,7 +371,7 @@
     "location": "Milano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:12.638398+02:00",
+    "date": "2026-11-07T18:51:09.065747+02:00",
     "product_name": "Vivo X300",
     "near_miss": false,
     "max_price": 400
@@ -371,7 +384,7 @@
     "location": "Aiello del Sabato (AV)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:12.638402+02:00",
+    "date": "2026-11-07T18:51:09.065752+02:00",
     "product_name": "Vivo X300",
     "near_miss": false,
     "max_price": 400
@@ -384,7 +397,7 @@
     "location": "Piove di Sacco (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:17.773819+02:00",
+    "date": "2026-11-07T18:51:13.423487+02:00",
     "product_name": "Lenovo IdeaPad slim 5",
     "near_miss": false,
     "max_price": 500
@@ -397,7 +410,7 @@
     "location": "Piove di Sacco (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:17.773846+02:00",
+    "date": "2026-11-07T18:51:13.423515+02:00",
     "product_name": "Lenovo IdeaPad slim 5",
     "near_miss": false,
     "max_price": 500
@@ -410,7 +423,7 @@
     "location": "Piove di Sacco (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:17.773854+02:00",
+    "date": "2026-11-07T18:51:13.423523+02:00",
     "product_name": "Lenovo IdeaPad slim 5",
     "near_miss": false,
     "max_price": 500
@@ -423,7 +436,7 @@
     "location": "Piove di Sacco (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:17.773860+02:00",
+    "date": "2026-11-07T18:51:13.423528+02:00",
     "product_name": "Lenovo IdeaPad slim 5",
     "near_miss": false,
     "max_price": 500
@@ -436,7 +449,7 @@
     "location": "Piove di Sacco (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:17.773864+02:00",
+    "date": "2026-11-07T18:51:13.423533+02:00",
     "product_name": "Lenovo IdeaPad slim 5",
     "near_miss": false,
     "max_price": 500
@@ -449,7 +462,7 @@
     "location": "Piove di Sacco (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:19.894500+02:00",
+    "date": "2026-11-07T18:51:15.480404+02:00",
     "product_name": "Lenovo IdeaPad slim 5",
     "near_miss": false,
     "max_price": 500
@@ -462,7 +475,7 @@
     "location": "Piove di Sacco (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:19.894520+02:00",
+    "date": "2026-11-07T18:51:15.480426+02:00",
     "product_name": "Lenovo IdeaPad slim 5",
     "near_miss": false,
     "max_price": 500
@@ -475,7 +488,7 @@
     "location": "Pontida (BG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:28.425581+02:00",
+    "date": "2026-11-07T18:51:23.731804+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -488,7 +501,7 @@
     "location": "Perosa Argentina (TO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:28.425616+02:00",
+    "date": "2026-11-07T18:51:23.731839+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -501,7 +514,7 @@
     "location": "Lucca (LU)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:28.425625+02:00",
+    "date": "2026-11-07T18:51:23.731847+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -514,7 +527,7 @@
     "location": "Milazzo (ME)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:28.425639+02:00",
+    "date": "2026-11-07T18:51:23.731861+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -527,7 +540,7 @@
     "location": "Cantu' (CO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:28.425645+02:00",
+    "date": "2026-11-07T18:51:23.731867+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -540,7 +553,7 @@
     "location": "Bologna (BO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:28.425652+02:00",
+    "date": "2026-11-07T18:51:23.731875+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -553,7 +566,7 @@
     "location": "Caserta (CE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:28.425659+02:00",
+    "date": "2026-11-07T18:51:23.731882+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -566,7 +579,7 @@
     "location": "Barcellona Pozzo di Gotto (ME)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:28.425671+02:00",
+    "date": "2026-11-07T18:51:23.731893+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -579,7 +592,7 @@
     "location": "Carpi (MO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:28.425676+02:00",
+    "date": "2026-11-07T18:51:23.731898+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -592,7 +605,7 @@
     "location": "Belvedere Marittimo (CS)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:28.425680+02:00",
+    "date": "2026-11-07T18:51:23.731902+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -605,7 +618,7 @@
     "location": "Piombino (LI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:28.425685+02:00",
+    "date": "2026-11-07T18:51:23.731907+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -618,7 +631,7 @@
     "location": "Napoli (NA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635518+02:00",
+    "date": "2026-11-07T18:51:25.699297+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -631,7 +644,7 @@
     "location": "Pescara (PE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635539+02:00",
+    "date": "2026-11-07T18:51:25.699319+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -644,7 +657,7 @@
     "location": "Budoni (OT)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635546+02:00",
+    "date": "2026-11-07T18:51:25.699326+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -657,7 +670,7 @@
     "location": "Prato (PO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635552+02:00",
+    "date": "2026-11-07T18:51:25.699332+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -670,7 +683,7 @@
     "location": "Legnano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635558+02:00",
+    "date": "2026-11-07T18:51:25.699338+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -683,7 +696,7 @@
     "location": "Perugia (PG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635563+02:00",
+    "date": "2026-11-07T18:51:25.699343+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -696,7 +709,7 @@
     "location": "Genova (GE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635573+02:00",
+    "date": "2026-11-07T18:51:25.699352+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -709,7 +722,7 @@
     "location": "Milano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635578+02:00",
+    "date": "2026-11-07T18:51:25.699358+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -722,7 +735,7 @@
     "location": "Francavilla al Mare (CH)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635582+02:00",
+    "date": "2026-11-07T18:51:25.699363+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -735,7 +748,7 @@
     "location": "Catania (CT)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635587+02:00",
+    "date": "2026-11-07T18:51:25.699368+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -748,7 +761,7 @@
     "location": "Gubbio (PG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635592+02:00",
+    "date": "2026-11-07T18:51:25.699372+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -761,7 +774,7 @@
     "location": "Reggio nell'Emilia (RE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635598+02:00",
+    "date": "2026-11-07T18:51:25.699379+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -774,7 +787,7 @@
     "location": "Monselice (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635603+02:00",
+    "date": "2026-11-07T18:51:25.699384+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -787,7 +800,7 @@
     "location": "Guidonia Montecelio (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635608+02:00",
+    "date": "2026-11-07T18:51:25.699388+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -800,7 +813,7 @@
     "location": "Milano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635612+02:00",
+    "date": "2026-11-07T18:51:25.699393+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -813,7 +826,7 @@
     "location": "Corsico (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635617+02:00",
+    "date": "2026-11-07T18:51:25.699397+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -826,7 +839,7 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635621+02:00",
+    "date": "2026-11-07T18:51:25.699402+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -839,7 +852,7 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635626+02:00",
+    "date": "2026-11-07T18:51:25.699407+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -852,7 +865,7 @@
     "location": "Casalmaggiore (CR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635632+02:00",
+    "date": "2026-11-07T18:51:25.699413+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -865,7 +878,7 @@
     "location": "Palmi (RC)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635637+02:00",
+    "date": "2026-11-07T18:51:25.699418+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -878,7 +891,7 @@
     "location": "Latina (LT)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635642+02:00",
+    "date": "2026-11-07T18:51:25.699423+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -891,7 +904,7 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635647+02:00",
+    "date": "2026-11-07T18:51:25.699427+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -904,7 +917,7 @@
     "location": "Catania (CT)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635651+02:00",
+    "date": "2026-11-07T18:51:25.699432+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -917,7 +930,7 @@
     "location": "Partinico (PA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635655+02:00",
+    "date": "2026-11-07T18:51:25.699437+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -930,7 +943,7 @@
     "location": "Campobasso (CB)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635663+02:00",
+    "date": "2026-11-07T18:51:25.699444+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -943,7 +956,7 @@
     "location": "Mola di Bari (BA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635668+02:00",
+    "date": "2026-11-07T18:51:25.699449+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -956,7 +969,7 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:30.635673+02:00",
+    "date": "2026-11-07T18:51:25.699454+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -969,7 +982,7 @@
     "location": "Camponogara (VE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782107+02:00",
+    "date": "2026-11-07T18:51:27.666228+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -982,7 +995,7 @@
     "location": "Mantova (MN)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782129+02:00",
+    "date": "2026-11-07T18:51:27.666250+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -995,7 +1008,7 @@
     "location": "Vicenza (VI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782136+02:00",
+    "date": "2026-11-07T18:51:27.666257+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1008,7 +1021,7 @@
     "location": "Matera (MT)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782142+02:00",
+    "date": "2026-11-07T18:51:27.666263+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1021,7 +1034,7 @@
     "location": "Palermo (PA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782147+02:00",
+    "date": "2026-11-07T18:51:27.666269+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1034,7 +1047,7 @@
     "location": "Scafati (SA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782157+02:00",
+    "date": "2026-11-07T18:51:27.666278+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1047,7 +1060,7 @@
     "location": "Monte Compatri (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782163+02:00",
+    "date": "2026-11-07T18:51:27.666283+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1060,7 +1073,7 @@
     "location": "Putignano (BA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782168+02:00",
+    "date": "2026-11-07T18:51:27.666288+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1073,7 +1086,7 @@
     "location": "Roma (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782175+02:00",
+    "date": "2026-11-07T18:51:27.666295+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1086,7 +1099,7 @@
     "location": "Napoli (NA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782180+02:00",
+    "date": "2026-11-07T18:51:27.666300+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1099,7 +1112,7 @@
     "location": "Catania (CT)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782185+02:00",
+    "date": "2026-11-07T18:51:27.666304+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1112,7 +1125,7 @@
     "location": "Novara (NO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782189+02:00",
+    "date": "2026-11-07T18:51:27.666309+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1125,7 +1138,7 @@
     "location": "Milano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782194+02:00",
+    "date": "2026-11-07T18:51:27.666314+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1138,7 +1151,7 @@
     "location": "Monteforte d'Alpone (VR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782200+02:00",
+    "date": "2026-11-07T18:51:27.666319+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1151,7 +1164,7 @@
     "location": "Taranto (TA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782211+02:00",
+    "date": "2026-11-07T18:51:27.666330+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1164,7 +1177,7 @@
     "location": "Montefalco (PG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782215+02:00",
+    "date": "2026-11-07T18:51:27.666335+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1177,7 +1190,7 @@
     "location": "Borgosesia (VC)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782221+02:00",
+    "date": "2026-11-07T18:51:27.666340+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1190,7 +1203,7 @@
     "location": "Lissone (MB)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782225+02:00",
+    "date": "2026-11-07T18:51:27.666345+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1203,7 +1216,7 @@
     "location": "Sant'Arpino (CE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782230+02:00",
+    "date": "2026-11-07T18:51:27.666350+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1216,7 +1229,7 @@
     "location": "Venezia (VE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782235+02:00",
+    "date": "2026-11-07T18:51:27.666355+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1229,7 +1242,7 @@
     "location": "Vipiteno (BZ)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782239+02:00",
+    "date": "2026-11-07T18:51:27.666360+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1242,7 +1255,7 @@
     "location": "Reggio di Calabria (RC)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782244+02:00",
+    "date": "2026-11-07T18:51:27.666365+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1255,7 +1268,7 @@
     "location": "Putignano (BA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782248+02:00",
+    "date": "2026-11-07T18:51:27.666369+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1268,7 +1281,7 @@
     "location": "Napoli (NA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782253+02:00",
+    "date": "2026-11-07T18:51:27.666374+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1281,7 +1294,7 @@
     "location": "Castellaneta (TA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782258+02:00",
+    "date": "2026-11-07T18:51:27.666379+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1294,7 +1307,7 @@
     "location": "Bari (BA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782262+02:00",
+    "date": "2026-11-07T18:51:27.666383+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1307,7 +1320,7 @@
     "location": "Trapani (TP)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:32.782267+02:00",
+    "date": "2026-11-07T18:51:27.666388+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1320,7 +1333,7 @@
     "location": "Ortona (CH)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:39.129012+02:00",
+    "date": "2026-11-07T18:51:33.446100+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1333,7 +1346,7 @@
     "location": "Bari (BA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:42.997988+02:00",
+    "date": "2026-11-07T18:51:37.152431+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1346,7 +1359,7 @@
     "location": "Piove di Sacco (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:42.998020+02:00",
+    "date": "2026-11-07T18:51:37.152464+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1359,7 +1372,7 @@
     "location": "Piove di Sacco (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:42.998037+02:00",
+    "date": "2026-11-07T18:51:37.152481+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1372,7 +1385,7 @@
     "location": "Battipaglia (SA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:44.854483+02:00",
+    "date": "2026-11-07T18:51:39.185275+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1385,7 +1398,7 @@
     "location": "Piove di Sacco (PD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:46.715727+02:00",
+    "date": "2026-11-07T18:51:41.052198+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": false,
     "max_price": 500
@@ -1398,7 +1411,7 @@
     "location": "Messina (ME)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:12.046455+02:00",
+    "date": "2026-11-07T18:48:18.265583+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1411,7 +1424,7 @@
     "location": "Pomezia (RM)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:12.046459+02:00",
+    "date": "2026-11-07T18:48:18.265588+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1424,7 +1437,7 @@
     "location": "Monza (MB)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:12.046464+02:00",
+    "date": "2026-11-07T18:48:18.265593+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1437,7 +1450,7 @@
     "location": "Corigliano-Rossano (CS)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:12.046474+02:00",
+    "date": "2026-11-07T18:48:18.265603+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1450,7 +1463,7 @@
     "location": "Gallarate (VA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:12.046480+02:00",
+    "date": "2026-11-07T18:48:18.265609+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1463,7 +1476,7 @@
     "location": "Buttigliera Alta (TO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:12.046489+02:00",
+    "date": "2026-11-07T18:48:18.265618+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1476,7 +1489,7 @@
     "location": "Verona (VR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:12.046500+02:00",
+    "date": "2026-11-07T18:48:18.265629+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1489,7 +1502,7 @@
     "location": "Battipaglia (SA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:35.122876+02:00",
+    "date": "2026-11-07T18:48:40.768395+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1502,7 +1515,7 @@
     "location": "Viareggio (LU)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:35.122886+02:00",
+    "date": "2026-11-07T18:48:40.768404+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1515,7 +1528,7 @@
     "location": "Busto Arsizio (VA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:37.222405+02:00",
+    "date": "2026-11-07T18:48:43.096711+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1528,7 +1541,7 @@
     "location": "Bologna (BO)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:37.222412+02:00",
+    "date": "2026-11-07T18:48:43.096718+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1541,7 +1554,7 @@
     "location": "Tortoli' (OG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:37.222423+02:00",
+    "date": "2026-11-07T18:48:43.096729+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1554,7 +1567,7 @@
     "location": "Genova (GE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:37.222429+02:00",
+    "date": "2026-11-07T18:48:43.096734+02:00",
     "product_name": "Samsung S24 256GB",
     "near_miss": true,
     "max_price": 360
@@ -1567,46 +1580,7 @@
     "location": "Pavia (PV)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:38:45.820627+02:00",
-    "product_name": "Samsung S25 256GB",
-    "near_miss": true,
-    "max_price": 380
-  },
-  {
-    "title": "Samsung s25 256 gb",
-    "price": 430,
-    "url": "https://www.subito.it/telefonia/samsung-s25-256-gb-torino-666381552.htm",
-    "source": "Subito.it",
-    "location": "Torino (TO)",
-    "shipping": true,
-    "condition": "usato",
-    "date": "2026-11-07T12:38:45.820633+02:00",
-    "product_name": "Samsung S25 256GB",
-    "near_miss": true,
-    "max_price": 380
-  },
-  {
-    "title": "Samsung Galaxy S25 256Gb Silver/Argento GARANZIA",
-    "price": 400,
-    "url": "https://www.subito.it/telefonia/samsung-galaxy-s25-256gb-silver-argento-garanzia-napoli-667442289.htm",
-    "source": "Subito.it",
-    "location": "Melito di Napoli (NA)",
-    "shipping": true,
-    "condition": "usato",
-    "date": "2026-11-07T12:39:13.960067+02:00",
-    "product_name": "Samsung S25 256GB",
-    "near_miss": true,
-    "max_price": 380
-  },
-  {
-    "title": "samsung s25 edge 256gb Usato",
-    "price": 400,
-    "url": "https://www.subito.it/telefonia/samsung-s25-edge-256gb-usato-cremona-667382210.htm",
-    "source": "Subito.it",
-    "location": "Cremona (CR)",
-    "shipping": true,
-    "condition": "usato",
-    "date": "2026-11-07T12:39:13.960073+02:00",
+    "date": "2026-11-07T18:48:51.101366+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
@@ -1619,7 +1593,7 @@
     "location": "Sarmato (PC)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:39:13.960085+02:00",
+    "date": "2026-11-07T18:49:17.678385+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
@@ -1632,7 +1606,7 @@
     "location": "Cento (FE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:39:13.960097+02:00",
+    "date": "2026-11-07T18:49:17.678398+02:00",
     "product_name": "Samsung S25 256GB",
     "near_miss": true,
     "max_price": 380
@@ -1645,7 +1619,7 @@
     "location": "Lecce (LE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:39:59.357545+02:00",
+    "date": "2026-11-07T18:49:59.708980+02:00",
     "product_name": "OPPO Find X9 Pro",
     "near_miss": true,
     "max_price": 650
@@ -1658,7 +1632,7 @@
     "location": "Avellino (AV)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:39:59.357551+02:00",
+    "date": "2026-11-07T18:49:59.708986+02:00",
     "product_name": "OPPO Find X9 Pro",
     "near_miss": true,
     "max_price": 650
@@ -1671,20 +1645,7 @@
     "location": "Caldiero (VR)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:08.976259+02:00",
-    "product_name": "Honor Magic 8 Pro",
-    "near_miss": true,
-    "max_price": 650
-  },
-  {
-    "title": "Honor Magic 8 pro",
-    "price": 680,
-    "url": "https://www.subito.it/telefonia/honor-magic-8-pro-milano-667276889.htm",
-    "source": "Subito.it",
-    "location": "Legnano (MI)",
-    "shipping": true,
-    "condition": "usato",
-    "date": "2026-11-07T12:40:08.976264+02:00",
+    "date": "2026-11-07T18:50:09.035390+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": true,
     "max_price": 650
@@ -1697,7 +1658,7 @@
     "location": "Sant'Arpino (CE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:08.976270+02:00",
+    "date": "2026-11-07T18:50:09.035397+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": true,
     "max_price": 650
@@ -1710,7 +1671,7 @@
     "location": "Ravenna (RA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:08.976275+02:00",
+    "date": "2026-11-07T18:50:09.035402+02:00",
     "product_name": "Honor Magic 8 Pro",
     "near_miss": true,
     "max_price": 650
@@ -1723,7 +1684,7 @@
     "location": "Altamura (BA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:43.955677+02:00",
+    "date": "2026-11-07T18:50:42.262444+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": true,
     "max_price": 100
@@ -1736,7 +1697,7 @@
     "location": "Paderno Dugnano (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:50.372915+02:00",
+    "date": "2026-11-07T18:50:48.161326+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": true,
     "max_price": 100
@@ -1749,7 +1710,7 @@
     "location": "Lugo (RA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:40:50.372942+02:00",
+    "date": "2026-11-07T18:50:48.161346+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": true,
     "max_price": 100
@@ -1762,7 +1723,7 @@
     "location": "Perugia (PG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:00.926777+02:00",
+    "date": "2026-11-07T18:50:58.107261+02:00",
     "product_name": "Google Pixel 1-5",
     "near_miss": true,
     "max_price": 100
@@ -1775,7 +1736,7 @@
     "location": "Predaia (TN)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:35.020006+02:00",
+    "date": "2026-11-07T18:51:29.617618+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": true,
     "max_price": 500
@@ -1788,7 +1749,7 @@
     "location": "Udine (UD)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:35.020036+02:00",
+    "date": "2026-11-07T18:51:29.617649+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": true,
     "max_price": 500
@@ -1801,7 +1762,7 @@
     "location": "Perugia (PG)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:35.020043+02:00",
+    "date": "2026-11-07T18:51:29.617658+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": true,
     "max_price": 500
@@ -1814,7 +1775,7 @@
     "location": "Genova (GE)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:35.020049+02:00",
+    "date": "2026-11-07T18:51:29.617664+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": true,
     "max_price": 500
@@ -1827,7 +1788,7 @@
     "location": "Figline e Incisa Valdarno (FI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:35.020056+02:00",
+    "date": "2026-11-07T18:51:29.617671+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": true,
     "max_price": 500
@@ -1840,7 +1801,7 @@
     "location": "Magenta (MI)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:35.020061+02:00",
+    "date": "2026-11-07T18:51:29.617676+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": true,
     "max_price": 500
@@ -1853,7 +1814,7 @@
     "location": "Piacenza (PC)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:35.020066+02:00",
+    "date": "2026-11-07T18:51:29.617681+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": true,
     "max_price": 500
@@ -1866,7 +1827,7 @@
     "location": "Ravenna (RA)",
     "shipping": true,
     "condition": "usato",
-    "date": "2026-11-07T12:41:35.020072+02:00",
+    "date": "2026-11-07T18:51:29.617688+02:00",
     "product_name": "Galaxy Book 4",
     "near_miss": true,
     "max_price": 500
