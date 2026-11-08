@@ -2248,8 +2248,8 @@
     "timestamp": "2026-11-04T15:46:38.935441"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-12-512-verona-667058884.htm|Honor Magic 8 Pro": {
-    "price": 680,
-    "timestamp": "2026-11-04T15:46:38.937972"
+    "price": 630,
+    "timestamp": "2026-11-08T14:17:59.319597"
   },
   "https://www.subito.it/telefonia/teleconvertitore-g2-200mm-vivo-x300-ultra-milano-667138253.htm|Vivo X300": {
     "price": 250,
@@ -2330,5 +2330,17 @@
   "https://www.subito.it/telefonia/samsung-galaxy-s24-256gb-8gb-ram-ravenna-667513116.htm|Samsung S24 256GB": {
     "price": 400,
     "timestamp": "2026-11-07T20:52:04.768699"
+  },
+  "https://www.subito.it/telefonia/teleconverter-vivo-x300-pro-zais-latina-667549907.htm|Vivo X300": {
+    "price": 300,
+    "timestamp": "2026-11-08T14:17:59.322508"
+  },
+  "https://www.subito.it/telefonia/teleconverter-vivo-x300-pro-latina-667549068.htm|Vivo X300": {
+    "price": 300,
+    "timestamp": "2026-11-08T14:17:59.325138"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s25-mint-256-garanzia-2027-foggia-667576733.htm|Samsung S25 256GB": {
+    "price": 429,
+    "timestamp": "2026-11-08T14:17:59.662541"
   }
 }
