@@ -2264,8 +2264,8 @@
     "timestamp": "2026-11-05T09:51:00.012559"
   },
   "https://www.subito.it/informatica/samsung-galaxy-book-4-i3-1315u-8gb-256gb-win11-genova-667258248.htm|Galaxy Book 4": {
-    "price": 349,
-    "timestamp": "2026-11-05T18:01:05.992883"
+    "price": 319,
+    "timestamp": "2026-11-08T19:05:26.300535"
   },
   "https://www.subito.it/informatica/galaxy-book-4-perugia-667215867.htm|Galaxy Book 4": {
     "price": 550,
@@ -2342,5 +2342,9 @@
   "https://www.subito.it/telefonia/samsung-galaxy-s25-mint-256-garanzia-2027-foggia-667576733.htm|Samsung S25 256GB": {
     "price": 429,
     "timestamp": "2026-11-08T14:17:59.662541"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s25-256gb-omaggio-napoli-667308877.htm|Samsung S25 256GB": {
+    "price": 425,
+    "timestamp": "2026-11-08T19:05:26.685496"
   }
 }
