@@ -2404,8 +2404,8 @@
     "timestamp": "2026-11-11T15:07:31.208144"
   },
   "https://www.subito.it/telefonia/samsung-s25-256gb-napoli-667986116.htm|Samsung S25 256GB": {
-    "price": 425,
-    "timestamp": "2026-11-11T15:07:33.135663"
+    "price": 410,
+    "timestamp": "2026-11-13T15:42:31.351733"
   },
   "https://www.subito.it/telefonia/oppo-find-x9-pro-catania-667936864.htm|OPPO Find X9 Pro": {
     "price": 700,
@@ -2438,5 +2438,21 @@
   "https://www.subito.it/fotografia/teleobiettivo-vivo-zeiss-2-35x-x300-prox300-pro-rimini-668172401.htm|Vivo X300": {
     "price": 230,
     "timestamp": "2026-11-13T07:13:15.847476"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s24-256-gb-yellow-siena-668210378.htm|Samsung S24 256GB": {
+    "price": 350,
+    "timestamp": "2026-11-13T15:42:29.719408"
+  },
+  "https://www.subito.it/telefonia/set-2x-vetri-temperati-new-c-per-google-pixel-8-arezzo-668181658.htm|Google Pixel 1-5": {
+    "price": 5,
+    "timestamp": "2026-11-13T15:42:29.721608"
+  },
+  "https://www.subito.it/telefonia/samsumg-s24-da-256-gb-firenze-668216207.htm|Samsung S24 256GB": {
+    "price": 380,
+    "timestamp": "2026-11-13T15:42:31.349423"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-air-512gb-promo-torino-668198004.htm|Honor Magic 8 Pro": {
+    "price": 699,
+    "timestamp": "2026-11-13T15:42:31.353819"
   }
 }
