@@ -2264,8 +2264,8 @@
     "timestamp": "2026-11-05T09:51:00.012559"
   },
   "https://www.subito.it/informatica/samsung-galaxy-book-4-i3-1315u-8gb-256gb-win11-genova-667258248.htm|Galaxy Book 4": {
-    "price": 319,
-    "timestamp": "2026-11-08T19:05:26.300535"
+    "price": 299,
+    "timestamp": "2026-11-14T20:41:28.369160"
   },
   "https://www.subito.it/informatica/galaxy-book-4-perugia-667215867.htm|Galaxy Book 4": {
     "price": 550,
@@ -2462,5 +2462,17 @@
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-512gb-promo-lampo-torino-668328031.htm|Honor Magic 8 Pro": {
     "price": 699,
     "timestamp": "2026-11-14T16:05:38.917960"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-air-16-512gb-garanzia-negozio-it-brindisi-668378142.htm|Honor Magic 8 Pro": {
+    "price": 550,
+    "timestamp": "2026-11-14T20:41:28.364006"
+  },
+  "https://www.subito.it/fotografia/custodia-per-vivo-x500-pro-max-x300-ultra-kit-foto-monza-668379303.htm|Vivo X300": {
+    "price": 15,
+    "timestamp": "2026-11-14T20:41:28.366634"
+  },
+  "https://www.subito.it/telefonia/samsung-s24-256-giga-viterbo-668376603.htm|Samsung S24 256GB": {
+    "price": 370,
+    "timestamp": "2026-11-14T20:41:28.968000"
   }
 }
