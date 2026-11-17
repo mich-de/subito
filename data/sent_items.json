@@ -72,8 +72,8 @@
     "timestamp": "2026-07-23T16:40:08.456218"
   },
   "https://amazonit.northladder.net/it-en/|Permuta Samsung S24 256GB": {
-    "price": 343,
-    "timestamp": "2026-09-17T10:35:23.775656"
+    "price": 200,
+    "timestamp": "2026-11-17T09:08:39.425711"
   },
   "https://www.subito.it/telefonia/samsung-s25-edge-256-gb-napoli-655144528.htm|Samsung S25 256GB": {
     "price": 400,
@@ -2518,5 +2518,9 @@
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-512gb-promo-torino-668563944.htm|Honor Magic 8 Pro": {
     "price": 699,
     "timestamp": "2026-11-16T17:26:06.895094"
+  },
+  "https://www.subito.it/telefonia/kit-400mm-completo-vivo-x300-ultra-fast-charger-lecce-668687856.htm|Vivo X300": {
+    "price": 299,
+    "timestamp": "2026-11-17T09:07:12.359154"
   }
 }
