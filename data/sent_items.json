@@ -2276,8 +2276,8 @@
     "timestamp": "2026-11-05T23:37:30.443847"
   },
   "https://www.subito.it/telefonia/xiaomi-redmi-note-4-sbloccato-google-pixel-siracusa-667254590.htm|Google Pixel 1-5": {
-    "price": 60,
-    "timestamp": "2026-11-05T23:37:30.446808"
+    "price": 40,
+    "timestamp": "2026-11-18T01:17:53.944162"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-milano-667276889.htm|Honor Magic 8 Pro": {
     "price": 680,
@@ -2550,5 +2550,17 @@
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-512gb-promo-torino-668709709.htm|Honor Magic 8 Pro": {
     "price": 699,
     "timestamp": "2026-11-17T18:31:26.788963"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-globale-12-512-catania-668811567.htm|Honor Magic 8 Pro": {
+    "price": 600,
+    "timestamp": "2026-11-18T01:17:53.937715"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-12-512-bologna-668806246.htm|Honor Magic 8 Pro": {
+    "price": 600,
+    "timestamp": "2026-11-18T01:17:53.941015"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-catania-668799959.htm|Honor Magic 8 Pro": {
+    "price": 699,
+    "timestamp": "2026-11-18T01:17:54.430679"
   }
 }
