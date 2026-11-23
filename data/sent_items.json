@@ -2584,8 +2584,8 @@
     "timestamp": "2026-11-19T17:22:01.878780"
   },
   "https://www.subito.it/telefonia/samsung-s24-da-256gb-modena-669009896.htm|Samsung S24 256GB": {
-    "price": 355,
-    "timestamp": "2026-11-19T17:22:01.882192"
+    "price": 375,
+    "timestamp": "2026-11-23T22:03:22.215048"
   },
   "https://www.subito.it/informatica/galaxy-book-4-ragusa-668993731.htm|Galaxy Book 4": {
     "price": 450,
@@ -2702,5 +2702,45 @@
   "https://www.subito.it/telefonia/samsung-s24-5g-256gb-monza-669414076.htm|Samsung S24 256GB": {
     "price": 400,
     "timestamp": "2026-11-23T09:45:51.366106"
+  },
+  "https://www.subito.it/telefonia/google-pixel-3-64gb-nero-venezia-669522497.htm|Google Pixel 1-5": {
+    "price": 90,
+    "timestamp": "2026-11-23T22:03:18.727343"
+  },
+  "https://www.subito.it/telefonia/vivo-x300-pro-messina-669519686.htm|Vivo X300": {
+    "price": 400,
+    "timestamp": "2026-11-23T22:03:18.730065"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s24-normale-256-gb-memoria-trieste-669446587.htm|Samsung S24 256GB": {
+    "price": 365,
+    "timestamp": "2026-11-23T22:03:22.206343"
+  },
+  "https://www.subito.it/telefonia/samsung-s24-256-gb-yellow-amber-trento-669523395.htm|Samsung S24 256GB": {
+    "price": 390,
+    "timestamp": "2026-11-23T22:03:22.209027"
+  },
+  "https://www.subito.it/telefonia/samsung-s25-12gb-256gb-salerno-669512125.htm|Samsung S25 256GB": {
+    "price": 400,
+    "timestamp": "2026-11-23T22:03:22.217552"
+  },
+  "https://www.subito.it/telefonia/samsung-galaxy-s25-edge-512gb-caserta-669361283.htm|Samsung S25 512GB": {
+    "price": 430,
+    "timestamp": "2026-11-23T22:03:22.220108"
+  },
+  "https://www.subito.it/telefonia/oppo-find-x9-pro-garanzia-perfetto-bologna-669459630.htm|OPPO Find X9 Pro": {
+    "price": 700,
+    "timestamp": "2026-11-23T22:03:22.222574"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-air-1-tb-perm-roma-669476528.htm|Honor Magic 8 Pro": {
+    "price": 669,
+    "timestamp": "2026-11-23T22:03:22.224991"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-air-512gb-promo-torino-669475177.htm|Honor Magic 8 Pro": {
+    "price": 699,
+    "timestamp": "2026-11-23T22:03:22.227567"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-air-512gb-promo-torino-669441663.htm|Honor Magic 8 Pro": {
+    "price": 699,
+    "timestamp": "2026-11-23T22:03:22.230009"
   }
 }
