@@ -2588,8 +2588,8 @@
     "timestamp": "2026-11-23T22:03:22.215048"
   },
   "https://www.subito.it/informatica/galaxy-book-4-ragusa-668993731.htm|Galaxy Book 4": {
-    "price": 450,
-    "timestamp": "2026-11-19T17:22:01.890153"
+    "price": 430,
+    "timestamp": "2026-11-28T14:07:30.078300"
   },
   "https://www.subito.it/informatica/galaxy-book-4-venezia-668983610.htm|Galaxy Book 4": {
     "price": 480,
@@ -2684,8 +2684,8 @@
     "timestamp": "2026-11-22T14:54:41.124632"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-air-16-512-gb-bari-669360210.htm|Honor Magic 8 Pro": {
-    "price": 590,
-    "timestamp": "2026-11-22T21:03:45.317777"
+    "price": 570,
+    "timestamp": "2026-11-28T14:07:30.075860"
   },
   "https://www.subito.it/telefonia/honor-magic-8-pro-napoli-669392710.htm|Honor Magic 8 Pro": {
     "price": 580,
@@ -2838,5 +2838,9 @@
   "https://www.subito.it/telefonia/honor-magic-8-pro-bologna-669962803.htm|Honor Magic 8 Pro": {
     "price": 700,
     "timestamp": "2026-11-27T22:41:58.756928"
+  },
+  "https://www.subito.it/telefonia/honor-magic-8-pro-air-512gb-promo-torino-670046817.htm|Honor Magic 8 Pro": {
+    "price": 699,
+    "timestamp": "2026-11-28T14:07:30.621742"
   }
 }
